@@ -37,7 +37,7 @@ exec uv run src/main.py \
     -o "$OUTPUT_DIR" \
     --workers "${WORKERS:-1}" \
     --model "$WRAPPER_MODEL" \
-    --chunk-retry-limit "${CHUNK_RETRY_LIMIT:-2}" \
+    --chunk-retry-limit "${CHUNK_RETRY_LIMIT:-3}" \
     --max-chunk-bytes "${MAX_CHUNK_BYTES:-4000}" \
     --reasoning-timeout "${REASONING_TIMEOUT:-60}" \
     --max-output-tokens "${MAX_OUTPUT_TOKENS:-4000}" \

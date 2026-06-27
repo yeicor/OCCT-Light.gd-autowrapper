@@ -1,8 +1,14 @@
 import glob
 import re
 import subprocess
+import threading
 from dataclasses import dataclass
 from pathlib import Path
+
+# Global lock to serialize builds across workers.
+# vcpkg install uses file-level locking internally, but sharing the
+# same build directory across parallel workers causes confusion.
+_BUILD_LOCK = threading.Lock()
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,55 +53,59 @@ def run_build(
     timeout_seconds: int,
     errors_file: Path | None = None,
 ) -> BuildResult:
-    """Execute a build command and return the result."""
-    final_command = command
+    """Execute a build command and return the result.
 
-    if errors_file:
-        errors_file.parent.mkdir(parents=True, exist_ok=True)
-        final_command = command.replace("<ERROR_FILE>", str(errors_file))
+    Uses a global lock to serialize builds across all workers
+    so that concurrent vcpkg installs do not interfere with each other.
+    """
+    with _BUILD_LOCK:
+        final_command = command
 
-    try:
-        proc = subprocess.run(
-            final_command,
-            cwd=output_dir,
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as e:
-        # Prepare useful debug output
-        stdout = e.stdout or ""
-        stderr = e.stderr or ""
+        if errors_file:
+            errors_file.parent.mkdir(parents=True, exist_ok=True)
+            final_command = command.replace("<ERROR_FILE>", str(errors_file))
 
-        timeout_msg = (
-            f"Build timed out after {timeout_seconds} seconds.\n"
-            f"Command: {final_command}\n"
-            f"Working directory: {output_dir}\n"
-            f"Partial stdout: {stdout}\n"
-            f"Partial stderr: {stderr}\n"
-        )
+        try:
+            proc = subprocess.run(
+                final_command,
+                cwd=output_dir,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+            )
+        except subprocess.TimeoutExpired as e:
+            stdout = e.stdout or ""
+            stderr = e.stderr or ""
 
-        # Optionally write timeout info to errors_file
-        if errors_file and not Path(errors_file).exists():
-            try:
-                errors_file.write_text(timeout_msg)
-            except Exception:
-                pass  # Don't mask the original issue
+            timeout_msg = (
+                f"Build timed out after {timeout_seconds} seconds.\n"
+                f"Command: {final_command}\n"
+                f"Working directory: {output_dir}\n"
+                f"Partial stdout: {stdout}\n"
+                f"Partial stderr: {stderr}\n"
+            )
 
-    # Existing failure handling
-    if proc.returncode != 0 and (not errors_file or not Path(errors_file).exists()):
-        error_msg = (
-            f"Build failed but no error file was created at {errors_file}. "
-            f"Please check that the build command is correct and that it creates the expected error file. "
-            f"Build command: {final_command}\n"
-            f"Working directory: {output_dir}\n"
-            f"Stdout: {proc.stdout}\n"
-            f"Stderr: {proc.stderr}\n"
-        )
-        raise RuntimeError(error_msg)
+            if errors_file and not Path(errors_file).exists():
+                try:
+                    errors_file.write_text(timeout_msg)
+                except Exception:
+                    pass  # Don't mask the original issue
 
-    return BuildResult(success=proc.returncode == 0, errors_file=errors_file)
+            return BuildResult(success=False, errors_file=errors_file)
+
+        if proc.returncode != 0 and (not errors_file or not Path(errors_file).exists()):
+            error_msg = (
+                f"Build failed but no error file was created at {errors_file}. "
+                "Please check that the build command is correct and that it creates the expected error file. "
+                f"Build command: {final_command}\n"
+                f"Working directory: {output_dir}\n"
+                f"Stdout: {proc.stdout}\n"
+                f"Stderr: {proc.stderr}\n"
+            )
+            raise RuntimeError(error_msg)
+
+        return BuildResult(success=proc.returncode == 0, errors_file=errors_file)
 
 
 def _search_vcpkg_buildtrees(output_dir: Path) -> list[str]:

@@ -399,6 +399,23 @@ def generate_wrappers_from_chunks_with_scheduler(
 
     show_info(f"Processing {len(filtered)} chunks with {config.workers} workers")
 
+    # Rebuild scheduler for only the filtered chunks so chunk indices from the
+    # scheduler match positions in the filtered list.
+    # Dependencies on non-filtered chunks are removed (they are implicitly satisfied).
+    filtered_indices_set = {c.index for c in filtered}
+    new_chunk_ids = sorted(c.index for c in filtered)
+    new_scheduler = DynamicTaskScheduler(new_chunk_ids, scheduler.dependency_graph)
+    for cid in new_chunk_ids:
+        new_scheduler.tasks[cid].remaining_dependencies &= filtered_indices_set
+    # Mark all non-filtered chunks as completed so the scheduler ignores them
+    for cid in range(len(chunks)):
+        if cid not in filtered_indices_set:
+            new_scheduler.completed.add(cid)
+    scheduler = new_scheduler
+
+    # Build lookup from original chunk index -> filtered list position
+    orig_to_filtered = {chunk.index: i for i, chunk in enumerate(filtered)}
+
     cache = GenerationCache(config.output_dir) if config.use_cache else None
 
     total_chunks = len(filtered)
@@ -430,7 +447,8 @@ def generate_wrappers_from_chunks_with_scheduler(
     global_lock = threading.Lock()
 
     def process_chunk(chunk_idx: int):
-        chunk = filtered[chunk_idx]
+        fi = orig_to_filtered[chunk_idx]
+        chunk = filtered[fi]
         chunk_hash_val = chunk_hash(chunk)
         chunk_label = get_chunk_label(chunk)[:60]
         worker_idx = worker_indices.get()
@@ -448,8 +466,7 @@ def generate_wrappers_from_chunks_with_scheduler(
                     return
 
                 with global_lock:
-                    completed, _ = scheduler.get_progress()
-                    processed_count = completed + 1
+                    processed_count = fi + 1
                     show_info(
                         f"[{processed_count}/{total_chunks}] Generating chunk: {chunk_label}..."
                     )
@@ -510,7 +527,7 @@ def generate_wrappers_from_chunks_with_scheduler(
                             writer=writer,
                             states=states,
                             chunk=chunk,
-                            chunk_index=chunk_idx,
+                            chunk_index=fi,
                             total_chunks=total_chunks,
                             successful_chunk_hashes=successful_chunk_hashes,
                             merged_output=merged_output,
