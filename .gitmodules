@@ -1,0 +1,3 @@
+[submodule "sqlite3.gd"]
+	path = sqlite3.gd
+	url = git@github.com:yeicor-gd/sqlite3.gd
