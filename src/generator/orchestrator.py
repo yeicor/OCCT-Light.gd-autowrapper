@@ -60,14 +60,14 @@ class GenerationConfig:
     llm: LLMConfig
     header_files: list[Path] = field(default_factory=list)
     build_after_each_chunk: bool = True
-    chunk_retry_limit: int = 10
-    build_timeout_seconds: int = 600
+    chunk_retry_limit: int = 2
+    build_timeout_seconds: int = 480
     validate_command: str = (
         '/usr/bin/env bash -c "GODOT_VERSION=system ./validate.sh <ERROR_FILE>"'
     )
     use_cache: bool = True
     skip_failed_chunks: bool = False
-    workers: int = 1
+    workers: int = 3
     skip_build_verification_on_cache_restore: bool = False
 
 
