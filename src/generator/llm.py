@@ -100,6 +100,7 @@ class LLMConfig:
     max_completion_tokens: int = 3000
     max_history_bytes: int = 100000
     reasoning_timeout_seconds: float = 60.0
+    n_ctx: int = 262144
 
 
 class Translator:
@@ -126,6 +127,7 @@ class Translator:
             api_key=SecretStr(config.api_key),
             temperature=config.temperature,
             max_completion_tokens=config.max_completion_tokens,
+            extra_body={"n_ctx": config.n_ctx},
         )
         self.stream_workers = workers
         self._message_history: list[BaseMessage] = []

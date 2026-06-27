@@ -42,6 +42,7 @@ class BuildFailure:
 import subprocess
 from pathlib import Path
 
+
 def run_build(
     output_dir: Path,
     command: str,
@@ -103,7 +104,8 @@ def analyze_build_failure(errors_file: Path | None) -> BuildFailure:
     """Analyze build failure from errors file.
 
     If the errors file exists, read errors from it.
-    Otherwise return empty errors tuple.
+    If the file is empty or missing, create a placeholder so the AI
+    has something to work with.
 
     Args:
         errors_file: Path to file containing extracted errors
@@ -120,8 +122,36 @@ def analyze_build_failure(errors_file: Path | None) -> BuildFailure:
                 # Split by double newline to get individual error blocks
                 blocks = content.split("\n\n")
                 extracted_errors = [block.strip() for block in blocks if block.strip()]
+            else:
+                # File exists but is empty — write a fallback message
+                fallback = (
+                    "Build failed but no structured error lines were captured.\n"
+                    "This usually means vcpkg/cmake failed before the compiler ran.\n"
+                    "Check that: the header includes are correct, dependencies are\n"
+                    "installed, and OCCT-Light is properly configured.\n"
+                    "Try running GODOT_VERSION=system ./validate.sh manually to see full output."
+                )
+                errors_file.write_text(fallback)
+                extracted_errors = [fallback]
         except OSError:
             pass
+    else:
+        # No error file at all — create one with a descriptive message
+        if errors_file:
+            try:
+                errors_file.parent.mkdir(parents=True, exist_ok=True)
+                fallback = (
+                    "Build failed but no error file was produced.\n"
+                    "The build command may not have completed, or the error occurred\n"
+                    "before the compiler ran. Check vcpkg configuration and dependencies."
+                )
+                errors_file.write_text(fallback)
+                extracted_errors = [fallback]
+            except OSError:
+                pass
+
+    if not extracted_errors:
+        extracted_errors = ["Build failed with no error details available."]
 
     return BuildFailure(extracted_errors=tuple(extracted_errors))
 

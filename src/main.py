@@ -42,6 +42,9 @@ def main(
     api_key: str = typer.Option(os.getenv("OPENAI_API_KEY", "none"), "--api-key"),
     temperature: float = typer.Option(1.0, "--temperature", min=0.0, max=2.0),
     max_output_tokens: int = typer.Option(25000, "--max-output-tokens", min=1000),
+    n_ctx: int = typer.Option(
+        262144, "--n-ctx", help="Context size for the LLM server"
+    ),
     max_history_bytes: int = typer.Option(50000 * 3, "--max-history-bytes", min=10000),
     reasoning_timeout_seconds: float = typer.Option(
         300.0, "--reasoning-timeout", min=1.0
@@ -52,6 +55,18 @@ def main(
         "--workers",
         "-w",
         help="Number of parallel workers",
+    ),
+    chunk_retry_limit: int = typer.Option(
+        2,
+        "--chunk-retry-limit",
+        min=1,
+        max=20,
+        help="Number of attempts per chunk before giving up or skipping",
+    ),
+    skip_failed_chunks: bool = typer.Option(
+        False,
+        "--skip-failed-chunks",
+        help="Skip chunks that fail all retries instead of stopping",
     ),
     skip_build_verification_on_cache: bool = typer.Option(
         True,
@@ -91,6 +106,7 @@ def main(
         max_history_bytes=max_history_bytes
         - max_output_tokens * 4,  # rough token to byte estimate
         reasoning_timeout_seconds=reasoning_timeout_seconds,
+        n_ctx=n_ctx,
     )
 
     # Extract all chunks from all header files
@@ -124,6 +140,8 @@ def main(
         llm=llm_config,
         header_files=all_header_files,
         workers=workers,
+        chunk_retry_limit=chunk_retry_limit,
+        skip_failed_chunks=skip_failed_chunks,
         skip_build_verification_on_cache_restore=skip_build_verification_on_cache,
     )
 

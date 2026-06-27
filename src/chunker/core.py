@@ -9,8 +9,65 @@ from .symbols import walk_and_collect_symbols
 
 _CLASS_NODES = {"class_specifier", "struct_specifier", "union_specifier"}
 _SCOPE_NAME_NODES = {"type_identifier", "identifier"}
-_MERGE_TO_NEXT_NODES = {"comment", "#ifndef", "#ifdef"}
+
+# Node types whose content should merge into the next span.
+# Comments should be included with the following declaration.
+_MERGE_TO_NEXT_NODES = {"comment"}
+
+# Pairs of consecutive node types to merge into a single span.
+# Consecutive #define constants with the same prefix form implicit enums.
 _MERGE_SEQUENCE_PAIRS = {("preproc_def", "preproc_def")}
+
+# Container nodes that always get split into their children regardless of size.
+# These are preprocessor guards, extern "C" blocks, and declaration lists
+# that wrap actual declarations and should never form a single chunk.
+_CONTAINER_NODES = {
+    "preproc_ifdef",
+    "preproc_ifndef",
+    "preproc_if",
+    "linkage_specification",
+    "declaration_list",
+}
+
+# Trivial node types to skip when building chunks — they add no semantic value.
+_SKIP_NODE_TYPES = {
+    "preproc_call",  # #endif, #else, #pragma, etc.
+    "identifier",  # condition names in #ifdef / #ifndef
+    "preproc_defined",  # defined(NAME) in #if conditions
+    "string_literal",  # language name in linkage_specification
+    "number_literal",
+    "primitive_type",
+    "type_identifier",  # bare type names used as conditions
+}
+
+
+def _flatten_node(node: Node) -> list[Node]:
+    """Recursively unwrap container nodes to find meaningful declaration children.
+
+    Container types (preproc_ifdef, linkage_specification, declaration_list, …)
+    are unwrapped so that their children become top-level spans.  Condition
+    expressions and trivial nodes are filtered out along the way.
+    """
+    if node.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
+        # Preprocessor conditional: skip condition child(ren), process the rest.
+        # The first named child is the condition (identifier, preproc_defined, …).
+        result: list[Node] = []
+        for child in node.named_children:
+            if child.type in _SKIP_NODE_TYPES:
+                continue
+            result.extend(_flatten_node(child))
+        return result
+    elif node.type in ("linkage_specification", "declaration_list"):
+        result: list[Node] = []
+        for child in node.named_children:
+            if child.type in _SKIP_NODE_TYPES:
+                continue
+            result.extend(_flatten_node(child))
+        return result
+    elif node.type in _SKIP_NODE_TYPES:
+        return []
+    else:
+        return [node]
 
 
 def extract_chunks_with_deps(
@@ -18,6 +75,11 @@ def extract_chunks_with_deps(
 ) -> tuple[list[Chunk], dict[str, dict]]:
     """
     Extract chunks from a header file and collect symbol information.
+
+    Container nodes (preprocessor guards, extern "C" blocks, declaration lists)
+    are automatically unwrapped so that individual declarations become separate
+    chunks.  Related items (comments, consecutive #defines) are re-merged when
+    they fit within *max_chunk_bytes*.
 
     Returns:
         (chunks, symbols) where symbols maps symbol names to declarations/usages
@@ -28,8 +90,15 @@ def extract_chunks_with_deps(
     parser = Parser(Language(cpp_language()))
     root = parser.parse(source).root_node
 
-    spans: list[tuple[int, int, str | None, bool, str]] = []
+    # Flatten root-level containers and collect spans for each declaration
+    flat_children: list[Node] = []
     for child in root.named_children:
+        flat_children.extend(_flatten_node(child))
+
+    spans: list[tuple[int, int, str | None, bool, str]] = []
+    for child in flat_children:
+        # Use _split_node without force-split so that genuinely large items
+        # (e.g. a 100 KB struct) still get sub-divided, but small items stay whole.
         spans.extend(_split_node(child, source, max_chunk_bytes, None, False))
 
     if not spans:
@@ -53,7 +122,7 @@ def extract_chunks_with_deps(
         chunks = []
         last_end = 0
 
-        for start, end, scope, merge_to_next, _node_type in spans:
+        for start, end, scope, merge_to_next, node_type in spans:
             if end <= last_end:
                 continue
             if merge_to_next:
@@ -191,28 +260,54 @@ def _merge_sequential_spans(
     source: bytes,
     max_chunk_bytes: int,
 ) -> list[tuple[int, int, str | None, bool, str]]:
+    """Greedily merge consecutive spans of matching types (e.g. #define sequences).
+
+    Groups consecutive spans where (prev_type, next_type) is in
+    _MERGE_SEQUENCE_PAIRS into a single chunk as long as the total
+    size stays under max_chunk_bytes.  This correctly handles runs
+    of 3+ items (e.g. OCCTL_KIND_INVALID, OCCTL_KIND_SOLID, ...).
+    """
     if not _MERGE_SEQUENCE_PAIRS:
         return spans
 
-    non_merge_positions = [
-        i for i, (_, _, _, merge, _node_type) in enumerate(spans) if not merge
-    ]
+    # Build a set of types that can start a merge chain
+    merge_start_types = {a for (a, _b) in _MERGE_SEQUENCE_PAIRS}
+    merge_cont_types = {b for (_a, b) in _MERGE_SEQUENCE_PAIRS}
 
-    last_end = 0
-    for current, nxt in zip(non_merge_positions, non_merge_positions[1:]):
-        current_type = spans[current][4]
-        next_type = spans[nxt][4]
-        if (current_type, next_type) in _MERGE_SEQUENCE_PAIRS:
-            start, end, scope, _merge, node_type = spans[current]
-            next_start, next_end, next_scope, next_merge, next_node_type = spans[nxt]
-            merged_size = next_end - last_end
-            if merged_size <= max_chunk_bytes:
-                spans[current] = (start, next_end, scope, True, node_type)
-            else:
-                last_end = end
-        else:
-            last_end = spans[current][1]
-    return spans
+    result: list[tuple[int, int, str | None, bool, str]] = []
+    i = 0
+    while i < len(spans):
+        start, end, scope, was_merged, node_type = spans[i]
+        if was_merged:
+            # Already absorbed by a previous span, skip
+            i += 1
+            continue
+
+        if node_type not in merge_start_types:
+            # No merge possible, keep as-is
+            result.append(spans[i])
+            i += 1
+            continue
+
+        # Greedy: keep extending while the next span's type matches
+        j = i + 1
+        while j < len(spans):
+            next_type = spans[j][4]
+            if (node_type, next_type) not in _MERGE_SEQUENCE_PAIRS:
+                break
+            # Check total size of merged group
+            merged_end = spans[j][1]
+            total_size = merged_end - start
+            if total_size > max_chunk_bytes:
+                break
+            # Accept into merged group
+            end = merged_end
+            j += 1
+
+        result.append((start, end, scope, False, node_type))
+        i = j
+
+    return result
 
 
 def _split_node(
@@ -230,7 +325,9 @@ def _split_node(
     children = [
         child for child in node.named_children if child.end_byte > child.start_byte
     ]
-    if size <= max_chunk_bytes or not children:
+    # Container nodes are always split into children regardless of size.
+    # Other nodes that fit within max_chunk_bytes stay whole.
+    if (size <= max_chunk_bytes or not children) and node.type not in _CONTAINER_NODES:
         return [
             (node.start_byte, node.end_byte, next_scope, node_merge_to_next, node.type)
         ]
