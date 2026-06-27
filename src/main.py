@@ -6,6 +6,7 @@ import typer
 from rich.progress import track
 
 from chunker import (
+    Chunk,
     DynamicTaskScheduler,
     build_dependency_graph,
     extract_chunks_with_deps,
@@ -123,6 +124,19 @@ def main(
 
     if not all_chunks:
         raise ValueError("No chunks extracted from any headers")
+
+    # Re-index chunks to have unique global indices
+    # (each file starts its own indexing from 0, causing collisions)
+    all_chunks = [
+        Chunk(
+            index=new_idx,
+            code=c.code,
+            scope=c.scope,
+            file=c.file,
+            header_include=c.header_include,
+        )
+        for new_idx, c in enumerate(all_chunks)
+    ]
 
     # Build dependency graph
     dependency_graph = build_dependency_graph(all_chunks, all_header_files)
