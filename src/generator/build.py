@@ -1,3 +1,4 @@
+import glob
 import re
 import subprocess
 from dataclasses import dataclass
@@ -30,6 +31,7 @@ class BuildFailure:
             r"error:\s*[''`]?([A-Za-z_][A-Za-z0-9_:]*)[''`]?\s+was not declared",
             r"undefined reference to\s+[''`]?([A-Za-z_][A-Za-z0-9_:]*)",
             r"no member named\s+[''`]?([A-Za-z_][A-Za-z0-9_:]*)",
+            r"error:\s*[''`]?(occtl_[A-Za-z_0-9]*)[''`]?",
         ]
         joined = "\n".join(self.extracted_errors) if self.extracted_errors else ""
         for pattern in patterns:
@@ -37,10 +39,6 @@ class BuildFailure:
             if m:
                 return m.group(1).split("::")[-1]
         return None
-
-
-import subprocess
-from pathlib import Path
 
 
 def run_build(
@@ -100,15 +98,53 @@ def run_build(
     return BuildResult(success=proc.returncode == 0, errors_file=errors_file)
 
 
-def analyze_build_failure(errors_file: Path | None) -> BuildFailure:
+def _search_vcpkg_buildtrees(output_dir: Path) -> list[str]:
+    """Fallback: search vcpkg buildtrees logs for real compiler errors.
+
+    The validate.sh script primarily searches buildtrees logs now, but
+    as a defensive fallback this also searches them directly.
+    """
+    errors: list[str] = []
+    buildtrees_dir = output_dir / "vcpkg" / "buildtrees" / "gdext"
+    if not buildtrees_dir.is_dir():
+        return []
+    for logfile in sorted(buildtrees_dir.glob("build-x64-linux-*-out.log")):
+        try:
+            text = logfile.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        interesting: list[str] = []
+        for line in text.split("\n"):
+            if re.search(
+                r"""
+                (error:\s|fatal\s+error|FAILED:\s|collect2:\s|
+                 undefined\s+reference|ld:\s|In\s+file\s+included\s+from|
+                 cc1plus:|CMake\s+Error|ninja:\s+build\s+stopped)
+                """,
+                line,
+                re.I | re.X,
+            ):
+                interesting.append(line)
+        if interesting:
+            errors.append(
+                f"=== From {logfile.name} ===\n" + "\n".join(interesting[-150:])
+            )
+    return errors
+
+
+def analyze_build_failure(
+    errors_file: Path | None, output_dir: Path | None = None
+) -> BuildFailure:
     """Analyze build failure from errors file.
 
     If the errors file exists, read errors from it.
     If the file is empty or missing, create a placeholder so the AI
     has something to work with.
+    Falls back to searching vcpkg buildtrees logs for real compiler errors.
 
     Args:
         errors_file: Path to file containing extracted errors
+        output_dir: The project root directory (to find vcpkg buildtrees logs)
 
     Returns:
         BuildFailure with extracted errors
@@ -122,38 +158,51 @@ def analyze_build_failure(errors_file: Path | None) -> BuildFailure:
                 # Split by double newline to get individual error blocks
                 blocks = content.split("\n\n")
                 extracted_errors = [block.strip() for block in blocks if block.strip()]
-            else:
-                # File exists but is empty — write a fallback message
-                fallback = (
-                    "Build failed but no structured error lines were captured.\n"
-                    "This usually means vcpkg/cmake failed before the compiler ran.\n"
-                    "Check that: the header includes are correct, dependencies are\n"
-                    "installed, and OCCT-Light is properly configured.\n"
-                    "Try running GODOT_VERSION=system ./validate.sh manually to see full output."
-                )
-                errors_file.write_text(fallback)
-                extracted_errors = [fallback]
         except OSError:
             pass
-    else:
-        # No error file at all — create one with a descriptive message
+
+    # If the error file content was empty or just the fallback "Last 500 lines" msg,
+    # it may not have real compiler errors. Try the buildtrees logs as backup.
+    if not extracted_errors or _looks_like_fallback(extracted_errors):
+        buildtrees_errors = _search_vcpkg_buildtrees(
+            output_dir or (errors_file.parent if errors_file else Path())
+        )
+        if buildtrees_errors:
+            extracted_errors = buildtrees_errors
+
+    if not extracted_errors:
+        fallback = (
+            "Build failed but no structured error lines were captured.\n"
+            "This usually means vcpkg/cmake failed before the compiler ran.\n"
+            "Check that: the header includes are correct, dependencies are\n"
+            "installed, and OCCT-Light is properly configured.\n"
+            "Try running GODOT_VERSION=system ./validate.sh manually to see full output."
+        )
         if errors_file:
             try:
                 errors_file.parent.mkdir(parents=True, exist_ok=True)
-                fallback = (
-                    "Build failed but no error file was produced.\n"
-                    "The build command may not have completed, or the error occurred\n"
-                    "before the compiler ran. Check vcpkg configuration and dependencies."
-                )
                 errors_file.write_text(fallback)
-                extracted_errors = [fallback]
             except OSError:
                 pass
-
-    if not extracted_errors:
-        extracted_errors = ["Build failed with no error details available."]
+        extracted_errors = [fallback]
 
     return BuildFailure(extracted_errors=tuple(extracted_errors))
+
+
+def _looks_like_fallback(errors: list[str]) -> bool:
+    """Check if errors are just the fallback message (not real compiler errors)."""
+    fallback_signals = [
+        "Build failed but no structured error",
+        "Last 500 lines of build output",
+        "Build failed but no error file was produced",
+        "Build failed with no error details available",
+        "Try running GODOT_VERSION=system ./validate.sh",
+    ]
+    text = " ".join(errors)
+    for signal in fallback_signals:
+        if signal in text:
+            return True
+    return False
 
 
 def _trim(text: str, max_chars: int) -> str:

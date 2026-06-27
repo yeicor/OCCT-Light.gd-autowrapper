@@ -174,7 +174,7 @@ def _process_chunk_with_retries(
             )
             return
 
-        last_build_failure = analyze_build_failure(error_file)
+        last_build_failure = analyze_build_failure(error_file, output_dir=worktree_path)
         error_feedback = last_build_failure.feedback_for_llm()
         translator.append_tool_result("build", False, error_feedback)
         chunk_label = get_chunk_label(chunk)[:60]
@@ -362,7 +362,7 @@ def _attempt_chunk_regeneration(
                 cache.add_successful_chunk(chunk_hash_val, regenerated)
             return True
 
-        build_failure = analyze_build_failure(error_file)
+        build_failure = analyze_build_failure(error_file, output_dir=worktree_path)
         translator.append_feedback(
             "The build failed: focus on fixing or working around the build errors from the previous attempt before continuing."
         )
@@ -566,7 +566,9 @@ def generate_wrappers_from_chunks_with_scheduler(
                         break  # Merge is good!
 
                     # Build failed after merge. There's a conflict!
-                    build_failure = analyze_build_failure(error_file)
+                    build_failure = analyze_build_failure(
+                        error_file, output_dir=worktree_path
+                    )
                     conflict_feedback = (
                         "The generated chunk caused a build conflict when merged with previously "
                         "generated wrappers. Please resolve the conflict based on the following "
