@@ -32,13 +32,23 @@ echo "Output:   ${OUTPUT_DIR}"
 echo "Workers:  ${WORKERS:-1}"
 echo ""
 
+# Process all OCCT-Light public headers (excluding viz and umbrella) in a single invocation
+HEADER_GLOBS=()
+for h in "${HEADERS_DIR}"/occtl*.h; do
+    base=$(basename "$h")
+    case "$base" in
+        occtl_viz.h|occtl.h) ;;  # Skip viz and umbrella header
+        *) HEADER_GLOBS+=("$h") ;;
+    esac
+done
+
 exec uv run src/main.py \
-    "${HEADERS_DIR}/occtl_core.h" \
+    "${HEADER_GLOBS[@]}" \
     -o "$OUTPUT_DIR" \
-    --workers "${WORKERS:-1}" \
+    --workers "${WORKERS:-3}" \
     --model "$WRAPPER_MODEL" \
     --chunk-retry-limit "${CHUNK_RETRY_LIMIT:-2}" \
-        --max-chunk-bytes "${MAX_CHUNK_BYTES:-2500}" \
-        --reasoning-timeout "${REASONING_TIMEOUT:-45}" \
-        --max-output-tokens "${MAX_OUTPUT_TOKENS:-3500}" \
+    --max-chunk-bytes "${MAX_CHUNK_BYTES:-4000}" \
+    --reasoning-timeout "${REASONING_TIMEOUT:-45}" \
+    --max-output-tokens "${MAX_OUTPUT_TOKENS:-3500}" \
     "$@"
