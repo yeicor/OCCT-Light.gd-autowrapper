@@ -66,6 +66,52 @@ def _is_uint64_id_ptr(c_type: str) -> bool:
 # Out-param classification
 # ---------------------------------------------------------------
 
+# Buffer element C types → Godot PackedArray return type for two-call pattern
+TWO_CALL_BUFFER_RETURN: dict[str, str] = {
+    "occtl_node_id_t": "PackedInt64Array",
+    "occtl_uid_t": "PackedInt64Array",
+    "occtl_ref_uid_t": "PackedInt64Array",
+    "occtl_ref_id_t": "PackedInt64Array",
+    "occtl_joint_id_t": "PackedInt64Array",
+    "int64_t": "PackedInt64Array",
+    "double": "PackedFloat64Array",
+    "int32_t": "PackedInt32Array",
+    "uint8_t": "PackedByteArray",
+}
+
+# Two-call buffer param name suffixes for detection
+TWO_CALL_BUF_SUFFIXES = ("_buf", "_nodes", "_uids", "_colors", "_wires", "_tags",
+                         "_issues", "_joints", "_data", "_keys", "_rgba", "_count",
+                         "_required", "_size", "buf", "name_buf")
+TWO_CALL_CAP_NAMES = {"cap", "capacity", "bufsize", "name_buf_size"}
+TWO_CALL_COUNT_NAMES = {"out_count", "out_size", "out_required", "out_name_required"}
+
+
+def _is_two_call_buffer_func(f: CFunction) -> bool:
+    """Detect trailing (ptr buf, size_t cap, size_t* out_count) two-call pattern."""
+    params = f.params
+    n = len(params)
+    if n < 3:
+        return False
+    # Only match when the triplet is the LAST three params
+    p0 = params[n - 3]
+    p1 = params[n - 2]
+    p2 = params[n - 1]
+    t0 = p0.type_name.strip()
+    t1 = p1.type_name.strip()
+    t2 = p2.type_name.strip()
+    if not (t0.endswith("*") and not t0.endswith("**")):
+        return False
+    base0 = _c_type_strip_ptr(t0).strip()
+    if base0 not in TWO_CALL_BUFFER_RETURN:
+        return False
+    if t1 != "size_t":
+        return False
+    if t2 != "size_t*":
+        return False
+    return True
+
+
 OUT_PARAM_PRIM_TYPES: dict[str, str] = {
     "uint32_t": "OcctlUint32",
     "int32_t": "OcctlInt32",
@@ -249,6 +295,18 @@ def _func_is_occtl_status(f: CFunction) -> bool:
 
 def _func_return_type_mapped(f: CFunction) -> str:
     ret = f.return_type.strip()
+
+    # Two-call buffer pattern → PackedArray return type
+    if _is_two_call_buffer_func(f):
+        for i in range(len(f.params) - 2):
+            p0 = f.params[i]
+            t0 = p0.type_name.strip()
+            if not (t0.endswith("*") and not t0.endswith("**")):
+                continue
+            base0 = _c_type_strip_ptr(t0).strip()
+            if base0 in TWO_CALL_BUFFER_RETURN:
+                return TWO_CALL_BUFFER_RETURN[base0]
+
     out_params = [p for p in f.params if is_out_param(p.type_name, p.name, ret)]
 
     # const occtl_error_t* → Ref<OcctlError>
@@ -298,9 +356,17 @@ def _is_stripped_out_param(p: CParameter, ret: str) -> bool:
     return False
 
 
+def _is_buffer_triplet_param(f: CFunction, p: CParameter) -> bool:
+    """Check if param is part of a trailing two-call buffer triplet."""
+    if not _is_two_call_buffer_func(f):
+        return False
+    n = len(f.params)
+    return p is f.params[n - 3] or p is f.params[n - 2] or p is f.params[n - 1]
+
+
 def _method_args_decl(f: CFunction) -> str:
     ret = f.return_type.strip()
-    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)]
     if not kept_params:
         return "void"
     args = []
@@ -323,7 +389,7 @@ def _method_args_decl(f: CFunction) -> str:
 
 def _method_arg_names(f: CFunction) -> str:
     ret = f.return_type.strip()
-    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)]
     return "".join(f', "{p.name}"' for p in kept_params)
 
 
@@ -408,6 +474,177 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
     non_handle_out_params = [p for p in out_params if not _is_direct_return_out_param(p)]
     lines = []
     ret_mapped = _func_return_type_mapped(f)
+
+    # Two-call buffer pattern (trailing ptr, size_t, size_t*)
+    if _is_two_call_buffer_func(f):
+        n_params = len(f.params)
+        buf_idx = n_params - 3
+        cap_idx = n_params - 2
+        cnt_idx = n_params - 1
+        t0 = f.params[buf_idx].type_name.strip()
+        base0 = _c_type_strip_ptr(t0).strip()
+
+        packed_type = TWO_CALL_BUFFER_RETURN[base0]
+        c_type = base0
+        cnt_name = f.params[cnt_idx].name
+
+        # Declare count variable
+        lines.append(f"    size_t _{cnt_name}_cnt = 0;")
+
+        # Build call args with nullptr for buffer, 0 for cap, &cnt for count
+        call_args_null = []
+        call_args_buf = []
+        string_convs = []  # deferred CharString declarations
+        for j, p in enumerate(f.params):
+            name = p.name if p.name else ""
+            if j == buf_idx:
+                call_args_null.append("nullptr")
+                call_args_buf.append(f"_{name}_buf.data()")
+            elif j == cap_idx:
+                call_args_null.append("0")
+                call_args_buf.append(f"_{cnt_name}_cnt")
+            elif j == cnt_idx:
+                call_args_null.append(f"&_{cnt_name}_cnt")
+                call_args_buf.append(f"&_{cnt_name}_cnt")
+            elif is_out_param(p.type_name, p.name, ret):
+                base = _c_type_strip_ptr(p.type_name).strip()
+                resolved = _resolve_typedef(base)
+                if resolved in (VALUE_STRUCT_TYPES | UINT64_ID_TYPES | ENUM_TYPES | set(OUT_PARAM_PRIM_TYPES.keys())):
+                    lines.append(f"    {resolved} _{name}_val = {{}};")
+                elif resolved in ("const char", "char"):
+                    lines.append(f"    const char* _{name}_val = nullptr;")
+                else:
+                    lines.append(f"    {base} _{name}_val = {{}};")
+                call_args_null.append(f"&_{name}_val")
+                call_args_buf.append(f"&_{name}_val")
+            else:
+                # Regular in-param - generate its conversion inline
+                t_stripped = re.sub(r'\s+(const|volatile)\s*$', '', p.type_name.strip())
+                if t_stripped.startswith("const ") and t_stripped.endswith("*") and not t_stripped.endswith("**"):
+                    base_r = _c_type_strip_ptr(t_stripped).strip()
+                    b = re.sub(r'^(const|volatile)\s+', '', base_r).strip()
+                    if is_value_struct_type(b):
+                        if f.name in DEFAULT_NULLABLE_PARAMS and p.name in DEFAULT_NULLABLE_PARAMS[f.name]:
+                            base_no_const = base_r.replace("const ", "", 1) if base_r.startswith("const ") else base_r
+                            lines.append(f"    {base_no_const} _{name}_c = {{}};")
+                            lines.append(f"    const {base_no_const}* _{name}_ptr = nullptr;")
+                            lines.append(f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}")
+                            call_args_null.append(f"_{name}_ptr")
+                            call_args_buf.append(f"_{name}_ptr")
+                        else:
+                            lines.append(f"    {base_r} _{name}_c = {name}->to_c();")
+                            call_args_null.append(f"&_{name}_c")
+                            call_args_buf.append(f"&_{name}_c")
+                    elif b in HANDLE_TYPES:
+                        arg = f"reinterpret_cast<const {b}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
+                        call_args_null.append(arg)
+                        call_args_buf.append(arg)
+                    elif b == "char":
+                        cs_name = f"_{name}_cs"
+                        string_convs.append(f"    godot::CharString {cs_name} = {name}.utf8();")
+                        call_args_null.append(f"{cs_name}.get_data()")
+                        call_args_buf.append(f"{cs_name}.get_data()")
+                    elif b == "void":
+                        arg = f"reinterpret_cast<const void*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                        call_args_null.append(arg)
+                        call_args_buf.append(arg)
+                    else:
+                        call_args_null.append(name)
+                        call_args_buf.append(name)
+                elif t_stripped in UINT64_ID_TYPES:
+                    call_args_null.append(f"{t_stripped}{{static_cast<uint64_t>({name})}}")
+                    call_args_buf.append(f"{t_stripped}{{static_cast<uint64_t>({name})}}")
+                elif t_stripped == "occtl_status_t":
+                    call_args_null.append(f"static_cast<{t_stripped}>({name})")
+                    call_args_buf.append(f"static_cast<{t_stripped}>({name})")
+                elif is_opaque_ptr_t_type(t_stripped):
+                    call_args_null.append(f"reinterpret_cast<{t_stripped}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
+                    call_args_buf.append(f"reinterpret_cast<{t_stripped}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
+                elif t_stripped.startswith("const occtl_") and t_stripped.endswith("*") and not t_stripped.endswith("**") and not t_stripped.startswith("const occtl_"):
+                    # Non-const handle pointer — already handled above for const handles
+                    call_args_null.append(name)
+                    call_args_buf.append(name)
+                else:
+                    # Try non-const pointer handling (handles, char, etc.)
+                    t_clean = re.sub(r'\s+(const|volatile)\s*$', '', t_stripped)
+                    if t_clean.endswith("*") and not t_clean.endswith("**"):
+                        base = _c_type_strip_ptr(t_clean).strip()
+                        if base in HANDLE_TYPES:
+                            arg = f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
+                            call_args_null.append(arg)
+                            call_args_buf.append(arg)
+                        elif base == "char":
+                            cs_name = f"_{name}_cs"
+                            string_convs.append(f"    godot::CharString {cs_name} = {name}.utf8();")
+                            call_args_null.append(f"{cs_name}.get_data()")
+                            call_args_buf.append(f"{cs_name}.get_data()")
+                        elif base == "void":
+                            arg = f"reinterpret_cast<void*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                            call_args_null.append(arg)
+                            call_args_buf.append(arg)
+                        else:
+                            call_args_null.append(name)
+                            call_args_buf.append(name)
+                    elif t_stripped in ENUM_TYPES:
+                        call_args_null.append(f"static_cast<{t_stripped}>({name})")
+                        call_args_buf.append(f"static_cast<{t_stripped}>({name})")
+                    else:
+                        call_args_null.append(name)
+                        call_args_buf.append(name)
+
+        # Emit deferred string conversions before first call
+        for conv in string_convs:
+            lines.append(conv)
+
+        # First call with nullptr
+        call_null_str = ", ".join(call_args_null)
+        if _func_is_occtl_status(f):
+            lines.append(f"    occtl_status_t _err = ::{f.name}({call_null_str});")
+            lines.append(f"    if (_err != 0 && _err != OCCTL_BUFFER_TOO_SMALL) {{ return {packed_type}(); }}")
+        else:
+            lines.append(f"    ::{f.name}({call_null_str});")
+
+        # Allocate buffer
+        buf_name = f.params[buf_idx].name
+        if base0 == "uint8_t":
+            lines.append(f"    std::vector<uint8_t> _{buf_name}_buf(_{cnt_name}_cnt);")
+        elif base0 in ("double", "int32_t", "int64_t"):
+            lines.append(f"    std::vector<{base0}> _{buf_name}_buf(_{cnt_name}_cnt);")
+        else:
+            lines.append(f"    std::vector<{c_type}> _{buf_name}_buf(_{cnt_name}_cnt);")
+
+        # Second call with buffer
+        call_buf_str = ", ".join(call_args_buf)
+        if _func_is_occtl_status(f):
+            lines.append(f"    _err = ::{f.name}({call_buf_str});")
+
+        # Convert to Godot PackedArray
+        if packed_type == "PackedInt64Array":
+            lines.append(f"    PackedInt64Array _result;")
+            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            if c_type != "int64_t":
+                lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{buf_name}_buf[_i].bits);")
+            else:
+                lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+            lines.append("    return _result;")
+        elif packed_type == "PackedFloat64Array":
+            lines.append(f"    PackedFloat64Array _result;")
+            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+            lines.append("    return _result;")
+        elif packed_type == "PackedInt32Array":
+            lines.append(f"    PackedInt32Array _result;")
+            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+            lines.append("    return _result;")
+        elif packed_type == "PackedByteArray":
+            lines.append(f"    PackedByteArray _result;")
+            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+            lines.append("    return _result;")
+        else:
+            lines.append(f"    return {packed_type}();")
+        return "\n".join(lines)
 
     # Special case: const occtl_error_t* return → Ref<OcctlError>
     if ret == "const occtl_error_t*":
@@ -768,7 +1005,7 @@ def generate_wrapper_source(
         p.type_name.strip() == "char*" or p.type_name.strip() in ("const char**", "const char * *")
         for f in functions
         for p in f.params
-    )
+    ) or any(_is_two_call_buffer_func(f) for f in functions)
 
     lines = [
         f'#include "{cls}.h"',
