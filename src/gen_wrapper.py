@@ -1035,10 +1035,9 @@ def generate_wrapper_source(
             lines.append(f"    BIND_CONSTANT({c.name});")
         else:
             lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("const_{c.name}"), &{cls}::const_{c.name});')
-    for ev in (
-        ev for enum in parsed.enums for ev in enum.values
-    ):
-        lines.append(f"    BIND_CONSTANT({ev.name});")
+    for enum in parsed.enums:
+        for ev in enum.values:
+            lines.append(f'    godot::ClassDB::bind_integer_constant(get_class_static(), "{escape(enum.enum_name)}", "{ev.name}", {ev.name});')
     method_names = _function_method_names(functions)
     for f in functions:
         mname = method_names[f.name]
@@ -1306,12 +1305,13 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         for ev in enum.values:
             methods.append(f'\t\t<constant name="{escape(ev.name)}" value="{escape(str(ev.value))}">')
             desc = f"Enum value = {ev.value}"
-            # Try to be more descriptive based on context
             enum_name_lower = enum.enum_name.lower()
             if "status" in enum_name_lower:
-                desc += f" Status code."
+                desc += f" Status code. Defined in [enum {cls}.{escape(enum.enum_name)}]."
             elif "kind" in enum_name_lower:
-                desc += f" Kind identifier."
+                desc += f" Kind identifier. Defined in [enum {cls}.{escape(enum.enum_name)}]."
+            else:
+                desc += f" Defined in [enum {cls}.{escape(enum.enum_name)}]."
             methods.append(f"\t\t\t{desc}")
             methods.append("\t\t</constant>")
 
