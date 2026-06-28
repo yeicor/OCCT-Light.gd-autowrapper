@@ -1,15 +1,10 @@
 [project]
 name = "occt-light-gd-autowrapper"
 version = "0.1.0"
-description = "Auto-generates godot-cpp bindings for OCCT-Light C headers"
+description = "Deterministic godot-cpp bindings generator for OCCT-Light C headers"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "langchain>=1.2.12",
-    "langchain-openai>=1.1.11",
-    "pydantic>=2.12.5",
-    "rich>=14.3.3",
     "tree-sitter>=0.25.2",
     "tree-sitter-cpp>=0.23.4",
-    "typer>=0.24.1",
 ]

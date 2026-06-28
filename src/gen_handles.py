@@ -1,0 +1,156 @@
+"""Generate Godot RefCounted handle classes for opaque OCCT-Light types.
+
+Each opaque pointer type (e.g. occtl_graph_t) gets a RefCounted wrapper
+that auto-frees the underlying C pointer on destruction.
+"""
+
+from xml.sax.saxutils import escape
+
+from parser import CStruct
+from type_map import HANDLE_FREE_HEADERS, HANDLE_TYPES, c_type_to_godot_class
+
+
+def generate_handle_header(struct: CStruct) -> str:
+    """Generate the .h file for a handle class."""
+    c_type = struct.type_name
+    cls = c_type_to_godot_class(c_type) + "Handle"
+    free_fn = HANDLE_TYPES.get(c_type, f"UNKNOWN_FREE")
+    guard = f"{cls.upper()}_H"
+
+    lines = [
+        f"#ifndef {guard}",
+        f"#define {guard}",
+        "",
+        "#include <godot_cpp/classes/ref.hpp>",
+        "#include <godot_cpp/core/class_db.hpp>",
+        "#include <godot_cpp/variant/utility_functions.hpp>",
+        "#include <cstdint>",
+        f'#include "occtl/{struct.header_include}"',
+        f'#include "{HANDLE_FREE_HEADERS.get(c_type, "occtl/occtl_core.h")}"',
+        "",
+        "using namespace godot;",
+        "",
+        f"class {cls} : public godot::RefCounted {{",
+        f"    GDCLASS({cls}, godot::RefCounted)",
+        "protected:",
+        "    static void _bind_methods();",
+        "public:",
+        f"    {c_type}* _handle = nullptr;",
+        "    bool _owns = true;",
+        "",
+        f"    ~{cls}() {{",
+        f"        if (_owns && _handle) {{",
+        f"            ::{free_fn}(_handle);",
+        "            _handle = nullptr;",
+        "        }",
+        f"    }}",
+        "",
+        f"    void set_handle(int64_t h);",
+        f"    int64_t get_handle() const;",
+        f"    bool is_valid() const;",
+        f"    int64_t release();",
+        f"    void free();",
+        "};",
+        "",
+        f"#endif // {guard}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def generate_handle_source(struct: CStruct, guard_directive: str = "", guard_expression: str = "") -> str:
+    """Generate the .cpp file for a handle class."""
+    c_type = struct.type_name
+    cls = c_type_to_godot_class(c_type) + "Handle"
+    free_fn = HANDLE_TYPES.get(c_type, f"UNKNOWN_FREE")
+
+    lines = [
+        f'#include "{cls}.h"',
+        "",
+    ]
+
+    if guard_directive and guard_expression:
+        lines.append(f"{guard_directive} {guard_expression}")
+    lines.extend([
+        f"void {cls}::_bind_methods() {{",
+        f'    godot::ClassDB::bind_method(godot::D_METHOD("set_handle", "handle"), &{cls}::set_handle);',
+        f'    godot::ClassDB::bind_method(godot::D_METHOD("get_handle"), &{cls}::get_handle);',
+        f'    godot::ClassDB::bind_method(godot::D_METHOD("is_valid"), &{cls}::is_valid);',
+        f'    godot::ClassDB::bind_method(godot::D_METHOD("release"), &{cls}::release);',
+        f'    godot::ClassDB::bind_method(godot::D_METHOD("free"), static_cast<void({cls}::*)()>(&{cls}::free));',
+        "}",
+        "",
+        f"void {cls}::set_handle(int64_t h) {{",
+        f"    _handle = reinterpret_cast<{c_type}*>(static_cast<uintptr_t>(h));",
+        f"    _owns = true;",
+        f"}}",
+        "",
+        f"int64_t {cls}::get_handle() const {{",
+        f"    return static_cast<int64_t>(reinterpret_cast<uintptr_t>(_handle));",
+        f"}}",
+        "",
+        f"bool {cls}::is_valid() const {{",
+        f"    return _handle != nullptr;",
+        f"}}",
+        "",
+        f"int64_t {cls}::release() {{",
+        f"    _owns = false;",
+        f"    return get_handle();",
+        f"}}",
+        "",
+        f"void {cls}::free() {{",
+        f"    if (_handle) {{",
+        f"        ::{free_fn}(_handle);",
+        f"        _handle = nullptr;",
+        f"    }}",
+        f"}}",
+        "",
+    ])
+    if guard_directive and guard_expression:
+        lines.append("#endif")
+    return "\n".join(lines)
+
+
+
+def generate_handle_doc_xml(struct: CStruct) -> str:
+    """Generate XML doc for a handle class."""
+    c_type = struct.type_name
+    cls = c_type_to_godot_class(c_type) + "Handle"
+
+    return (
+        '<?xml version="1.0" encoding="UTF-8" ?>\n'
+        f'<class name="{cls}" inherits="RefCounted" version="4.0" '
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+        'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
+        "\t<brief_description>"
+        f"Handle wrapper for {c_type}."
+        "\t</brief_description>\n"
+        "\t<description>"
+        f"Auto-generated handle for the opaque C type {c_type}. Wraps a C pointer and auto-frees it on destruction."
+        "\t</description>\n"
+        "\t<tutorials>\n\t</tutorials>\n"
+        "\t<methods>\n"
+        '\t\t<method name="set_handle">\n'
+        '\t\t\t<return type="void" />\n'
+        '\t\t\t<argument index="0" name="handle" type="int" />\n'
+        "\t\t\t<description>Set the wrapped C pointer from an int64_t handle.</description>\n"
+        "\t\t</method>\n"
+        '\t\t<method name="get_handle">\n'
+        '\t\t\t<return type="int" />\n'
+        "\t\t\t<description>Get the wrapped C pointer as an int64_t handle.</description>\n"
+        "\t\t</method>\n"
+        '\t\t<method name="is_valid">\n'
+        '\t\t\t<return type="bool" />\n'
+        "\t\t\t<description>Check if the handle wraps a non-null pointer.</description>\n"
+        "\t\t</method>\n"
+        '\t\t<method name="release">\n'
+        '\t\t\t<return type="int" />\n'
+        "\t\t\t<description>Release ownership of the C pointer and return the handle. The destructor will not free it.</description>\n"
+        "\t\t</method>\n"
+        '\t\t<method name="free">\n'
+        '\t\t\t<return type="void" />\n'
+        "\t\t\t<description>Manually free the wrapped C pointer.</description>\n"
+        "\t\t</method>\n"
+        "\t</methods>\n"
+        "</class>\n"
+    )
