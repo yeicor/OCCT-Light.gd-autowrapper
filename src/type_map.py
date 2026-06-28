@@ -132,6 +132,18 @@ TYPEDEF_CANONICAL_MAP: dict[str, str] = {
 }
 
 # ---------------------------------------------------------------
+# Callback typedefs — function pointer types that need Callable bridge.
+# ---------------------------------------------------------------
+CALLBACK_TYPES: set[str] = {
+    "occtl_node_visitor_t",
+    "occtl_ref_visitor_t",
+    "occtl_rep_visitor_t",
+}
+
+def is_callback_type(c_type: str) -> bool:
+    return c_type.strip() in CALLBACK_TYPES
+
+# ---------------------------------------------------------------
 # Enum types → treat as int in Godot (not Ref<T> wrappers).
 # These are typedefs for enums, not structs.
 # ---------------------------------------------------------------
