@@ -81,6 +81,15 @@ OUT_PARAM_PRIM_TYPES: dict[str, str] = {
 }
 
 
+# Functions whose pointer-to-value-struct params can be nullptr (use defaults).
+# Key = C function name, value = set of param names that are nullable.
+DEFAULT_NULLABLE_PARAMS: dict[str, set[str]] = {
+    "occtl_runtime_init": {"info"},
+    "occtl_heal_shape": {"options"},
+    "occtl_heal_unify_same_domain": {"options"},
+}
+
+
 def _is_const_char_double_ptr(t: str) -> bool:
     t = t.strip()
     return t in ("const char**", "const char * *")
@@ -318,6 +327,20 @@ def _method_arg_names(f: CFunction) -> str:
     return "".join(f', "{p.name}"' for p in kept_params)
 
 
+def _method_defvals(f: CFunction) -> str:
+    """Return DEFVAL(...) string for trailing nullable params."""
+    ret = f.return_type.strip()
+    kept = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+    nullable = DEFAULT_NULLABLE_PARAMS.get(f.name, set())
+    defvals = []
+    for p in kept:
+        if p.name in nullable:
+            defvals.append("DEFVAL(Variant())")
+    if not defvals:
+        return ""
+    return ", " + ", ".join(defvals)
+
+
 def _wrapper_class_name(header_include: str) -> str:
     stem = Path(header_include).stem
     parts = stem.replace("occtl_", "", 1).split("_")
@@ -461,8 +484,15 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
                     lines.append(f"    const uint8_t* _{name}_c = {name}.ptr();")
                     call_args.append(f"_{name}_c")
                 elif is_value_struct_type(base):
-                    lines.append(f"    {base_raw} _{name}_c = {name}->to_c();")
-                    call_args.append(f"&_{name}_c")
+                    if f.name in DEFAULT_NULLABLE_PARAMS and p.name in DEFAULT_NULLABLE_PARAMS[f.name]:
+                        base_no_const = base_raw.replace("const ", "", 1) if base_raw.startswith("const ") else base_raw
+                        lines.append(f"    {base_no_const} _{name}_c = {{}};")
+                        lines.append(f"    const {base_no_const}* _{name}_ptr = nullptr;")
+                        lines.append(f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}")
+                        call_args.append(f"_{name}_ptr")
+                    else:
+                        lines.append(f"    {base_raw} _{name}_c = {name}->to_c();")
+                        call_args.append(f"&_{name}_c")
                 elif base in HANDLE_TYPES:
                     call_args.append(f"reinterpret_cast<const {base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))")
                 elif base in UINT64_ID_TYPES:
@@ -764,7 +794,8 @@ def generate_wrapper_source(
     method_names = _function_method_names(functions)
     for f in functions:
         mname = method_names[f.name]
-        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("{mname}"{_method_arg_names(f)}), &{cls}::{mname});')
+        defvals = _method_defvals(f)
+        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("{mname}"{_method_arg_names(f)}), &{cls}::{mname}{defvals});')
     if not functions and not parsed.constants and not parsed.enums:
         lines.append(f"    godot::ClassDB::bind_method(godot::D_METHOD(\"_unused\"), &{cls}::_unused);")
     lines.append("}")
