@@ -656,11 +656,10 @@ def generate_wrapper_header(
         "public:",
     ])
     for c in _filtered_constants(parsed.constants):
-        ret = _constant_godot_return_type(c)
-        lines.append(f"    {ret} const_{c.name}(); // NOLINT")
-    for enum in parsed.enums:
-        for ev in enum.values:
-            lines.append(f"    int {ev.name}(); // NOLINT")
+        ret = _constant_godot_return_type(c, parsed.constants)
+        if ret != "int":
+            lines.append(f"    {ret} const_{c.name}(); // NOLINT")
+    # Enum values are registered via BIND_ENUM_CONSTANT; no methods needed.
     method_names = _function_method_names(functions)
     for f in functions:
         ret_mapped = _func_return_type_mapped(f)
@@ -678,25 +677,49 @@ def generate_wrapper_header(
     return "\n".join(lines)
 
 
-def _constant_godot_return_type(c: CConstant) -> str:
+def _constant_value_resolve(v: str, consts: list[CConstant]) -> str:
+    """Resolve a constant value through #define reference chains."""
+    seen = set()
+    while True:
+        v_stripped = v.strip()
+        if v_stripped in seen:
+            break
+        seen.add(v_stripped)
+        found = None
+        for c in consts:
+            if c.name == v_stripped:
+                found = c.value.strip()
+                break
+        if found is None or found == v_stripped:
+            break
+        v = found
+    return v
+
+
+def _constant_godot_return_type(c: CConstant, consts: list[CConstant] | None = None) -> str:
     v = c.value.strip()
+    # Resolve through #define chains if we have a constant lookup
+    if consts is not None:
+        v = _constant_value_resolve(v, consts)
     while v.startswith("(") and v.endswith(")"):
         v = v[1:-1].strip()
+    # Strip C integer suffixes: u, U, l, L, ul, UL, ll, LL, ull, ULL
+    clean = v.rstrip("uUlL ")
     v_lower = v.lower()
     if v_lower in ("true", "false"):
         return "bool"
-    if "." in v or "e" in v_lower:
+    if "." in v or ("e" in v_lower and any(d in v for d in "0123456789")):
         return "double"
-    if v_lower.startswith("0x"):
+    if v_lower.startswith("0x") or v_lower.startswith("0X"):
         return "int"
     try:
-        int(v)
+        int(clean)
         return "int"
     except ValueError:
         pass
     if any(c in v for c in "+-*/"):
-        return "double" if ("." in v or "pi" in v_lower) else "int"
-    if v_lower in ("null", "nullptr", "null"):
+        return "double" if ("." in v or v_lower.startswith("pi")) else "int"
+    if v_lower in ("null", "nullptr"):
         return "int64_t"
     return "int64_t"
 
@@ -729,10 +752,15 @@ def generate_wrapper_source(
 
     lines.append(f"void {cls}::_bind_methods() {{")
     for c in _filtered_constants(parsed.constants):
-        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("const_{c.name}"), &{cls}::const_{c.name});')
-    for enum in parsed.enums:
-        for ev in enum.values:
-            lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("{ev.name}"), &{cls}::{ev.name});')
+        ret = _constant_godot_return_type(c, parsed.constants)
+        if ret == "int":
+            lines.append(f"    BIND_CONSTANT({c.name});")
+        else:
+            lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("const_{c.name}"), &{cls}::const_{c.name});')
+    for ev in (
+        ev for enum in parsed.enums for ev in enum.values
+    ):
+        lines.append(f"    BIND_CONSTANT({ev.name});")
     method_names = _function_method_names(functions)
     for f in functions:
         mname = method_names[f.name]
@@ -743,17 +771,11 @@ def generate_wrapper_source(
     lines.append("")
 
     for c in _filtered_constants(parsed.constants):
-        ret = _constant_godot_return_type(c)
-        body = _generate_constant_body(c)
-        lines.append(f"{ret} {cls}::const_{c.name}() {{ // NOLINT")
-        lines.append(f"    {body}")
-        lines.append("}")
-        lines.append("")
-
-    for enum in parsed.enums:
-        for ev in enum.values:
-            lines.append(f"int {cls}::{ev.name}() {{ // NOLINT")
-            lines.append(f"    return {ev.value};")
+        ret = _constant_godot_return_type(c, parsed.constants)
+        if ret != "int":
+            body = _generate_constant_body(c, parsed.constants)
+            lines.append(f"{ret} {cls}::const_{c.name}() {{ // NOLINT")
+            lines.append(f"    {body}")
             lines.append("}")
             lines.append("")
 
@@ -778,9 +800,9 @@ def generate_wrapper_source(
     return "\n".join(lines)
 
 
-def _generate_constant_body(c: CConstant) -> str:
+def _generate_constant_body(c: CConstant, consts: list[CConstant] | None = None) -> str:
     v = c.value.strip()
-    ret = _constant_godot_return_type(c)
+    ret = _constant_godot_return_type(c, consts)
     if ret == "double":
         try:
             evaluated = _eval_const(v)
@@ -882,22 +904,24 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
     methods = []
 
     for c in parsed.constants:
-        ret = _constant_godot_return_type(c)
-        methods.append(f'\t\t<method name="{escape(c.name)}">')
-        methods.append(f'\t\t\t<return type="{ret}" />')
-        methods.append("\t\t\t<description>")
-        methods.append(f"\t\t\t\t{c.doc_comment or f'Constant wrapper for #define {c.name}'}.")
-        methods.append("\t\t\t</description>")
-        methods.append("\t\t</method>")
+        ret = _constant_godot_return_type(c, parsed.constants)
+        if ret in ("int", "bool"):
+            methods.append(f'\t\t<constant name="{escape(c.name)}" value="{escape(str(c.value))}">')
+            methods.append(f"\t\t\t{c.doc_comment or f'Constant for #define {c.name}'}.")
+            methods.append("\t\t</constant>")
+        else:
+            methods.append(f'\t\t<method name="const_{escape(c.name)}">')
+            methods.append(f'\t\t\t<return type="{ret}" />')
+            methods.append("\t\t\t<description>")
+            methods.append(f"\t\t\t\t{c.doc_comment or f'Constant wrapper for #define {c.name}'}.")
+            methods.append("\t\t\t</description>")
+            methods.append("\t\t</method>")
 
     for enum in parsed.enums:
         for ev in enum.values:
-            methods.append(f'\t\t<method name="{escape(ev.name)}">')
-            methods.append('\t\t\t<return type="int" />')
-            methods.append("\t\t\t<description>")
-            methods.append(f"\t\t\t\tEnum value {ev.name} = {ev.value}.")
-            methods.append("\t\t\t</description>")
-            methods.append("\t\t</method>")
+            methods.append(f'\t\t<constant name="{escape(ev.name)}" value="{escape(str(ev.value))}">')
+            methods.append(f"\t\t\tEnum value = {ev.value}.")
+            methods.append("\t\t</constant>")
 
     method_names = _function_method_names(parsed.functions)
     for f in parsed.functions:
@@ -957,25 +981,20 @@ def generate_gdscript_tests(
 
     for c in _filtered_constants(parsed.constants):
         lines.append(f"static func test_{c.name}() -> String:")
-        ret = _constant_godot_return_type(c)
-        mname = f"const_{c.name}"
-        if ret == "double":
+        ret = _constant_godot_return_type(c, parsed.constants)
+        if ret == "int":
+            lines.append(f"    var v = {cls}.{c.name}")
+        else:
+            mname = f"const_{c.name}"
             lines.append(f"    var v = {cls}.new().{mname}()")
             lines.append("    if v == null: return \"Failed: {c.name} returned null\"")
-        elif ret == "int":
-            lines.append(f"    var v = {cls}.new().{mname}()")
-            lines.append("    if v == null: return \"Failed\"")
-        elif ret == "bool":
-            lines.append(f"    var v = {cls}.new().{mname}()")
-        else:
-            lines.append(f"    var v = {cls}.new().{mname}()")
         lines.append('    return ""')
         lines.append("")
 
     for enum in parsed.enums:
         for ev in enum.values:
             lines.append(f"static func test_{ev.name}() -> String:")
-            lines.append(f"    var v = {cls}.new().{ev.name}()")
+            lines.append(f"    var v = {cls}.{ev.name}")
             lines.append("    if v < 0: return \"Failed: enum value negative\"")
             lines.append('    return ""')
             lines.append("")
