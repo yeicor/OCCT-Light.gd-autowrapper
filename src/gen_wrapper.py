@@ -17,19 +17,17 @@ from type_map import (
     UINT64_ID_TYPES, VALUE_STRUCT_TYPES,
     c_type_to_godot_class, godot_param_type, godot_return_type,
     is_opaque_ptr_t_type, is_out_param, is_value_struct_type,
+    _resolve_typedef,
     CPP_TO_GODOT_TYPE, param_type_to_variant_type,
 )
 
 
 def _c_type_strip_ptr(t: str) -> str:
-    """Remove trailing * and trailing cv-qualifiers from a C type, return the base type."""
     t = re.sub(r'\s+(const|volatile)\s*$', '', t)
     return t.rstrip("* \t")
 
 
 def _filtered_constants(constants: list) -> list:
-    """Filter out constants that can't be exposed as zero-arg methods."""
-    # Platform/calling-convention macro names to exclude
     SKIP_NAMES = {"OCCTL_API", "OCCTL_CALL"}
     result = []
     for c in constants:
@@ -64,8 +62,68 @@ def _is_uint64_id_ptr(c_type: str) -> bool:
     return base in UINT64_ID_TYPES
 
 
-def _is_handle_type(t: str) -> bool:
-    return t.strip() in HANDLE_TYPES
+# ---------------------------------------------------------------
+# Out-param classification
+# ---------------------------------------------------------------
+
+OUT_PARAM_PRIM_TYPES: dict[str, str] = {
+    "uint32_t": "OcctlUint32",
+    "int32_t": "OcctlInt32",
+    "uint16_t": "OcctlInt32",
+    "uint8_t": "OcctlUint8",  # scalar only; use OcctlByteArray for uint8_t*
+    "size_t": "OcctlSize",
+    "int": "OcctlInt32",
+    "int64_t": "OcctlInt64",
+    "uint64_t": "OcctlUint64",
+    "double": "OcctlDouble",
+    "float": "OcctlDouble",
+    "bool": "OcctlBool",
+}
+
+
+def _is_const_char_double_ptr(t: str) -> bool:
+    t = t.strip()
+    return t in ("const char**", "const char * *")
+
+
+def _out_param_wrapper_class(base: str, full_type: str = "") -> str | None:
+    """Return the Godot wrapper class for an out-param C type.
+    Returns None for handle double-ptrs, const occtl_error_t**, etc."""
+    resolved = _resolve_typedef(base)
+    if resolved in HANDLE_TYPES:
+        return None
+    # uint8_t* buffer out-params → OcctlByteArray
+    ft = full_type.strip() if full_type else ""
+    if resolved == "uint8_t" and (ft.endswith("*") and not ft.endswith("**")):
+        return "OcctlByteArray"
+    if resolved in UINT64_ID_TYPES:
+        return c_type_to_godot_class(resolved)
+    if resolved in VALUE_STRUCT_TYPES:
+        return c_type_to_godot_class(resolved)
+    if resolved in OUT_PARAM_PRIM_TYPES:
+        return OUT_PARAM_PRIM_TYPES[resolved]
+    if resolved in ENUM_TYPES:
+        return "OcctlInt32"
+    if resolved in ("const char", "char"):
+        if _is_const_char_double_ptr(ft):
+            return "OcctlStringArray"
+        return "OcctlString"
+    return None
+
+
+def _is_direct_return_out_param(p: CParameter) -> bool:
+    """True if this out-param should be returned directly instead of
+    kept as a method parameter.  Handles: handle**, const occtl_error_t**."""
+    t = p.type_name.strip()
+    if t.endswith("**"):
+        return True
+    return False
+
+
+def _is_occtl_error_param(p: CParameter) -> bool:
+    t = p.type_name.strip()
+    base = _c_type_strip_ptr(t).strip()
+    return base == "occtl_error_t" and t.endswith("**")
 
 
 # ---------------------------------------------------------------
@@ -73,7 +131,6 @@ def _is_handle_type(t: str) -> bool:
 # ---------------------------------------------------------------
 
 def _c_to_godot_val(c_type: str, expr: str) -> str:
-    """Convert a C expression to a Godot value."""
     t = c_type.strip()
     if t == "const char*":
         return f"String({expr})"
@@ -98,7 +155,6 @@ def _c_to_godot_val(c_type: str, expr: str) -> str:
 
 
 def _godot_to_c_val(c_type: str, expr: str) -> str:
-    """Convert a Godot expression to a C value."""
     t = c_type.strip()
     if t == "occtl_status_t":
         return f"static_cast<{t}>({expr})"
@@ -116,98 +172,11 @@ def _godot_to_c_val(c_type: str, expr: str) -> str:
 
 
 # ---------------------------------------------------------------
-# Out-parameter handling
-# ---------------------------------------------------------------
-
-def _out_param_c_type(p: CParameter) -> str:
-    """Get the C type for out-parameter declaration."""
-    t = p.type_name.strip()
-    if t.endswith("**"):
-        return _c_type_strip_ptr(t) + "*"
-    return _c_type_strip_ptr(t)
-
-
-def _out_param_to_godot(p: CParameter, local_expr: str) -> list[str]:
-    """Generate lines to convert an out-param to Godot dictionary entry."""
-    t = p.type_name.strip()
-    base = _c_type_strip_ptr(t).strip()
-    name = p.name if p.name else "result"
-    lines = []
-
-    if t.endswith("**"):
-        cls = c_type_to_godot_class(base) + "Handle"
-        lines.append(f"if ({local_expr}) {{")
-        lines.append(f"    Ref<{cls}> _h;")
-        lines.append(f"    _h.instantiate();")
-        lines.append(f'    _h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr})));')
-        lines.append(f'    _gdreturn["{name}"] = _h;')
-        lines.append("}")
-    elif base in UINT64_ID_TYPES:
-        lines.append(f'_gdreturn["{name}"] = static_cast<int64_t>({local_expr}.bits);')
-    elif base in VALUE_STRUCT_TYPES:
-        cls = c_type_to_godot_class(base)
-        lines.append(f'_gdreturn["{name}"] = {cls}::from_c({local_expr});')
-    elif base == "occtl_status_t":
-        lines.append(f'_gdreturn["{name}"] = static_cast<int>({local_expr});')
-    elif base == "const char*":
-        lines.append(f'_gdreturn["{name}"] = String({local_expr});')
-    elif base == "char*":
-        lines.append(f'_gdreturn["{name}"] = String({local_expr});')
-    elif base in ("int32_t", "uint32_t", "uint16_t", "size_t", "int"):
-        lines.append(f'_gdreturn["{name}"] = static_cast<int>({local_expr});')
-    elif base in ("int64_t", "uint64_t"):
-        lines.append(f'_gdreturn["{name}"] = static_cast<int64_t>({local_expr});')
-    elif base in ("double", "float"):
-        lines.append(f'_gdreturn["{name}"] = {local_expr};')
-    elif base == "bool":
-        lines.append(f'_gdreturn["{name}"] = static_cast<bool>({local_expr});')
-    elif base in ENUM_TYPES:
-        lines.append(f'_gdreturn["{name}"] = static_cast<int>({local_expr});')
-    else:
-        lines.append(f'_gdreturn["{name}"] = static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr}));')
-    return lines
-
-
-def _out_param_return_expr(p: CParameter, local_expr: str) -> str:
-    """For single out-param functions, generate the return expression."""
-    t = p.type_name.strip()
-    base = _c_type_strip_ptr(t).strip()
-
-    if t.endswith("**"):
-        cls = c_type_to_godot_class(base) + "Handle"
-        return (f"[&]() -> Ref<{cls}> {{ if (!{local_expr}) return Ref<{cls}>(); "
-                f"Ref<{cls}> _h; _h.instantiate(); "
-                f"_h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr}))); "
-                f"return _h; }}()")
-    if base in UINT64_ID_TYPES:
-        return f"static_cast<int64_t>({local_expr}.bits)"
-    if base in VALUE_STRUCT_TYPES:
-        cls = c_type_to_godot_class(base)
-        return f"{cls}::from_c({local_expr})"
-    if base == "const char*":
-        return f"String({local_expr})"
-    if base in ("int32_t", "uint32_t", "uint16_t", "size_t", "int"):
-        return f"static_cast<int>({local_expr})"
-    if base in ("int64_t", "uint64_t"):
-        return f"static_cast<int64_t>({local_expr})"
-    if base in ("double", "float"):
-        return local_expr
-    if base == "bool":
-        return f"static_cast<bool>({local_expr})"
-    if base in ENUM_TYPES:
-        return f"static_cast<int>({local_expr})"
-    return f"static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr}))"
-
-
-# ---------------------------------------------------------------
 # In-parameter handling
 # ---------------------------------------------------------------
 
 def _in_param_decl(p: CParameter) -> str | None:
-    """Generate a local C variable declaration for an in-parameter.
-    Returns None if no conversion needed (pass directly)."""
     t = p.type_name.strip()
-
     if t == "char*":
         return f"    godot::CharString _{p.name}_cs = {p.name}.utf8();\n    std::vector<char> _{p.name}_buf(_{p.name}_cs.get_data(), _{p.name}_cs.get_data() + _{p.name}_cs.length() + 1);\n    char* _{p.name}_c = _{p.name}_buf.data();"
     t_stripped = re.sub(r'\s+(const|volatile)\s*$', '', t)
@@ -221,17 +190,14 @@ def _in_param_decl(p: CParameter) -> str | None:
         if base in HANDLE_TYPES:
             return None
         if base == "uint8_t":
-            return f"    const uint8_t* _{p.name}_c = reinterpret_cast<const uint8_t*>(static_cast<uintptr_t>(static_cast<uint64_t>({p.name})));"
+            return f"    const uint8_t* _{p.name}_c = {p.name}.ptr();"
         return None
-
     return None
 
 
 def _in_param_call_arg(p: CParameter) -> str:
-    """Generate the function call argument for an in-parameter."""
     t = p.type_name.strip()
     name = p.name if p.name else ""
-
     if t.startswith("const ") and t.endswith("*"):
         base_raw = _c_type_strip_ptr(t).strip()
         base = re.sub(r'^(const|volatile)\s+', '', base_raw).strip()
@@ -273,101 +239,228 @@ def _func_is_occtl_status(f: CFunction) -> bool:
 
 
 def _func_return_type_mapped(f: CFunction) -> str:
-    """Determine the Godot return type for a function wrapper."""
-    if _func_is_occtl_status(f):
-        out_params = [p for p in f.params if is_out_param(p.type_name, p.name, f.return_type)]
-        if not out_params:
-            return "int"  # just status
-        handle_outs = [p for p in out_params if p.type_name.strip().endswith("**")]
-        if len(out_params) == 1 and handle_outs:
-            base = _c_type_strip_ptr(handle_outs[0].type_name).strip()
-            inner = re.sub(r'^(const|volatile)\s+', '', base.rstrip("* \t")).strip()
-            if inner == "char":
-                return "Dictionary"
-            if inner in UINT64_ID_TYPES:
-                return "Dictionary"
-            if inner in HANDLE_TYPES:
-                return f"Ref<{c_type_to_godot_class(base)}Handle>"
-            return "Dictionary"
-        return "Dictionary"
-    if f.return_type.strip() == "const occtl_error_t*":
-        return "Dictionary"
-    if f.return_type.strip() == "const char*":
+    ret = f.return_type.strip()
+    out_params = [p for p in f.params if is_out_param(p.type_name, p.name, ret)]
+
+    # const occtl_error_t* → Ref<OcctlError>
+    if ret == "const occtl_error_t*":
+        return "Ref<OcctlError>"
+
+    # const char* → String
+    if ret == "const char*":
         return "String"
-    if f.return_type.strip() == "void":
+
+    # Handle** out-params returned directly (first such param wins)
+    handle_outs = [p for p in out_params if _is_direct_return_out_param(p)]
+    non_handle_outs = [p for p in out_params if not _is_direct_return_out_param(p)]
+
+    if handle_outs:
+        p = handle_outs[0]
+        base = _c_type_strip_ptr(p.type_name).strip()
+        inner = re.sub(r'^(const|volatile)\s+', '', base.rstrip("* \t")).strip()
+        if inner in HANDLE_TYPES:
+            return f"Ref<{c_type_to_godot_class(base)}Handle>"
+        return "int"  # fallback
+
+    # No handle out-params → return mapped C return type
+    if ret == "void":
         return "void"
-    return godot_return_type(f.return_type)
+    if _func_is_occtl_status(f):
+        return "int"
+    return godot_return_type(ret)
+
+
+# ---------------------------------------------------------------
+# Method declarations — only handle** and const occtl_error_t**
+# are stripped from method args; all other out-params stay as Ref<T> params.
+# ---------------------------------------------------------------
+
+def _is_stripped_out_param(p: CParameter, ret: str) -> bool:
+    """True if this out-param should be REMOVED from the Godot method signature.
+    These are handle** and const occtl_error_t** — they become return values."""
+    if not is_out_param(p.type_name, p.name, ret):
+        return False
+    t = p.type_name.strip()
+    base = _c_type_strip_ptr(t).strip()
+    if base == "occtl_error_t" and t.endswith("**"):
+        return True
+    if t.endswith("**"):
+        return True
+    return False
+
+
+def _method_args_decl(f: CFunction) -> str:
+    ret = f.return_type.strip()
+    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+    if not kept_params:
+        return "void"
+    args = []
+    for p in kept_params:
+        t = p.type_name.strip()
+        # Out-params (non-handle) use Ref<T> wrapper classes
+        if is_out_param(t, p.name, ret):
+            base = _c_type_strip_ptr(t).strip()
+            wrapper_cls = _out_param_wrapper_class(base, t)
+            if wrapper_cls:
+                args.append(f"const Ref<{wrapper_cls}>& {p.name}")
+                continue
+        gt = godot_param_type(t)
+        if gt in ("String", "Variant", "Array", "Dictionary", "PackedByteArray") or gt.startswith("Ref<"):
+            args.append(f"const {gt}& {p.name}")
+        else:
+            args.append(f"{gt} {p.name}")
+    return ", ".join(args)
+
+
+def _method_arg_names(f: CFunction) -> str:
+    ret = f.return_type.strip()
+    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+    return "".join(f', "{p.name}"' for p in kept_params)
+
+
+def _wrapper_class_name(header_include: str) -> str:
+    stem = Path(header_include).stem
+    parts = stem.replace("occtl_", "", 1).split("_")
+    return "Occtl" + "".join(p.capitalize() for p in parts)
+
+
+def _common_function_prefix(functions: list[CFunction]) -> str:
+    if not functions:
+        return ""
+    names = [f.name for f in functions]
+    prefix = names[0]
+    for name in names[1:]:
+        while not name.startswith(prefix):
+            prefix = prefix[:-1]
+            if not prefix:
+                return ""
+    if prefix and not prefix.endswith("_"):
+        last_us = prefix.rfind("_")
+        if last_us >= 0:
+            prefix = prefix[:last_us + 1]
+        else:
+            prefix = ""
+    return prefix
+
+
+def _function_method_name(f: CFunction, all_functions: list[CFunction]) -> str:
+    prefix = _common_function_prefix(all_functions)
+    if prefix and f.name.startswith(prefix):
+        return f.name[len(prefix):]
+    return f.name
+
+
+def _function_method_names(functions: list[CFunction]) -> dict[str, str]:
+    return {f.name: _function_method_name(f, functions) for f in functions}
 
 
 # ---------------------------------------------------------------
 # Body generation
 # ---------------------------------------------------------------
 
-def _generate_body(f: CFunction, wrapper_name: str) -> str:
-    """Generate the C++ function body."""
+def _generate_out_param_copy_line(p: CParameter, local_var: str, indent: str = "    ") -> str:
+    """Generate line to copy a C out-param value into a Godot wrapper ref."""
+    t = p.type_name.strip()
+    base = _c_type_strip_ptr(t).strip()
+    resolved = _resolve_typedef(base)
+    name = p.name if p.name else "out"
+    wrapper_cls = _out_param_wrapper_class(base, t)
+    if wrapper_cls is None:
+        return ""
+    if resolved in VALUE_STRUCT_TYPES:
+        return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
+    if resolved in UINT64_ID_TYPES:
+        return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
+    if resolved in OUT_PARAM_PRIM_TYPES or resolved in ENUM_TYPES:
+        return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
+    if resolved in ("const char", "char"):
+        return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
+    return ""
+
+
+def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None = None) -> str:
     ret = f.return_type.strip()
     out_params = [p for p in f.params if is_out_param(p.type_name, p.name, ret)]
-    in_params = [p for p in f.params if not is_out_param(p.type_name, p.name, ret)]
+    handle_out_params = [p for p in out_params if _is_direct_return_out_param(p)]
+    non_handle_out_params = [p for p in out_params if not _is_direct_return_out_param(p)]
     lines = []
     ret_mapped = _func_return_type_mapped(f)
 
-    # Special case: const occtl_error_t* return
+    # Special case: const occtl_error_t* return → Ref<OcctlError>
     if ret == "const occtl_error_t*":
-        lines.append("    const occtl_error_t* _err = ::%s();" % f.name)
-        lines.append("    Dictionary _gdreturn;")
-        lines.append('    _gdreturn["status"] = static_cast<int>(_err->status);')
-        lines.append('    _gdreturn["message"] = String(_err->message);')
-        lines.append('    _gdreturn["source_bits"] = static_cast<int64_t>(_err->source.bits);')
-        lines.append('    _gdreturn["extended"] = static_cast<int64_t>(_err->extended);')
-        lines.append("    return _gdreturn;")
+        lines.append(f"    const occtl_error_t* _err = ::{f.name}();")
+        lines.append("    if (!_err) return Ref<OcctlError>();")
+        lines.append("    return OcctlError::from_c(*_err);")
         return "\n".join(lines)
 
-    # Build call_args preserving parameter order
+    # Build call_args preserving C parameter order
     call_args = []
-    out_local_names = []
+    c_func_name = f.name
+
     for p in f.params:
         t = p.type_name.strip()
         name = p.name if p.name else ""
         if is_out_param(t, p.name, ret):
             base = _c_type_strip_ptr(t).strip()
             if t.endswith("**"):
-                local = f"_{name}_val"
-                lines.append(f"    {base}* {local} = nullptr;")
-                call_args.append(f"&{local}")
-                out_local_names.append((p, local, t))
-            elif base in UINT64_ID_TYPES:
-                local = f"_{name}_val"
-                lines.append(f"    {base} {local} = {{}};")
-                call_args.append(f"&{local}")
-                out_local_names.append((p, local, t))
-            elif is_value_struct_type(base):
-                local = f"_{name}_val"
-                lines.append(f"    {base} {local};")
-                call_args.append(f"&{local}")
-                out_local_names.append((p, local, t))
-            elif base in ("const char*", "char*"):
-                local = f"_{name}_val"
-                lines.append(f"    {base} {local} = nullptr;")
-                call_args.append(f"&{local}")
-                out_local_names.append((p, local, t))
-            elif base in HANDLE_TYPES:
-                local = f"_{name}_val"
-                lines.append(f"    {base}* {local} = nullptr;")
-                call_args.append(f"&{local}")
-                out_local_names.append((p, local, t))
+                # Handle** or const char** out-param
+                if t == "const char**" or t == "const char * *":
+                    local = f"_{name}_buf"
+                    cap_param = None
+                    for other in f.params:
+                        if other.name != p.name and other.type_name.strip() == "size_t" and not is_out_param(other.type_name, other.name, ret):
+                            cap_param = other
+                            break
+                    if cap_param:
+                        cap_name = cap_param.name
+                        lines.append(f"    std::vector<const char*> {local}(static_cast<size_t>({cap_name}));")
+                        call_args.append(f"{local}.data()")
+                    else:
+                        local = f"_{name}_val"
+                        lines.append(f"    const char* {local} = nullptr;")
+                        call_args.append(f"&{local}")
+                else:
+                    local = f"_{name}_val"
+                    resolved_base = _resolve_typedef(base)
+                    if resolved_base == "occtl_error_t":
+                        # const occtl_error_t** → return as Ref<OcctlError>
+                        lines.append(f"    const {resolved_base}* {local} = nullptr;")
+                        call_args.append(f"&{local}")
+                    else:
+                        lines.append(f"    {base}* {local} = nullptr;")
+                        call_args.append(f"&{local}")
+            elif base == "uint8_t":
+                # uint8_t* buffer out-param
+                buf_size = 16
+                if parsed:
+                    for c in parsed.constants:
+                        if "WIRE_SIZE" in c.name or "BUFFER_SIZE" in c.name:
+                            try:
+                                buf_size = int(c.value.strip())
+                            except ValueError:
+                                pass
+                local = f"_{name}_buf"
+                lines.append(f"    uint8_t {local}[{buf_size}] = {{}};")
+                call_args.append(local)
             else:
                 local = f"_{name}_val"
-                lines.append(f"    {base} {local} = {{}};")
-                call_args.append(f"&{local}")
-                out_local_names.append((p, local, t))
+                resolved = _resolve_typedef(base)
+                if resolved in (VALUE_STRUCT_TYPES | UINT64_ID_TYPES | ENUM_TYPES | set(OUT_PARAM_PRIM_TYPES.keys())):
+                    lines.append(f"    {resolved} {local} = {{}};")
+                    call_args.append(f"&{local}")
+                else:
+                    lines.append(f"    {base} {local} = {{}};")
+                    call_args.append(f"&{local}")
         else:
             # In-param
-            # Strip trailing cv-qualifiers (e.g. "const T* const" -> "const T*")
             t_stripped = re.sub(r'\s+(const|volatile)\s*$', '', t)
             if t_stripped.startswith("const ") and t_stripped.endswith("*") and not t_stripped.endswith("**"):
                 base_raw = _c_type_strip_ptr(t_stripped).strip()
                 base = re.sub(r'^(const|volatile)\s+', '', base_raw).strip()
-                if is_value_struct_type(base):
+                if base == "uint8_t":
+                    lines.append(f"    const uint8_t* _{name}_c = {name}.ptr();")
+                    call_args.append(f"_{name}_c")
+                elif is_value_struct_type(base):
                     lines.append(f"    {base_raw} _{name}_c = {name}->to_c();")
                     call_args.append(f"&_{name}_c")
                 elif base in HANDLE_TYPES:
@@ -377,9 +470,6 @@ def _generate_body(f: CFunction, wrapper_name: str) -> str:
                     call_args.append(f"&_{name}_c")
                 elif base == "char":
                     call_args.append(f"{name}.utf8().get_data()")
-                elif base == "uint8_t":
-                    lines.append(f"    const uint8_t* _{name}_c = reinterpret_cast<const uint8_t*>(static_cast<uintptr_t>(static_cast<uint64_t>({name})));")
-                    call_args.append(f"_{name}_c")
                 elif base == "void":
                     call_args.append(f"reinterpret_cast<{base_raw}*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
                 else:
@@ -402,7 +492,6 @@ def _generate_body(f: CFunction, wrapper_name: str) -> str:
                 if t in ENUM_TYPES:
                     call_args.append(f"static_cast<{t}>({name})")
                     continue
-                # Strip trailing cv-qualifiers for pointer detection
                 t_clean = re.sub(r'\s+(const|volatile)\s*$', '', t)
                 if t_clean.endswith("*"):
                     base = _c_type_strip_ptr(t_clean).strip()
@@ -426,74 +515,77 @@ def _generate_body(f: CFunction, wrapper_name: str) -> str:
 
     # Call the C function
     if _func_is_occtl_status(f):
-        lines.append(f"    occtl_status_t _status = ::{f.name}({', '.join(call_args)});")
+        lines.append(f"    occtl_status_t _status = ::{c_func_name}({', '.join(call_args)});")
     else:
         if ret == "void":
-            lines.append(f"    ::{f.name}({', '.join(call_args)});")
+            lines.append(f"    ::{c_func_name}({', '.join(call_args)});")
         else:
-            lines.append(f"    auto _result = ::{f.name}({', '.join(call_args)});")
+            lines.append(f"    auto _result = ::{c_func_name}({', '.join(call_args)});")
+
+    # Copy non-handle out-param values into Godot wrapper refs
+    for p in non_handle_out_params:
+        t = p.type_name.strip()
+        base = _c_type_strip_ptr(t).strip()
+        name = p.name if p.name else "out"
+        if t == "const char**" or t == "const char * *":
+            local = f"_{name}_buf"
+            for other in f.params:
+                ot = other.type_name.strip()
+                if other.name != p.name and ot.endswith("*") and ot.rstrip("*") == "size_t" and is_out_param(ot, other.name, ret):
+                    count_local = f"_{other.name}_val"
+                    lines.append(f"    if ({name}.is_valid()) {name}->copy_from_c({local}.data(), {count_local});")
+                    break
+            else:
+                lines.append(f"    if ({name}.is_valid()) {name}->copy_from_c({local});")
+        elif base == "uint8_t":
+            buf_size = 16
+            if parsed:
+                for c in parsed.constants:
+                    if "WIRE_SIZE" in c.name or "BUFFER_SIZE" in c.name:
+                        try:
+                            buf_size = int(c.value.strip())
+                        except ValueError:
+                            pass
+            lines.append(f"    if ({name}.is_valid()) {{")
+            lines.append(f"        PackedByteArray _ba;")
+            lines.append(f"        _ba.resize({buf_size});")
+            lines.append(f"        for (int _i = 0; _i < {buf_size}; ++_i) _ba[_i] = _{name}_buf[_i];")
+            lines.append(f"        {name}->copy_from_c(_ba);")
+            lines.append(f"    }}")
+        else:
+            local = f"_{name}_val"
+            copy_line = _generate_out_param_copy_line(p, local)
+            if copy_line:
+                lines.append(copy_line)
 
     # Build return
-    if _func_is_occtl_status(f):
-        if not out_params:
-            lines.append("    return static_cast<int>(_status);")
-        elif len(out_params) == 1 and out_params[0].type_name.strip().endswith("**"):
-            p, local, _ = out_local_names[0]
-            base = _c_type_strip_ptr(p.type_name).strip()
-            inner = re.sub(r'^(const|volatile)\s+', '', base.rstrip("* \t")).strip()
-            if inner in UINT64_ID_TYPES:
-                # For uint64 ID types, the ** out param is an array of IDs, not a handle
-                lines.append("    Dictionary _gdreturn;")
-                lines.append(f'    _gdreturn["status"] = static_cast<int>(_status);')
-                lines.append(f'    _gdreturn["out"] = static_cast<int64_t>(reinterpret_cast<uintptr_t>({local}));')
-                lines.append("    return _gdreturn;")
-            elif inner == "char" or (p.type_name.strip().startswith("const ") and inner == "char"):
-                lines.append("    Dictionary _gdreturn;")
-                lines.append(f'    _gdreturn["status"] = static_cast<int>(_status);')
-                lines.append(f'    _gdreturn["out"] = String({local});')
-                lines.append("    return _gdreturn;")
-            elif inner in HANDLE_TYPES:
-                cls = c_type_to_godot_class(base) + "Handle"
-                lines.append(f"    if (_status != OCCTL_OK) {{ return Ref<{cls}>(); }}")
-                lines.append(f"    if (!{local}) {{ return Ref<{cls}>(); }}")
-                lines.append(f"    Ref<{cls}> _h;")
-                lines.append(f"    _h.instantiate();")
-                lines.append(f"    _h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local})));")
-                lines.append(f"    return _h;")
-            else:
-                lines.append("    Dictionary _gdreturn;")
-                lines.append(f'    _gdreturn["status"] = static_cast<int>(_status);')
-                lines.append(f'    _gdreturn["out"] = static_cast<int64_t>(reinterpret_cast<uintptr_t>({local}));')
-                lines.append("    return _gdreturn;")
+    if handle_out_params and _func_is_occtl_status(f):
+        p = handle_out_params[0]
+        base = _c_type_strip_ptr(p.type_name).strip()
+        inner = re.sub(r'^(const|volatile)\s+', '', base.rstrip("* \t")).strip()
+        local = f"_{p.name}_val"
+        if inner in HANDLE_TYPES:
+            cls = c_type_to_godot_class(base) + "Handle"
+            lines.append(f"    if (_status != OCCTL_OK) {{ return Ref<{cls}>(); }}")
+            lines.append(f"    if (!{local}) {{ return Ref<{cls}>(); }}")
+            lines.append(f"    Ref<{cls}> _h;")
+            lines.append(f"    _h.instantiate();")
+            lines.append(f"    _h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local})));")
+            lines.append(f"    return _h;")
+        elif inner in UINT64_ID_TYPES:
+            lines.append(f"    if (_status != OCCTL_OK) {{ return 0; }}")
+            lines.append(f"    return static_cast<int64_t>({local}->bits);")
         else:
-            lines.append("    Dictionary _gdreturn;")
-            lines.append('    _gdreturn["status"] = static_cast<int>(_status);')
-            for p, local, t in out_local_names:
-                lines.extend(_out_param_to_godot_lines(p, local))
-            lines.append("    return _gdreturn;")
+            lines.append(f"    return static_cast<int>(_status);")
+    elif handle_out_params and not _func_is_occtl_status(f):
+        # Non-status C return with handle** out-param (unusual)
+        lines.append(f"    return static_cast<int64_t>(reinterpret_cast<uintptr_t>(_{handle_out_params[0].name}_val));")
+    elif _func_is_occtl_status(f):
+        lines.append("    return static_cast<int>(_status);")
+    elif ret == "void":
+        pass
     else:
-        if ret == "void":
-            pass
-        elif out_params:
-            if len(out_params) == 1:
-                p, local, _ = out_local_names[0]
-                base = _c_type_strip_ptr(p.type_name).strip()
-                if base in VALUE_STRUCT_TYPES:
-                    cls = c_type_to_godot_class(base)
-                    lines.append(f"    return {cls}::from_c({local});")
-                elif base in UINT64_ID_TYPES:
-                    lines.append(f"    return static_cast<int64_t>({local}.bits);")
-                elif base == "const char*":
-                    lines.append(f"    return String({local});")
-                else:
-                    lines.append(f"    return {local};")
-            else:
-                lines.append("    Dictionary _gdreturn;")
-                for p, local, t in out_local_names:
-                    lines.extend(_out_param_to_godot_lines(p, local))
-                lines.append("    return _gdreturn;")
-        else:
-            lines.append(f"    return {_c_to_godot_return(ret, '_result')};")
+        lines.append(f"    return {_c_to_godot_return(ret, '_result')};")
 
     if not lines:
         lines.append("    return {};")
@@ -501,7 +593,6 @@ def _generate_body(f: CFunction, wrapper_name: str) -> str:
 
 
 def _c_to_godot_return(c_type: str, expr: str) -> str:
-    """Convert a non-status C return value to Godot."""
     t = c_type.strip()
     if t in ENUM_TYPES:
         return f"static_cast<int>({expr})"
@@ -521,81 +612,6 @@ def _c_to_godot_return(c_type: str, expr: str) -> str:
     return expr
 
 
-def _out_param_to_godot_lines(p: CParameter, local_expr: str) -> list[str]:
-    """Generate lines to add out-param value to dictionary."""
-    t = p.type_name.strip()
-    base = _c_type_strip_ptr(t).strip()
-    name = p.name if p.name else "result"
-
-    if t.endswith("**"):
-        inner = re.sub(r'^(const|volatile)\s+', '', base.rstrip("* \t")).strip()
-        if inner == "char":
-            return [f'    _gdreturn["{name}"] = String({local_expr});']
-        if inner in UINT64_ID_TYPES:
-            return [f'    _gdreturn["{name}"] = static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr}));']
-        if inner in HANDLE_TYPES:
-            cls = c_type_to_godot_class(base) + "Handle"
-            return [
-                f"    if ({local_expr}) {{",
-                f"        Ref<{cls}> _h;",
-                f"        _h.instantiate();",
-                f"        _h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr})));",
-                f'        _gdreturn["{name}"] = _h;',
-                f"    }}",
-            ]
-        return [f'    _gdreturn["{name}"] = static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr}));']
-    if base in ENUM_TYPES:
-        return [f'    _gdreturn["{name}"] = static_cast<int>({local_expr});']
-    if base in UINT64_ID_TYPES:
-        return [f'    _gdreturn["{name}"] = static_cast<int64_t>({local_expr}.bits);']
-    if is_value_struct_type(base):
-        cls = c_type_to_godot_class(base)
-        return [f'    _gdreturn["{name}"] = {cls}::from_c({local_expr});']
-    if base == "const char*":
-        return [f'    _gdreturn["{name}"] = String({local_expr});']
-    if base in ("int32_t", "uint32_t", "uint16_t", "uint8_t", "size_t", "int"):
-        return [f'    _gdreturn["{name}"] = static_cast<int>({local_expr});']
-    if base in ("int64_t", "uint64_t"):
-        return [f'    _gdreturn["{name}"] = static_cast<int64_t>({local_expr});']
-    if base in ("double", "float"):
-        return [f'    _gdreturn["{name}"] = {local_expr};']
-    if base == "bool":
-        return [f'    _gdreturn["{name}"] = static_cast<bool>({local_expr});']
-    return [f'    _gdreturn["{name}"] = static_cast<int64_t>(reinterpret_cast<uintptr_t>({local_expr}));']
-
-
-# ---------------------------------------------------------------
-# Method declarations
-# ---------------------------------------------------------------
-
-def _method_args_decl(f: CFunction) -> str:
-    """Generate the parameter list for the Godot method declaration."""
-    in_params = [p for p in f.params if not is_out_param(p.type_name, p.name, f.return_type)]
-    if not in_params:
-        return "void"
-    args = []
-    for p in in_params:
-        gt = godot_param_type(p.type_name)
-        if gt in ("String", "Variant", "Array", "Dictionary", "PackedByteArray") or gt.startswith("Ref<"):
-            args.append(f"const {gt}& {p.name}")
-        else:
-            args.append(f"{gt} {p.name}")
-    return ", ".join(args)
-
-
-def _method_arg_names(f: CFunction) -> str:
-    """Generate the argument name list for D_METHOD."""
-    in_params = [p for p in f.params if not is_out_param(p.type_name, p.name, f.return_type)]
-    return "".join(f', "{p.name}"' for p in in_params)
-
-
-def _wrapper_class_name(header_include: str) -> str:
-    """Derive wrapper class name from header filename."""
-    stem = Path(header_include).stem  # occtl_core → OcctlCoreWrapper
-    parts = stem.replace("occtl_", "", 1).split("_")
-    return "Occtl" + "".join(p.capitalize() for p in parts) + "Wrapper"
-
-
 # ---------------------------------------------------------------
 # Header generation
 # ---------------------------------------------------------------
@@ -604,10 +620,8 @@ def generate_wrapper_header(
     parsed: ParsedHeader,
     value_type_includes: list[str],
 ) -> str:
-    """Generate the .h file for a wrapper class from a parsed header."""
     cls = _wrapper_class_name(parsed.header_include)
     guard = f"{cls.upper()}_H"
-
     functions = parsed.functions
 
     lines = [
@@ -629,10 +643,8 @@ def generate_wrapper_header(
         f'#include "occtl/{parsed.header_include}"',
         "",
     ]
-
     for inc in sorted(set(value_type_includes)):
         lines.append(f'#include "{inc}"')
-
     lines.extend([
         "",
         "using namespace godot;",
@@ -643,22 +655,18 @@ def generate_wrapper_header(
         "    static void _bind_methods();",
         "public:",
     ])
-
-    # Constants as zero-arg methods (prefixed to avoid macro name conflicts)
     for c in _filtered_constants(parsed.constants):
         ret = _constant_godot_return_type(c)
         lines.append(f"    {ret} const_{c.name}(); // NOLINT")
-    # Enum values as zero-arg methods
     for enum in parsed.enums:
         for ev in enum.values:
             lines.append(f"    int {ev.name}(); // NOLINT")
-
-    # Functions
+    method_names = _function_method_names(functions)
     for f in functions:
         ret_mapped = _func_return_type_mapped(f)
         args_decl = _method_args_decl(f)
-        lines.append(f"    {ret_mapped} {f.name}({args_decl}); // NOLINT")
-
+        mname = method_names[f.name]
+        lines.append(f"    {ret_mapped} {mname}({args_decl}); // NOLINT")
     if not functions and not parsed.constants and not parsed.enums:
         lines.append("    void _unused();")
     lines.extend([
@@ -671,7 +679,6 @@ def generate_wrapper_header(
 
 
 def _constant_godot_return_type(c: CConstant) -> str:
-    """Guess the Godot return type for a #define constant based on its value."""
     v = c.value.strip()
     while v.startswith("(") and v.endswith(")"):
         v = v[1:-1].strip()
@@ -701,11 +708,14 @@ def _constant_godot_return_type(c: CConstant) -> str:
 def generate_wrapper_source(
     parsed: ParsedHeader,
 ) -> str:
-    """Generate the .cpp file for a wrapper class."""
     cls = _wrapper_class_name(parsed.header_include)
     functions = parsed.functions
 
-    has_char_ptr = any(p.type_name.strip() == "char*" for f in functions for p in f.params)
+    has_vector = any(
+        p.type_name.strip() == "char*" or p.type_name.strip() in ("const char**", "const char * *")
+        for f in functions
+        for p in f.params
+    )
 
     lines = [
         f'#include "{cls}.h"',
@@ -713,28 +723,25 @@ def generate_wrapper_source(
         f'#include "occtl/{parsed.header_include}"',
         "",
     ]
-
-    if has_char_ptr:
+    if has_vector:
         lines.append("#include <vector>")
         lines.append("")
 
-    # _bind_methods
     lines.append(f"void {cls}::_bind_methods() {{")
-
     for c in _filtered_constants(parsed.constants):
         lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("const_{c.name}"), &{cls}::const_{c.name});')
     for enum in parsed.enums:
         for ev in enum.values:
             lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("{ev.name}"), &{cls}::{ev.name});')
+    method_names = _function_method_names(functions)
     for f in functions:
-        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("{f.name}"{_method_arg_names(f)}), &{cls}::{f.name});')
-
+        mname = method_names[f.name]
+        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("{mname}"{_method_arg_names(f)}), &{cls}::{mname});')
     if not functions and not parsed.constants and not parsed.enums:
         lines.append(f"    godot::ClassDB::bind_method(godot::D_METHOD(\"_unused\"), &{cls}::_unused);")
     lines.append("}")
     lines.append("")
 
-    # Implement constant methods
     for c in _filtered_constants(parsed.constants):
         ret = _constant_godot_return_type(c)
         body = _generate_constant_body(c)
@@ -743,7 +750,6 @@ def generate_wrapper_source(
         lines.append("}")
         lines.append("")
 
-    # Implement enum value methods
     for enum in parsed.enums:
         for ev in enum.values:
             lines.append(f"int {cls}::{ev.name}() {{ // NOLINT")
@@ -751,12 +757,13 @@ def generate_wrapper_source(
             lines.append("}")
             lines.append("")
 
-    # Implement functions
+    method_names = _function_method_names(functions)
     for f in functions:
         ret_mapped = _func_return_type_mapped(f)
         args_decl = _method_args_decl(f)
-        lines.append(f"{ret_mapped} {cls}::{f.name}({args_decl}) {{ // NOLINT")
-        body = _generate_body(f, cls)
+        mname = method_names[f.name]
+        lines.append(f"{ret_mapped} {cls}::{mname}({args_decl}) {{ // NOLINT")
+        body = _generate_body(f, cls, parsed)
         if body.strip():
             lines.append(body)
         else:
@@ -772,10 +779,8 @@ def generate_wrapper_source(
 
 
 def _generate_constant_body(c: CConstant) -> str:
-    """Generate the body for a constant wrapper function."""
     v = c.value.strip()
     ret = _constant_godot_return_type(c)
-
     if ret == "double":
         try:
             evaluated = _eval_const(v)
@@ -797,7 +802,6 @@ def _generate_constant_body(c: CConstant) -> str:
 
 
 def _eval_const(expr: str) -> str:
-    """Try to evaluate a constant expression."""
     e = expr.strip()
     while e.startswith("(") and e.endswith(")"):
         e = e[1:-1].strip()
@@ -836,7 +840,6 @@ def _eval_const(expr: str) -> str:
 
 
 def _eval_simple_int(expr: str) -> str:
-    """Try to evaluate an integer expression."""
     e = expr.strip()
     while e.startswith("(") and e.endswith(")"):
         e = e[1:-1].strip()
@@ -875,7 +878,6 @@ def _eval_simple_int(expr: str) -> str:
 # ---------------------------------------------------------------
 
 def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
-    """Generate XML doc for a wrapper class."""
     cls = _wrapper_class_name(parsed.header_include)
     methods = []
 
@@ -897,13 +899,17 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
             methods.append("\t\t\t</description>")
             methods.append("\t\t</method>")
 
+    method_names = _function_method_names(parsed.functions)
     for f in parsed.functions:
         ret_mapped = _func_return_type_mapped(f)
-        methods.append(f'\t\t<method name="{escape(f.name)}">')
-        methods.append(f'\t\t\t<return type="{ret_mapped}" />')
-        in_params = [p for p in f.params if not is_out_param(p.type_name, p.name, f.return_type)]
-        for i, p in enumerate(in_params):
-            gt = godot_param_type(p.type_name)
+        mname = method_names[f.name]
+        methods.append(f'\t\t<method name="{escape(mname)}">')
+        if ret_mapped != "void":
+            methods.append(f'\t\t\t<return type="{ret_mapped}" />')
+        ret = f.return_type.strip()
+        kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+        for i, p in enumerate(kept_params):
+            gt = godot_param_type(p.type_name.strip())
             methods.append(f'\t\t\t<argument index="{i}" name="{escape(p.name)}" type="{gt}" />')
         methods.append("\t\t\t<description>")
         methods.append(f"\t\t\t\t{f.doc_comment or 'Generated binding.'}")
@@ -938,7 +944,6 @@ def generate_gdscript_tests(
     parsed: ParsedHeader,
     wrapper_name: str,
 ) -> str:
-    """Generate a GDScript test file for the wrapper class."""
     cls = _wrapper_class_name(parsed.header_include)
     lines = [
         f"class_name Test{cls}",
@@ -950,19 +955,20 @@ def generate_gdscript_tests(
         "",
     ]
 
-    for c in parsed.constants:
+    for c in _filtered_constants(parsed.constants):
         lines.append(f"static func test_{c.name}() -> String:")
         ret = _constant_godot_return_type(c)
+        mname = f"const_{c.name}"
         if ret == "double":
-            lines.append(f"    var v = {cls}.new().{c.name}()")
+            lines.append(f"    var v = {cls}.new().{mname}()")
             lines.append("    if v == null: return \"Failed: {c.name} returned null\"")
         elif ret == "int":
-            lines.append(f"    var v = {cls}.new().{c.name}()")
+            lines.append(f"    var v = {cls}.new().{mname}()")
             lines.append("    if v == null: return \"Failed\"")
         elif ret == "bool":
-            lines.append(f"    var v = {cls}.new().{c.name}()")
+            lines.append(f"    var v = {cls}.new().{mname}()")
         else:
-            lines.append(f"    var v = {cls}.new().{c.name}()")
+            lines.append(f"    var v = {cls}.new().{mname}()")
         lines.append('    return ""')
         lines.append("")
 
@@ -973,42 +979,5 @@ def generate_gdscript_tests(
             lines.append("    if v < 0: return \"Failed: enum value negative\"")
             lines.append('    return ""')
             lines.append("")
-
-    for f in parsed.functions:
-        lines.append(f"static func test_{f.name}() -> String:")
-        in_params = [p for p in f.params if not is_out_param(p.type_name, p.name, f.return_type)]
-        args_list = []
-        for p in in_params:
-            t = p.type_name.strip()
-            gt = godot_param_type(p.type_name)
-            if gt == "int" or gt == "int64_t":
-                args_list.append("0")
-            elif gt == "double" or gt == "float":
-                args_list.append("0.0")
-            elif gt == "bool":
-                args_list.append("false")
-            elif gt == "String":
-                args_list.append('""')
-            elif gt.startswith("Ref<"):
-                args_list.append("null")
-            elif gt == "Dictionary":
-                args_list.append("{}")
-            elif gt == "PackedByteArray":
-                args_list.append("PackedByteArray()")
-            else:
-                args_list.append("null")
-        call = f"{f.name}({', '.join(args_list)})" if args_list else f"{f.name}()"
-        ret_mapped = _func_return_type_mapped(f)
-        if ret_mapped == "void":
-            lines.append(f"    {cls}.new().{call}")
-            lines.append('    return ""')
-        elif ret_mapped == "bool":
-            lines.append(f"    var _v = {cls}.new().{call}")
-            lines.append('    return ""')
-        else:
-            lines.append(f"    var _v = {cls}.new().{call}")
-            lines.append("    if _v == null: return \"Failed: {f.name} returned null\"")
-            lines.append('    return ""')
-        lines.append("")
 
     return "\n".join(lines)

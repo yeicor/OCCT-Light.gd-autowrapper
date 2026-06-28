@@ -144,6 +144,7 @@ def generate_value_type_header(struct: CStruct) -> str:
     lines.append("")
     lines.append(f"    {c_type} to_c() const;")
     lines.append(f"    static Ref<{cls}> from_c(const {c_type}& val);")
+    lines.append(f"    void copy_from_c(const {c_type}& val);")
     lines.append("};")
     lines.append("")
     lines.append(f"#endif // {guard}")
@@ -297,6 +298,58 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         else:
             raise ValueError(f"Unhandled type '{t}' in from_c() for field '{clean}' of {c_type}")
     lines.append("    return r;")
+    lines.append("}")
+    lines.append("")
+
+    # copy_from_c() — instance method, modifies in-place
+    lines.append(f"void {cls}::copy_from_c(const {c_type}& val) {{")
+    for field in struct.fields:
+        t = field.type_name.strip()
+        clean = _field_clean_name(field)
+        if t == "const void*":
+            lines.append(f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+        elif t.startswith("const ") and t.endswith("*"):
+            inner = t[len("const "):-1].strip()
+            if _is_uint64_id(inner):
+                lines.append(f"    {clean} = static_cast<int64_t>(val.{clean}->bits);")
+            elif inner in VALUE_STRUCT_TYPES:
+                sub_cls = c_type_to_godot_class(inner)
+                lines.append(f"    {clean} = {sub_cls}::from_c(*val.{clean});")
+            elif inner == "char":
+                lines.append(f"    {clean} = String(val.{clean});")
+            else:
+                lines.append(f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+        elif t.endswith("*") and not t.startswith("const"):
+            inner = t[:-1].strip()
+            if inner == "char":
+                lines.append(f"    {clean} = String(val.{clean});")
+            elif _is_value_struct(inner):
+                sub_cls = c_type_to_godot_class(inner)
+                lines.append(f"    {clean} = {sub_cls}::from_c(*val.{clean});")
+            elif _is_uint64_id(inner):
+                lines.append(f"    {clean} = static_cast<int64_t>(val.{clean}->bits);")
+            else:
+                lines.append(f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+        elif t == "const char*":
+            lines.append(f"    {clean} = String(val.{clean});")
+        elif t in ("occtl_status_t",):
+            lines.append(f"    {clean} = static_cast<int>(val.{clean});")
+        elif _is_uint64_id(t):
+            lines.append(f"    {clean} = static_cast<int64_t>(val.{clean}.bits);")
+        elif _is_value_struct(t):
+            sub_cls = c_type_to_godot_class(t)
+            lines.append(f"    {clean} = {sub_cls}::from_c(val.{clean});")
+        elif _field_is_array(field):
+            size = _field_array_size(field)
+            arr_type = "PackedFloat64Array" if t == "double" else "Array"
+            lines.append(f"    {clean}.resize({size});")
+            lines.append(f"    for (int _i = 0; _i < {size}; _i++) {clean}[_i] = val.{clean}[_i];")
+        elif t in ("double", "float", "bool", "int32_t", "uint32_t", "uint16_t", "int64_t", "uint64_t", "size_t", "int"):
+            lines.append(f"    {clean} = val.{clean};")
+        elif _is_enum_type(t):
+            lines.append(f"    {clean} = static_cast<int>(val.{clean});")
+        else:
+            raise ValueError(f"Unhandled type '{t}' in copy_from_c() for field '{clean}' of {c_type}")
     lines.append("}")
     lines.append("")
 

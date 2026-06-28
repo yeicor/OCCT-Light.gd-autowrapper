@@ -11,6 +11,7 @@ def generate_module_h(
     wrapper_names: list[str],
     value_type_names: list[str],
     handle_class_names: list[str],
+    out_prim_names: list[str] | None = None,
 ) -> str:
     """Generate module.h content."""
     all_headers: list[str] = []
@@ -19,6 +20,8 @@ def generate_module_h(
     for n in value_type_names:
         all_headers.append(f'#include "{n}.h"')
     for n in handle_class_names:
+        all_headers.append(f'#include "{n}.h"')
+    for n in (out_prim_names or []):
         all_headers.append(f'#include "{n}.h"')
 
     # Deduplicate and sort
@@ -64,11 +67,13 @@ def generate_module_cpp(
     wrapper_names: list[str],
     value_type_names: list[str],
     handle_class_names: list[str],
+    out_prim_names: list[str] | None = None,
 ) -> str:
     """Generate module.cpp content with GDREGISTER_CLASS for all classes."""
     all_classes: list[str] = list(wrapper_names)
     all_classes.extend(value_type_names)
     all_classes.extend(handle_class_names)
+    all_classes.extend(out_prim_names or [])
 
     reg_lines: list[str] = []
     for cls in all_classes:

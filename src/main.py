@@ -23,6 +23,11 @@ from gen_handles import (
     generate_handle_source,
 )
 from gen_module import generate_module_cpp, generate_module_h
+from gen_out_prim import (
+    generate_out_prim_headers,
+    generate_out_prim_sources,
+    generate_out_prim_doc_xml,
+)
 from gen_tests import generate_all_tests
 from gen_values import (
     collect_value_types,
@@ -144,7 +149,7 @@ def _write_if_changed(path: Path, content: str) -> bool:
         if existing == content:
             return False
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content)
+    path.write_text(content, encoding="utf-8")
     return True
 
 
@@ -250,6 +255,7 @@ def main() -> None:
     wrapper_names: list[str] = []
     value_type_names: list[str] = []
     handle_class_names: list[str] = []
+    out_prim_names: list[str] = []
 
     written_count = 0
 
@@ -281,14 +287,43 @@ def main() -> None:
         if _write_if_changed(autowrapper_dir / f"{cls}.cpp", src):
             written_count += 1
 
+    # 2.5. Out-param primitive wrapper classes
+    # Skip classes already generated as value types (OcctlInt32, OcctlBool, etc.)
+    for hdr_name, hdr_content in generate_out_prim_headers():
+        cls = hdr_name.replace(".h", "")
+        if cls not in value_type_names:
+            out_prim_names.append(cls)
+            if _write_if_changed(autowrapper_dir / hdr_name, hdr_content):
+                written_count += 1
+    for src_name, src_content in generate_out_prim_sources():
+        cls = src_name.replace(".cpp", "")
+        if cls not in value_type_names:
+            if _write_if_changed(autowrapper_dir / src_name, src_content):
+                written_count += 1
+
     # 3. Wrapper classes (one per header)
     for ph in parsed_headers:
         cls = _wrapper_class_name(ph.header_include)
         wrapper_names.append(cls)
 
-        # Collect value type includes needed by this wrapper
+        # Collect includes needed by this wrapper
         value_includes: list[str] = []
         for f in ph.functions:
+            # Include for return type when it is a Ref<T> wrapper
+            from gen_wrapper import (
+                OUT_PARAM_PRIM_TYPES,
+                _is_const_char_double_ptr, _out_param_wrapper_class,
+            )
+            ret = f.return_type.strip()
+            ret_clean = re.sub(r'\s+(const|volatile)\s*$', '', ret)
+            ret_clean = ret_clean.rstrip("* \t")
+            ret_clean = re.sub(r'^(const|volatile)\s+', '', ret_clean).strip()
+            ret_resolved = _resolve_typedef(ret_clean)
+            if ret_clean in VALUE_STRUCT_TYPES or ret_resolved in VALUE_STRUCT_TYPES:
+                incl = f"{c_type_to_godot_class(ret_resolved)}.h"
+                if incl not in value_includes:
+                    value_includes.append(incl)
+            # Include for each parameter
             for p in f.params:
                 from type_map import is_out_param
                 base = p.type_name.strip()
@@ -296,6 +331,7 @@ def main() -> None:
                 base = base.rstrip("* \t")
                 base_clean = re.sub(r'^(const|volatile)\s+', '', base).strip()
                 resolved = _resolve_typedef(base_clean)
+                # Include for value struct / handle types
                 if resolved.endswith("_t") and resolved not in ENUM_TYPES and resolved not in UINT64_ID_TYPES and resolved not in CPP_TO_GODOT_TYPE:
                     if resolved in HANDLE_TYPES:
                         incl = f"{c_type_to_godot_class(resolved)}Handle.h"
@@ -305,10 +341,16 @@ def main() -> None:
                         continue
                     if incl not in value_includes:
                         value_includes.append(incl)
-        for c in ph.constants:
-            pass
-        for e in ph.enums:
-            pass
+                # Include for out-param wrapper types
+                ft = p.type_name.strip()
+                if is_out_param(ft, p.name, ret):
+                    wrapper_cls = _out_param_wrapper_class(base_clean, ft)
+                    if wrapper_cls and wrapper_cls not in value_includes:
+                        # Skip handles; value structs and UID types get included here
+                        # if not already covered by the block above (UID types are
+                        # excluded from that block despite being in VALUE_STRUCT_TYPES)
+                        if base_clean not in HANDLE_TYPES:
+                            value_includes.append(f"{wrapper_cls}.h")
 
         hdr = generate_wrapper_header(ph, value_includes)
         src = generate_wrapper_source(ph)
@@ -318,8 +360,8 @@ def main() -> None:
             written_count += 1
 
     # 4. module.h / module.cpp
-    mhdr = generate_module_h(wrapper_names, value_type_names, handle_class_names)
-    msrc = generate_module_cpp(wrapper_names, value_type_names, handle_class_names)
+    mhdr = generate_module_h(wrapper_names, value_type_names, handle_class_names, out_prim_names)
+    msrc = generate_module_cpp(wrapper_names, value_type_names, handle_class_names, out_prim_names)
     if _write_if_changed(autowrapper_dir / "module.h", mhdr):
         written_count += 1
     if _write_if_changed(autowrapper_dir / "module.cpp", msrc):
@@ -329,7 +371,7 @@ def main() -> None:
 
     # 5. Clean up orphan files (files that should no longer exist)
     expected_files: set[str] = set()
-    for cls in value_type_names + wrapper_names + handle_class_names:
+    for cls in value_type_names + wrapper_names + handle_class_names + out_prim_names:
         expected_files.add(f"{cls}.h")
         expected_files.add(f"{cls}.cpp")
     expected_files.add("module.h")
@@ -345,6 +387,10 @@ def main() -> None:
     # 6. XML docs
     if not args.skip_docs:
         doc_files = generate_all_docs(parsed_headers, all_value_structs, all_handle_structs, output_dir)
+        # Out-param primitive docs
+        for fname, xml in generate_out_prim_doc_xml():
+            (output_dir / "doc_classes" / fname).write_text(xml, encoding="utf-8")
+            doc_files.append(fname)
         print(f"Written {len(doc_files)} doc XML files")
 
     # 7. GDScript tests

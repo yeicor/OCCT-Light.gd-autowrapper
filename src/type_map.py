@@ -348,6 +348,8 @@ def godot_param_type(c_type: str) -> str:
             return "int64_t"
         if typed in ("const char", "char") or inner in ("const char", "char"):
             return "String"
+        if typed in ("uint8_t",) or inner in ("uint8_t",):
+            return "PackedByteArray"
         if typed in CPP_TO_GODOT_TYPE:
             return CPP_TO_GODOT_TYPE[typed]
         # Unknown pointer type — error

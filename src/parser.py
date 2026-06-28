@@ -306,7 +306,7 @@ class HeaderParser:
                     evalue = -1
                     if len(parts) > 1:
                         try:
-                            evalue = int(parts[1].strip())
+                            evalue = int(parts[1].strip(), 0)
                         except ValueError:
                             pass
                     if ename:

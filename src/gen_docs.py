@@ -33,7 +33,7 @@ def generate_all_docs(
         xml = generate_wrapper_doc_xml(ph)
         from gen_wrapper import _wrapper_class_name
         fname = f"{_wrapper_class_name(ph.header_include)}.xml"
-        (doc_dir / fname).write_text(xml)
+        (doc_dir / fname).write_text(xml, encoding="utf-8")
         written.append(fname)
 
     # Value type docs (skip native-mapped types)
@@ -42,7 +42,7 @@ def generate_all_docs(
             xml = generate_value_type_doc_xml(s)
             from type_map import c_type_to_godot_class
             fname = f"{c_type_to_godot_class(s.type_name)}.xml"
-            (doc_dir / fname).write_text(xml)
+            (doc_dir / fname).write_text(xml, encoding="utf-8")
             written.append(fname)
 
     # Handle docs
@@ -51,7 +51,7 @@ def generate_all_docs(
             xml = generate_handle_doc_xml(s)
             from type_map import c_type_to_godot_class
             fname = f"{c_type_to_godot_class(s.type_name)}Handle.xml"
-            (doc_dir / fname).write_text(xml)
+            (doc_dir / fname).write_text(xml, encoding="utf-8")
             written.append(fname)
 
     return written
