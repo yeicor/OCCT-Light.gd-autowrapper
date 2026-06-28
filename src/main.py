@@ -22,7 +22,14 @@ from gen_handles import (
     generate_handle_header,
     generate_handle_source,
 )
-from gen_module import generate_module_cpp, generate_module_h
+from gen_module import (
+    _chunk_list,
+    generate_module_cpp,
+    generate_module_h,
+    generate_module_part_cpp,
+    generate_module_parts_h,
+    part_count_for,
+)
 from gen_out_prim import (
     generate_out_prim_headers,
     generate_out_prim_sources,
@@ -359,9 +366,37 @@ def main() -> None:
         if _write_if_changed(autowrapper_dir / f"{cls}.cpp", src):
             written_count += 1
 
-    # 4. module.h / module.cpp
+    # 4. Build the consolidated class list and split into part files
+    all_classes: list[str] = list(wrapper_names)
+    all_classes.extend(value_type_names)
+    all_classes.extend(handle_class_names)
+    all_classes.extend(out_prim_names)
+    # Deduplicate while preserving order
+    seen: set[str] = set()
+    all_classes_dedup: list[str] = []
+    for c in all_classes:
+        if c not in seen:
+            seen.add(c)
+            all_classes_dedup.append(c)
+    all_classes = all_classes_dedup
+
+    class_chunks = _chunk_list(all_classes, 40)
+    n_parts = len(class_chunks)
+
+    # 4a. module_parts.h
+    mph = generate_module_parts_h(n_parts)
+    if _write_if_changed(autowrapper_dir / "module_parts.h", mph):
+        written_count += 1
+
+    # 4b. module_part_<N>.cpp  (one per chunk)
+    for i, chunk in enumerate(class_chunks):
+        psrc = generate_module_part_cpp(i, chunk)
+        if _write_if_changed(autowrapper_dir / f"module_part_{i}.cpp", psrc):
+            written_count += 1
+
+    # 4c. module.h / module.cpp  (entry point only)
     mhdr = generate_module_h(wrapper_names, value_type_names, handle_class_names, out_prim_names)
-    msrc = generate_module_cpp(wrapper_names, value_type_names, handle_class_names, out_prim_names)
+    msrc = generate_module_cpp(n_parts, wrapper_names, value_type_names, handle_class_names, out_prim_names)
     if _write_if_changed(autowrapper_dir / "module.h", mhdr):
         written_count += 1
     if _write_if_changed(autowrapper_dir / "module.cpp", msrc):
@@ -376,6 +411,9 @@ def main() -> None:
         expected_files.add(f"{cls}.cpp")
     expected_files.add("module.h")
     expected_files.add("module.cpp")
+    expected_files.add("module_parts.h")
+    for i in range(n_parts):
+        expected_files.add(f"module_part_{i}.cpp")
     orphan_count = 0
     for f in autowrapper_dir.iterdir():
         if f.suffix in (".h", ".cpp") and f.name not in expected_files:
