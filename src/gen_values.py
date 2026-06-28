@@ -83,6 +83,115 @@ def _field_clean_name(field: CField) -> str:
     return field.name.split("[")[0].strip()
 
 
+# Factory methods for value types: maps class_name → list of
+# (method_name, [(param_name, param_type)], [assignment_lines])
+FACTORY_METHODS: dict[str, list[tuple[str, list[tuple[str, str]], list[str]]]] = {
+    "OcctlPoint3": [
+        ("from_vector3", [("v", "Vector3")], [
+            "instance->x = v.x;",
+            "instance->y = v.y;",
+            "instance->z = v.z;",
+        ]),
+    ],
+    "OcctlPoint2": [
+        ("from_vector2", [("v", "Vector2")], [
+            "instance->x = v.x;",
+            "instance->y = v.y;",
+        ]),
+    ],
+    "OcctlDirection3": [
+        ("from_vector3", [("v", "Vector3")], [
+            "instance->x = v.x;",
+            "instance->y = v.y;",
+            "instance->z = v.z;",
+        ]),
+    ],
+    "OcctlDirection2": [
+        ("from_vector2", [("v", "Vector2")], [
+            "instance->x = v.x;",
+            "instance->y = v.y;",
+        ]),
+    ],
+    "OcctlVector3": [
+        ("from_vector3", [("v", "Vector3")], [
+            "instance->x = v.x;",
+            "instance->y = v.y;",
+            "instance->z = v.z;",
+        ]),
+    ],
+    "OcctlVector2": [
+        ("from_vector2", [("v", "Vector2")], [
+            "instance->x = v.x;",
+            "instance->y = v.y;",
+        ]),
+    ],
+    "OcctlTransform": [
+        ("from_transform3d", [("t", "Transform3D")], [
+            "instance->m.resize(12);",
+            "instance->m[0] = t.basis[0].x;",
+            "instance->m[1] = t.basis[0].y;",
+            "instance->m[2] = t.basis[0].z;",
+            "instance->m[3] = t.origin.x;",
+            "instance->m[4] = t.basis[1].x;",
+            "instance->m[5] = t.basis[1].y;",
+            "instance->m[6] = t.basis[1].z;",
+            "instance->m[7] = t.origin.y;",
+            "instance->m[8] = t.basis[2].x;",
+            "instance->m[9] = t.basis[2].y;",
+            "instance->m[10] = t.basis[2].z;",
+            "instance->m[11] = t.origin.z;",
+        ]),
+    ],
+    "OcctlAabb3": [
+        ("from_aabb", [("a", "AABB")], [
+            "{ auto _c = occtl_point3_t{}; _c.x = a.position.x; _c.y = a.position.y; _c.z = a.position.z; instance->min = OcctlPoint3::from_c(_c); }",
+            "{ auto _c = occtl_point3_t{}; _c.x = a.position.x + a.size.x; _c.y = a.position.y + a.size.y; _c.z = a.position.z + a.size.z; instance->max = OcctlPoint3::from_c(_c); }",
+        ]),
+    ],
+    "OcctlColorRgba": [
+        ("from_color", [("c", "Color")], [
+            "instance->r = c.r;",
+            "instance->g = c.g;",
+            "instance->b = c.b;",
+            "instance->a = c.a;",
+        ]),
+    ],
+    "OcctlAxis1Placement": [
+        ("from_components", [("point", "Vector3"), ("direction", "Vector3")], [
+            "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
+            "{ auto _dir = occtl_direction3_t{}; _dir.x = direction.x; _dir.y = direction.y; _dir.z = direction.z; instance->direction = OcctlDirection3::from_c(_dir); }",
+        ]),
+    ],
+    "OcctlAxis2Placement": [
+        ("from_components", [("point", "Vector3"), ("z_dir", "Vector3"), ("x_dir", "Vector3")], [
+            "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
+            "{ auto _x = occtl_direction3_t{}; _x.x = x_dir.x; _x.y = x_dir.y; _x.z = x_dir.z; instance->x_dir = OcctlDirection3::from_c(_x); }",
+            "{ auto _ref = occtl_direction3_t{}; _ref.x = z_dir.x; _ref.y = z_dir.y; _ref.z = z_dir.z; instance->x_dir_ref = OcctlDirection3::from_c(_ref); }",
+        ]),
+    ],
+    "OcctlAxis3Placement": [
+        ("from_components", [("point", "Vector3"), ("z_dir", "Vector3"), ("x_dir", "Vector3")], [
+            "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
+            "{ auto _x = occtl_direction3_t{}; _x.x = x_dir.x; _x.y = x_dir.y; _x.z = x_dir.z; instance->x_dir = OcctlDirection3::from_c(_x); }",
+            "{ auto _y = occtl_direction3_t{}; _y.x = point.x; _y.y = point.y; _y.z = point.z; instance->y_dir = OcctlDirection3::from_c(_y); }",
+            "{ auto _z = occtl_direction3_t{}; _z.x = z_dir.x; _z.y = z_dir.y; _z.z = z_dir.z; instance->z_dir = OcctlDirection3::from_c(_z); }",
+        ]),
+    ],
+    "OcctlAxis2Placement2d": [
+        ("from_components", [("point", "Vector2"), ("z_dir", "Vector2"), ("x_dir", "Vector2")], [
+            "{ auto _loc = occtl_point2_t{}; _loc.x = point.x; _loc.y = point.y; instance->location = OcctlPoint2::from_c(_loc); }",
+            "{ auto _x = occtl_direction2_t{}; _x.x = x_dir.x; _x.y = x_dir.y; instance->x_dir = OcctlDirection2::from_c(_x); }",
+        ]),
+    ],
+    "OcctlError": [
+        ("from_values", [("status", "int"), ("message", "String")], [
+            "instance->status = status;",
+            "instance->message = message;",
+        ]),
+    ],
+}
+
+
 def generate_value_type_header(struct: CStruct) -> str:
     """Generate the .h file for a value type class."""
     cls = c_type_to_godot_class(struct.type_name)
@@ -96,6 +205,12 @@ def generate_value_type_header(struct: CStruct) -> str:
         "#include <godot_cpp/classes/ref.hpp>",
         "#include <godot_cpp/core/class_db.hpp>",
         "#include <godot_cpp/variant/utility_functions.hpp>",
+        "#include <godot_cpp/variant/string.hpp>",
+        "#include <godot_cpp/variant/vector3.hpp>",
+        "#include <godot_cpp/variant/vector2.hpp>",
+        "#include <godot_cpp/variant/transform3d.hpp>",
+        "#include <godot_cpp/variant/aabb.hpp>",
+        "#include <godot_cpp/variant/color.hpp>",
         "#include <cstdint>",
         f'#include "occtl/{struct.header_include}"',
         "",
@@ -145,6 +260,12 @@ def generate_value_type_header(struct: CStruct) -> str:
     lines.append(f"    {c_type} to_c() const;")
     lines.append(f"    static Ref<{cls}> from_c(const {c_type}& val);")
     lines.append(f"    void copy_from_c(const {c_type}& val);")
+    # Static factory methods
+    if cls in FACTORY_METHODS:
+        lines.append("")
+        for method_name, params, _ in FACTORY_METHODS[cls]:
+            param_decls = ", ".join(f"{pt} {pn}" for pn, pt in params)
+            lines.append(f"    static Ref<{cls}> {method_name}({param_decls}); // NOLINT")
     lines.append("};")
     lines.append("")
     lines.append(f"#endif // {guard}")
@@ -203,6 +324,12 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("get_{clean}"), &{cls}::get_{clean});')
         lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("set_{clean}", "val"), &{cls}::set_{clean});')
         lines.append(f'    ADD_PROPERTY(PropertyInfo(Variant::{vt}, "{clean}"), "set_{clean}", "get_{clean}");')
+    if cls in FACTORY_METHODS:
+        for method_name, params, _ in FACTORY_METHODS[cls]:
+            param_str = ", ".join(f'"{pn}"' for pn, _ in params)
+            if param_str:
+                param_str = ", " + param_str
+            lines.append(f'    godot::ClassDB::bind_static_method("{cls}", godot::D_METHOD("{method_name}"{param_str}), &{cls}::{method_name});')
     lines.append("}")
     lines.append("")
 
@@ -352,6 +479,19 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             raise ValueError(f"Unhandled type '{t}' in copy_from_c() for field '{clean}' of {c_type}")
     lines.append("}")
     lines.append("")
+
+    # Factory method implementations
+    if cls in FACTORY_METHODS:
+        for method_name, params, assignments in FACTORY_METHODS[cls]:
+            param_decls = ", ".join(f"{pt} {pn}" for pn, pt in params)
+            lines.append(f"Ref<{cls}> {cls}::{method_name}({param_decls}) {{")
+            lines.append(f"    Ref<{cls}> instance;")
+            lines.append(f"    instance.instantiate();")
+            for assignment in assignments:
+                lines.append(f"    {assignment}")
+            lines.append("    return instance;")
+            lines.append("}")
+            lines.append("")
 
     return "\n".join(lines)
 
