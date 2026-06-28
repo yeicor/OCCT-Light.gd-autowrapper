@@ -506,16 +506,31 @@ def generate_value_type_doc_xml(struct: CStruct) -> str:
         methods.append(f'\t\t<method name="get_{clean}">')
         methods.append(f'\t\t\t<return type="{gt}" />')
         methods.append("\t\t\t<description>")
-        methods.append(f"\t\t\t\tGetter for {clean}.")
+        methods.append(f"\t\t\t\tReturns the [member {clean}] value.")
         methods.append("\t\t\t</description>")
         methods.append("\t\t</method>")
         methods.append(f'\t\t<method name="set_{clean}">')
         methods.append(f'\t\t\t<return type="void" />')
         methods.append(f'\t\t\t<argument index="0" name="val" type="{gt}" />')
         methods.append("\t\t\t<description>")
-        methods.append(f"\t\t\t\tSetter for {clean}.")
+        methods.append(f"\t\t\t\tSets the [member {clean}] value.")
         methods.append("\t\t\t</description>")
         methods.append("\t\t</method>")
+
+    # Factory method doc entries
+    if cls in FACTORY_METHODS:
+        for method_name, params, _ in FACTORY_METHODS[cls]:
+            methods.append(f'\t\t<method name="{method_name}">')
+            methods.append(f'\t\t\t<return type="RefCounted" />')
+            for i, (pn, pt) in enumerate(params):
+                methods.append(f'\t\t\t<argument index="{i}" name="{pn}" type="{pt}" />')
+            methods.append("\t\t\t<description>")
+            methods.append(f"\t\t\t\tConstructs a [{cls}] from Godot-native components.")
+            for pn, pt in params:
+                methods.append(f"\t\t\t\t[param {pn}] Input {pt} value.")
+            methods.append(f"\t\t\t\t[return] A new [{cls}] with fields populated.")
+            methods.append("\t\t\t</description>")
+            methods.append("\t\t</method>")
 
     methods_xml = "\n".join(methods)
     return (

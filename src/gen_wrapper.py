@@ -21,6 +21,17 @@ from type_map import (
     CPP_TO_GODOT_TYPE, param_type_to_variant_type,
 )
 
+# C type → short human-readable description for doc generation
+_C_TYPE_DOC_DESC: dict[str, str] = {
+    "occtl_node_id_t": "node",
+    "occtl_uid_t": "UID",
+    "occtl_ref_uid_t": "reference UID",
+    "occtl_ref_id_t": "reference ID",
+    "occtl_rep_uid_t": "representation UID",
+    "occtl_joint_id_t": "joint",
+}
+
+
 
 def _c_type_strip_ptr(t: str) -> str:
     t = re.sub(r'\s+(const|volatile)\s*$', '', t)
@@ -1167,6 +1178,102 @@ def _eval_simple_int(expr: str) -> str:
 # Doc XML generation
 # ---------------------------------------------------------------
 
+def _c_type_to_doc_type_ref(c_type: str, rest: str = "") -> str:
+    """Convert a C type to a Godot doc cross-reference link string.
+    Returns e.g. '[OcctlPoint3]' or empty string if no good link."""
+    t = c_type.strip()
+    t_base = re.sub(r'(?:^const\s+|\s*\*+$)', '', t).strip() if not c_type.startswith("const") else re.sub(r'^\s*const\s+', '', t).rstrip("* ").strip()
+    # Handle const pointers
+    if t.startswith("const ") and t.endswith("*"):
+        inner = t[len("const "):-1].strip()
+        if is_value_struct_type(inner):
+            cls = c_type_to_godot_class(inner)
+            return f"[{cls}]{rest}"
+        if inner in UINT64_ID_TYPES:
+            return f"[b]{_C_TYPE_DOC_DESC.get(inner, inner)}[/b]{rest}"
+        return rest
+    if is_value_struct_type(t):
+        cls = c_type_to_godot_class(t)
+        return f"[{cls}]{rest}"
+    if t in HANDLE_TYPES:
+        cls = c_type_to_godot_class(t) + "Handle"
+        return f"[{cls}]{rest}"
+    if t in UINT64_ID_TYPES:
+        return f"[b]{_C_TYPE_DOC_DESC.get(t, t)}[/b]{rest}"
+    if t in ENUM_TYPES:
+        return f"[b]enum[/b]{rest}"
+    return rest
+
+
+def _c_type_to_godot_doc_type(c_type: str) -> str:
+    """Map C type to Godot type string for doc (param type, return type)."""
+    t = c_type.strip()
+    gt = godot_param_type(t)
+    if gt == "int" and t in ENUM_TYPES:
+        return "int"
+    return gt
+
+
+def _describe_return(ret_mapped: str, c_ret: str) -> str:
+    """Generate a human-readable [return] description."""
+    if ret_mapped == "void":
+        return ""
+    if ret_mapped == "int" and c_ret.strip() == "occtl_status_t":
+        return "    [return] Status code ([constant OcctlCore.OCCTL_OK] on success)."
+    if ret_mapped.startswith("Ref<"):
+        inner = ret_mapped[4:-1]
+        if inner.endswith("Handle"):
+            return f"    [return] A new [{inner}] handle, or null on failure."
+        return f"    [return] A new [{inner}]."
+    if ret_mapped == "PackedInt64Array":
+        return "    [return] Array of node/UID values."
+    if ret_mapped == "PackedFloat64Array":
+        return "    [return] Array of double values."
+    if ret_mapped == "PackedInt32Array":
+        return "    [return] Array of int values."
+    if ret_mapped == "String":
+        return "    [return] String result."
+    if ret_mapped == "bool":
+        return "    [return] Boolean result."
+    if ret_mapped == "int":
+        return "    [return] Integer result."
+    return f"    [return] {ret_mapped} result."
+
+
+def _describe_param(p: CParameter, ret: str) -> str:
+    """Generate a [param name] description line for a parameter."""
+    t = p.type_name.strip()
+    gt = godot_param_type(t)
+    base_desc = ""
+    if is_out_param(t, p.name, ret):
+        base_desc = "Output parameter."
+    elif t in ENUM_TYPES:
+        base_desc = "Enum value."
+    elif is_value_struct_type(t):
+        cls = c_type_to_godot_class(t)
+        base_desc = f"A [{cls}]."
+    elif t in HANDLE_TYPES:
+        cls = c_type_to_godot_class(t) + "Handle"
+        base_desc = f"A [{cls}] handle."
+    elif t.startswith("const ") and t.endswith("*"):
+        inner = t[len("const "):-1].strip()
+        if is_value_struct_type(inner):
+            cls = c_type_to_godot_class(inner)
+            base_desc = f"A [{cls}]."
+        elif inner in UINT64_ID_TYPES:
+            base_desc = f"A {_C_TYPE_DOC_DESC.get(inner, inner)}."
+        elif inner in HANDLE_TYPES:
+            cls = c_type_to_godot_class(inner) + "Handle"
+            base_desc = f"A [{cls}] handle."
+        else:
+            base_desc = "Input parameter."
+    elif t in UINT64_ID_TYPES:
+        base_desc = f"A {_C_TYPE_DOC_DESC.get(t, t)}."
+    else:
+        base_desc = "Input parameter."
+    return f"    [param {p.name}] {base_desc}"
+
+
 def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
     cls = _wrapper_class_name(parsed.header_include)
     methods = []
@@ -1175,20 +1282,37 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         ret = _constant_godot_return_type(c, parsed.constants)
         if ret in ("int", "bool"):
             methods.append(f'\t\t<constant name="{escape(c.name)}" value="{escape(str(c.value))}">')
-            methods.append(f"\t\t\t{c.doc_comment or f'Constant for #define {c.name}'}.")
+            desc = c.doc_comment or f'Constant for #define {c.name}'
+            # Add cross-reference hint
+            val_lower = str(c.value).lower()
+            if val_lower in ("occtl_ok", "0") and "ok" in c.name.lower():
+                desc += " Success status."
+            elif val_lower == "occtl_buffer_too_small":
+                desc += " Returned when a buffer is too small for the output."
+            methods.append(f"\t\t\t{desc}.")
             methods.append("\t\t</constant>")
         else:
             methods.append(f'\t\t<method name="const_{escape(c.name)}">')
             methods.append(f'\t\t\t<return type="{ret}" />')
             methods.append("\t\t\t<description>")
-            methods.append(f"\t\t\t\t{c.doc_comment or f'Constant wrapper for #define {c.name}'}.")
+            desc = c.doc_comment or f'Constant wrapper for #define {c.name}'
+            if "pi" in c.name.lower():
+                desc += " Mathematical constant pi."
+            methods.append(f"\t\t\t\t{desc}.")
             methods.append("\t\t\t</description>")
             methods.append("\t\t</method>")
 
     for enum in parsed.enums:
         for ev in enum.values:
             methods.append(f'\t\t<constant name="{escape(ev.name)}" value="{escape(str(ev.value))}">')
-            methods.append(f"\t\t\tEnum value = {ev.value}.")
+            desc = f"Enum value = {ev.value}"
+            # Try to be more descriptive based on context
+            enum_name_lower = enum.enum_name.lower()
+            if "status" in enum_name_lower:
+                desc += f" Status code."
+            elif "kind" in enum_name_lower:
+                desc += f" Kind identifier."
+            methods.append(f"\t\t\t{desc}")
             methods.append("\t\t</constant>")
 
     method_names = _function_method_names(parsed.functions)
@@ -1199,12 +1323,21 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         if ret_mapped != "void":
             methods.append(f'\t\t\t<return type="{ret_mapped}" />')
         ret = f.return_type.strip()
-        kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+        kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)]
         for i, p in enumerate(kept_params):
-            gt = godot_param_type(p.type_name.strip())
+            gt = _c_type_to_godot_doc_type(p.type_name.strip())
             methods.append(f'\t\t\t<argument index="{i}" name="{escape(p.name)}" type="{gt}" />')
         methods.append("\t\t\t<description>")
-        methods.append(f"\t\t\t\t{f.doc_comment or 'Generated binding.'}")
+        doc = f.doc_comment or f"Generated binding for {f.name}."
+        methods.append(f"\t\t\t\t{doc}")
+        # Add [param] descriptions for each kept param
+        for p in kept_params:
+            param_desc = _describe_param(p, ret)
+            methods.append(f"\t\t\t\t{param_desc}")
+        # Add [return] description
+        ret_desc = _describe_return(ret_mapped, ret)
+        if ret_desc:
+            methods.append(f"\t\t\t\t{ret_desc}")
         methods.append("\t\t\t</description>")
         methods.append("\t\t</method>")
 
