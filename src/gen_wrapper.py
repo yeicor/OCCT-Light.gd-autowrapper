@@ -261,6 +261,24 @@ def _is_two_call_string_triplet(params: list, n: int) -> tuple[int, str]:
     return -1, ""
 
 
+def _is_two_call_string_array_triplet(params: list, n: int) -> tuple[int, str]:
+    """Check if params[n-3:n] matches (const char** buf, size_t, size_t*) pattern
+    where buf is a pointer-to-pointer to char (array of C strings).
+    Returns (buffer_index, 'const_char_ptr') or (-1, '')."""
+    if n < 3:
+        return -1, ""
+    p0 = params[n - 3]
+    p1 = params[n - 2]
+    p2 = params[n - 1]
+    t0 = p0.type_name.strip()
+    t1 = p1.type_name.strip()
+    t2 = p2.type_name.strip()
+    if t0 in ("const char**", "const char * *"):
+        if t1 == "size_t" and t2 == "size_t*":
+            return n - 3, "const_char_ptr"
+    return -1, ""
+
+
 def _is_two_call_struct_triplet(params: list, n: int) -> tuple[int, str]:
     """Check if params[n-3:n] matches (struct_t* buf, size_t, size_t*) pattern.
     Returns (buffer_index, struct_type_name) or (-1, '')."""
@@ -301,7 +319,7 @@ def _find_leading_buffers(params: list, triplet_start: int) -> list[tuple[int, s
 
 def _is_two_call_buffer_func(f: CFunction) -> bool:
     """Detect trailing (ptr buf, size_t cap, size_t* out_count) two-call pattern.
-    Handles regular IDs, char*, and value struct* buffers."""
+    Handles regular IDs, char*, const char**, and value struct* buffers."""
     params = f.params
     n = len(params)
     if n < 3:
@@ -310,6 +328,9 @@ def _is_two_call_buffer_func(f: CFunction) -> bool:
     if idx >= 0:
         return True
     idx, base = _is_two_call_string_triplet(params, n)
+    if idx >= 0:
+        return True
+    idx, base = _is_two_call_string_array_triplet(params, n)
     if idx >= 0:
         return True
     idx, base = _is_two_call_struct_triplet(params, n)
@@ -325,19 +346,21 @@ def _get_two_call_buffer_arrays(f: CFunction) -> list[tuple[str, str, str]]:
     n = len(params)
     arrays = []
 
-    # Find the trailing triplet
+    # Find the trailing triplet (try all patterns)
     idx, base = _is_two_call_trailing_triplet(params, n)
     if idx < 0:
         idx, base = _is_two_call_string_triplet(params, n)
+    if idx < 0:
+        idx, base = _is_two_call_string_array_triplet(params, n)
     if idx < 0:
         idx, base = _is_two_call_struct_triplet(params, n)
     if idx < 0:
         return arrays
 
     # Leading parallel buffers — only for packed/struct trailing triplets.
-    # String-buffer trailing triplet means leading ptrs are scalar out-params, not arrays.
+    # String/string-array trailing triplet means leading ptrs are scalar out-params, not arrays.
     leading = []
-    if base != "char":
+    if base not in ("char", "const_char_ptr"):
         leading = _find_leading_buffers(params, idx)
     for li, lb in leading:
         pname = params[li].name
@@ -353,6 +376,8 @@ def _get_two_call_buffer_arrays(f: CFunction) -> list[tuple[str, str, str]]:
         arrays.append((tname, base, f"Array[Ref[{cls}]]"))
     elif base == "char":
         arrays.append((tname, "char", "String"))
+    elif base == "const_char_ptr":
+        arrays.append((tname, "const char*", "PackedStringArray"))
     else:
         arrays.append((tname, base, "PackedInt64Array"))
 
@@ -410,6 +435,35 @@ DEFAULT_NULLABLE_PARAMS: dict[str, set[str]] = {
 def _is_const_char_double_ptr(t: str) -> bool:
     t = t.strip()
     return t in ("const char**", "const char * *")
+
+
+def _find_const_view_pairs(f: CFunction) -> list[tuple[int, int]]:
+    """Find (const T** ptr_idx, size_t* count_idx) pairs for
+    view/allocation patterns where T is a value struct or uint64_id type.
+    The count param must follow the ptr param.
+    Returns list of (ptr_param_index, count_param_index)."""
+    pairs: list[tuple[int, int]] = []
+    params = f.params
+    for i, p in enumerate(params):
+        t = p.type_name.strip()
+        if not (t.endswith("**") and not t.endswith("***")):
+            continue
+        base = _c_type_strip_ptr(t).strip()
+        inner = re.sub(r"^(const|volatile)\s+", "", base.rstrip("* \t")).strip()
+        # Skip types already handled by other mechanisms
+        if inner == "char" or inner == "occtl_error_t" or inner in HANDLE_TYPES:
+            continue
+        if not (is_value_struct_type(inner) or inner in UINT64_ID_TYPES):
+            continue
+        # Look for following size_t* count param
+        for j in range(i + 1, len(params)):
+            ot = params[j].type_name.strip()
+            if ot == "size_t*" and is_out_param(
+                ot, params[j].name, f.return_type.strip()
+            ):
+                pairs.append((i, j))
+                break
+    return pairs
 
 
 def _out_param_wrapper_class(base: str, full_type: str = "") -> str | None:
@@ -481,120 +535,6 @@ def _c_to_godot_val(c_type: str, expr: str) -> str:
     raise ValueError(f"Unknown C type in _c_to_godot_val: {t}")
 
 
-def _godot_to_c_val(c_type: str, expr: str) -> str:
-    t = c_type.strip()
-    if t == "occtl_status_t":
-        return f"static_cast<{t}>({expr})"
-    if t in UINT64_ID_TYPES:
-        return f"{t}{{static_cast<uint64_t>({expr})}}"
-    if is_value_struct_type(t):
-        return f"{expr}->to_c()"
-    if t in ("int64_t", "uint64_t", "double", "float"):
-        return f"static_cast<{t}>({expr})"
-    if t in ("int32_t", "uint16_t", "size_t"):
-        return f"static_cast<{t}>({expr})"
-    if t == "uint32_t":
-        return f"static_cast<{t}>({expr})"
-    if t in ("bool", "int", "uint8_t"):
-        return f"static_cast<{t}>({expr})"
-    if t in ENUM_TYPES:
-        return f"static_cast<{t}>({expr})"
-    # ----- FALLTHROUGH HARDENED -----
-    raise NotImplementedError(f"_godot_to_c_val: unknown type {t!r} (expr={expr!r})")
-
-
-# ---------------------------------------------------------------
-# In-parameter handling
-# ---------------------------------------------------------------
-
-
-def _in_param_decl(p: CParameter) -> str | None:
-    t = p.type_name.strip()
-    if t == "char*":
-        return f"    godot::CharString _{p.name}_cs = {p.name}.utf8();\n    std::vector<char> _{p.name}_buf(_{p.name}_cs.get_data(), _{p.name}_cs.get_data() + _{p.name}_cs.length() + 1);\n    char* _{p.name}_c = _{p.name}_buf.data();"
-    t_stripped = re.sub(r"\s+(const|volatile)\s*$", "", t)
-    if (
-        t_stripped.startswith("const ")
-        and t_stripped.endswith("*")
-        and not t_stripped.endswith("**")
-    ):
-        base_raw = _c_type_strip_ptr(t_stripped).strip()
-        base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
-        if is_value_struct_type(base):
-            base_no_const = (
-                base_raw.replace("const ", "", 1)
-                if base_raw.startswith("const ")
-                else base_raw
-            )
-            return f"    {base_no_const} _{p.name}_c = {{}};\n    const {base_no_const}* _{p.name}_ptr = nullptr;\n    if ({p.name}.is_valid()) {{ _{p.name}_c = {p.name}->to_c(); _{p.name}_ptr = &_{p.name}_c; }}"
-        if base in UINT64_ID_TYPES:
-            return f"    {base} _{p.name}_c = {{static_cast<uint64_t>({p.name})}};"
-        if base in HANDLE_TYPES:
-            return None
-        if base == "uint8_t":
-            return f"    const uint8_t* _{p.name}_c = {p.name}.ptr();"
-        return None
-    return None
-
-
-def _in_param_call_arg(p: CParameter) -> str:
-    t = p.type_name.strip()
-    name = p.name if p.name else ""
-    if t.startswith("const ") and t.endswith("*"):
-        base_raw = _c_type_strip_ptr(t).strip()
-        base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
-        if is_value_struct_type(base):
-            return f"_{name}_ptr"
-        if base in UINT64_ID_TYPES:
-            return f"&_{name}_c"
-        if base in HANDLE_TYPES:
-            return f"reinterpret_cast<const {base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
-        if base == "char":
-            return f"{name}.utf8().get_data()"
-        if base == "uint8_t":
-            return f"_{name}_c"
-        # ----- FALLTHROUGH HARDENED -----
-        raise NotImplementedError(
-            f"_in_param_call_arg: unknown const pointer type {t!r} (name={name!r})"
-        )
-    if t in UINT64_ID_TYPES:
-        return f"{t}{{static_cast<uint64_t>({name})}}"
-    if is_value_struct_type(t):
-        return f"{name}->to_c()"
-    if t == "occtl_status_t":
-        return f"static_cast<{t}>({name})"
-    if t in ("void",):
-        return ""
-    if t == "char*":
-        return f"_{name}_c"
-    if t in (
-        "double",
-        "float",
-        "int32_t",
-        "uint32_t",
-        "int64_t",
-        "uint64_t",
-        "size_t",
-        "uint16_t",
-        "uint8_t",
-        "bool",
-        "int",
-    ):
-        return f"static_cast<{t}>({name})"
-    if t in ENUM_TYPES:
-        return f"static_cast<{t}>({name})"
-    if t.endswith("*"):
-        base = _c_type_strip_ptr(t).strip()
-        if base in HANDLE_TYPES:
-            return f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
-        # ----- FALLTHROUGH HARDENED -----
-        raise NotImplementedError(
-            f"_in_param_call_arg: unknown pointer type {t!r} (base={base!r})"
-        )
-    # ----- FALLTHROUGH HARDENED -----
-    raise NotImplementedError(f"_in_param_call_arg: unknown type {t!r} (name={name!r})")
-
-
 # ---------------------------------------------------------------
 # Function classification
 # ---------------------------------------------------------------
@@ -621,7 +561,7 @@ def _func_return_type_mapped(f: CFunction) -> str:
     if ret == "const char*":
         return "String"
 
-    # Handle** out-params returned directly (first such param wins)
+    # ** out-params returned directly (first such param wins)
     handle_outs = [p for p in out_params if _is_direct_return_out_param(p)]
     non_handle_outs = [p for p in out_params if not _is_direct_return_out_param(p)]
 
@@ -629,9 +569,19 @@ def _func_return_type_mapped(f: CFunction) -> str:
         p = handle_outs[0]
         base = _c_type_strip_ptr(p.type_name).strip()
         inner = re.sub(r"^(const|volatile)\s+", "", base.rstrip("* \t")).strip()
-        if inner in HANDLE_TYPES:
+        if inner in HANDLE_TYPES or is_auto_handle_type(inner):
             return f"Ref<{c_type_to_godot_class(base)}Handle>"
-        return "int"  # fallback
+        # Single const char** → returns String (single C string from double-ptr)
+        if inner == "char":
+            return "String"
+        # const T** view pairs return Array of Ref<T>
+        view_pairs = _find_const_view_pairs(f)
+        if view_pairs:
+            return "Array"
+        raise ValueError(
+            f"_func_return_type_mapped: unknown double-ptr out-param type "
+            f"'{p.type_name.strip()}' (inner={inner!r}) in function {f.name}"
+        )
 
     # No handle out-params → return mapped C return type
     if ret == "void":
@@ -786,14 +736,17 @@ def _input_ptr_size_element_type(f: CFunction, ptr_idx: int) -> str:
 
 
 # ---------------------------------------------------------------
-# Method declarations — only handle** and const occtl_error_t**
-# are stripped from method args; all other out-params stay as Ref<T> params.
+# Method declarations — handle**, const T** view pairs, and
+# const occtl_error_t** are stripped from method args; all other
+# out-params stay as Ref<T> params.
 # ---------------------------------------------------------------
 
 
 def _is_stripped_out_param(p: CParameter, ret: str) -> bool:
     """True if this out-param should be REMOVED from the Godot method signature.
-    These are handle** and const occtl_error_t** — they become return values."""
+    These are handle**, const occtl_error_t** — they become return values.
+    size_t* count params from const view pairs are also stripped via
+    _build_kept_params which skips them explicitly."""
     if not is_out_param(p.type_name, p.name, ret):
         return False
     t = p.type_name.strip()
@@ -843,14 +796,23 @@ def _build_kept_params(
     """Build the list of params to keep, preserving original order.
 
     Strips out-params (handle**), buffer triplet params, size params
-    from string+size pairs, and size params from input ptr+size pairs,
-    while keeping string/array params at their original positions.
+    from string+size pairs, size params from input ptr+size pairs,
+    and size_t* count params from const view pairs.
     """
     input_ptr_size_pairs = _find_input_ptr_size_pairs(f)
     input_ptr_size_indices = {size_idx for _, size_idx in input_ptr_size_pairs}
 
+    # Find const view pair count indices to strip
+    const_view_pairs = _find_const_view_pairs(f)
+    const_view_count_indices = {count_idx for _, count_idx in const_view_pairs}
+    const_view_ptr_indices = {ptr_idx for ptr_idx, _ in const_view_pairs}
+
     kept = []
     for i, p in enumerate(f.params):
+        if i in const_view_count_indices:
+            continue  # skip count params from const view pairs
+        if i in const_view_ptr_indices:
+            continue  # skip ptr params from const view pairs (handled by _is_stripped_out_param too)
         if _is_stripped_out_param(p, ret):
             continue
         if _is_buffer_triplet_param(f, p):
@@ -1111,16 +1073,26 @@ def _generate_body(
     lines = []
     ret_mapped = _func_return_type_mapped(f)
 
+    # Const view pairs: (const T** ptr, size_t* count) → return Array of Ref<T>
+    const_view_pairs = _find_const_view_pairs(f)
+    const_view_ptr_indices = {ptr_idx for ptr_idx, _ in const_view_pairs}
+    const_view_count_indices = {count_idx for _, count_idx in const_view_pairs}
+    const_view_ptr_to_count = dict(const_view_pairs)
+
     # Two-call buffer pattern (trailing ptr, size_t, size_t*)
     if _is_two_call_buffer_func(f):
         n_params = len(f.params)
         # Identify trailing triplet and leading buffers
         buf_idx, base0 = _is_two_call_trailing_triplet(f.params, n_params)
         is_string = False
+        is_string_array = False
         is_struct_arr = False
         if buf_idx < 0:
             buf_idx, base0 = _is_two_call_string_triplet(f.params, n_params)
             is_string = buf_idx >= 0
+        if buf_idx < 0:
+            buf_idx, base0 = _is_two_call_string_array_triplet(f.params, n_params)
+            is_string_array = buf_idx >= 0
         if buf_idx < 0:
             buf_idx, base0 = _is_two_call_struct_triplet(f.params, n_params)
             is_struct_arr = buf_idx >= 0
@@ -1129,9 +1101,9 @@ def _generate_body(
         cnt_name = f.params[cnt_idx].name
 
         # Only detect leading buffers when trailing triplet is packed or struct.
-        # String-buffer trailing triplet means leading numeric ptrs are scalar out-params.
+        # String/string-array trailing triplet means leading ptrs are scalar out-params.
         leading = []
-        if not is_string:
+        if not is_string and not is_string_array:
             leading = _find_leading_buffers(f.params, buf_idx)
 
         # Collect all buffer param indices: leading + trailing triplet buffer
@@ -1146,6 +1118,7 @@ def _generate_body(
         arrays = _get_two_call_buffer_arrays(f)
         single_packed = len(arrays) == 1 and arrays[0][2].startswith("Packed")
         single_string = is_returning_string
+        single_string_array = is_string_array and len(buffer_indices) == 1
         single_struct = len(arrays) == 1 and arrays[0][2].startswith("Array[Ref[")
         return_dict = len(arrays) > 1
 
@@ -1344,6 +1317,11 @@ def _generate_body(
                 lines.append(
                     f"    std::vector<{bbase}> _{bname}_buf(static_cast<size_t>(_{cnt_name}_cnt));"
                 )
+            elif is_string_array or bbase == "const char":
+                # const char** — array of C string pointers
+                lines.append(
+                    f"    std::vector<const char*> _{bname}_buf(_{cnt_name}_cnt);"
+                )
             else:
                 lines.append(f"    std::vector<{bbase}> _{bname}_buf(_{cnt_name}_cnt);")
 
@@ -1392,6 +1370,14 @@ def _generate_body(
         elif single_string:
             buf_name = f.params[buf_idx].name
             lines.append(f"    return godot::String(_{buf_name}_buf.data());")
+        elif single_string_array:
+            buf_name = f.params[buf_idx].name
+            lines.append("    PackedStringArray _result;")
+            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            lines.append(
+                f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = godot::String(_{buf_name}_buf[_i]);"
+            )
+            lines.append("    return _result;")
         elif single_struct:
             buf_name = f.params[buf_idx].name
             struct_cls = arrays[0][2].replace("Array[Ref[", "").rstrip("]")
@@ -1504,9 +1490,13 @@ def _generate_body(
         if cb_handled:
             continue
 
+        # Skip count params from const view pairs (already handled with ptr)
+        p_idx = f.params.index(p)
+        if p_idx in const_view_count_indices:
+            continue
+
         # Input ptr+size pair handling
         if p is not None:
-            p_idx = f.params.index(p)
             if p_idx in input_ptr_size_indices:
                 # This is the pointer param of an input ptr+size pair
                 # Generate: reinterpret_cast<const elem_type*>(name.ptr())
@@ -1560,6 +1550,16 @@ def _generate_body(
         if is_out_param(t, p.name, ret):
             base = _c_type_strip_ptr(t).strip()
             if t.endswith("**"):
+                # View pair: const T** ptr + size_t* count → Array of Ref<T>
+                if p_idx in const_view_ptr_indices:
+                    count_idx = const_view_ptr_to_count[p_idx]
+                    count_name = f.params[count_idx].name
+                    inner_type = re.sub(r"^(const|volatile)\s+", "", base).strip()
+                    lines.append(f"    const {inner_type}* _{name}_ptr = nullptr;")
+                    lines.append(f"    size_t _{count_name}_cnt = 0;")
+                    call_args.append(f"&_{name}_ptr")
+                    call_args.append(f"&_{count_name}_cnt")
+                    continue  # count param handled here, skip when loop reaches it
                 # Handle** or const char** out-param
                 if t == "const char**" or t == "const char * *":
                     local = f"_{name}_buf"
@@ -1589,9 +1589,19 @@ def _generate_body(
                         # const occtl_error_t** → return as Ref<OcctlError>
                         lines.append(f"    const {resolved_base}* {local} = nullptr;")
                         call_args.append(f"&{local}")
-                    else:
+                    elif resolved_base in HANDLE_TYPES or is_auto_handle_type(
+                        resolved_base
+                    ):
+                        # Handle** → passed as pointer-to-pointer, handled in return section
                         lines.append(f"    {base}* {local} = nullptr;")
                         call_args.append(f"&{local}")
+                    else:
+                        # ----- HARDENED: Unknown ** type would silently drop data -----
+                        raise ValueError(
+                            f"[_generate_body] Unknown double-ptr out-param type: "
+                            f"{f.name}.{name}, t={t!r}, base={base!r}, "
+                            f"resolved={_resolve_typedef(base)!r}"
+                        )
             elif base == "uint8_t":
                 # uint8_t* buffer out-param
                 buf_size = 16
@@ -1834,12 +1844,49 @@ def _generate_body(
                 lines.append(copy_line)
 
     # Build return
-    if handle_out_params and _func_is_occtl_status(f):
+    if const_view_pairs and _func_is_occtl_status(f):
+        # const T** view pair → return Array of Ref<T> (or PackedArray for id types)
+        for ptr_idx, cnt_idx in const_view_pairs:
+            p = f.params[ptr_idx]
+            cnt = f.params[cnt_idx]
+            ptr_name = p.name if p.name else "out"
+            cnt_name = cnt.name
+        inner_type = re.sub(
+            r"^(const|volatile)\s+", "", _c_type_strip_ptr(p.type_name.strip()).strip()
+        ).strip()
+        view_resolved = _resolve_typedef(inner_type)
+        if _func_is_occtl_status(f):
+            lines.append(f"    if (_status != OCCTL_OK) {{ return Array(); }}")
+        if view_resolved in UINT64_ID_TYPES:
+            # PackedInt64Array for id types (occtl_rep_id_t, occtl_uid_t, etc.)
+            lines.append(f"    PackedInt64Array _result;")
+            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            lines.append(
+                f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{ _result[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{ptr_name}_ptr[_i].bits); }}"
+            )
+            lines.append(f"    return _result;")
+        elif is_value_struct_type(view_resolved):
+            cls = c_type_to_godot_class(view_resolved)
+            lines.append(f"    Array _result;")
+            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{")
+            lines.append(f"        Ref<{cls}> _item;")
+            lines.append(f"        _item.instantiate();")
+            lines.append(f"        _item->copy_from_c(_{ptr_name}_ptr[_i]);")
+            lines.append(f"        _result[static_cast<int64_t>(_i)] = _item;")
+            lines.append(f"    }}")
+            lines.append(f"    return _result;")
+        else:
+            raise ValueError(
+                f"[_generate_body] View pair inner type '{view_resolved}' not supported "
+                f"in function {f.name}"
+            )
+    elif handle_out_params and _func_is_occtl_status(f):
         p = handle_out_params[0]
         base = _c_type_strip_ptr(p.type_name).strip()
         inner = re.sub(r"^(const|volatile)\s+", "", base.rstrip("* \t")).strip()
         local = f"_{p.name}_val"
-        if inner in HANDLE_TYPES:
+        if inner in HANDLE_TYPES or is_auto_handle_type(inner):
             cls = c_type_to_godot_class(base) + "Handle"
             lines.append(f"    if (_status != OCCTL_OK) {{ return Ref<{cls}>(); }}")
             lines.append(f"    if (!{local}) {{ return Ref<{cls}>(); }}")
@@ -1852,8 +1899,18 @@ def _generate_body(
         elif inner in UINT64_ID_TYPES:
             lines.append(f"    if (_status != OCCTL_OK) {{ return 0; }}")
             lines.append(f"    return static_cast<int64_t>({local}->bits);")
+        elif inner == "char":
+            # Single const char** output → return String
+            lines.append(f"    if (_status != OCCTL_OK) {{ return String(); }}")
+            lines.append(f"    if (!{local}) {{ return String(); }}")
+            lines.append(f"    return String({local});")
         else:
-            lines.append(f"    return static_cast<int>(_status);")
+            # ----- HARDENED: Unknown ** type would silently drop data -----
+            raise ValueError(
+                f"[_generate_body] Unknown double-ptr out-param type "
+                f"'{p.type_name.strip()}' (inner={inner!r}) in function {f.name}. "
+                f"Cannot build return value."
+            )
     elif handle_out_params and not _func_is_occtl_status(f):
         # Non-status C return with handle** out-param (unusual)
         lines.append(
