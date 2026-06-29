@@ -170,58 +170,93 @@ class HeaderParser:
         )
 
         named = list(root.named_children)
+        errors: list[str] = []
         i = 0
         while i < len(named):
             node = named[i]
-            try:
-                if node.type == "comment":
-                    i += 1
-                    continue
-                elif node.type == "preproc_def":
-                    const = self._parse_define(
-                        node, source, header_path, header_include
+            if node.type == "comment":
+                i += 1
+                continue
+            elif node.type == "preproc_include":
+                i += 1
+                continue
+            elif node.type == "preproc_def":
+                const = self._parse_define(node, source, header_path, header_include)
+                if const:
+                    result.constants.append(const)
+            elif node.type == "type_definition":
+                parsed = self._parse_typedef(node, source, header_path, header_include)
+                for s in parsed.structs:
+                    result.structs.append(s)
+                for e in parsed.enums:
+                    result.enums.append(e)
+            elif node.type == "declaration":
+                func, struct = self._parse_declaration(
+                    node, source, header_path, header_include
+                )
+                if func:
+                    result.functions.append(func)
+                if struct:
+                    result.structs.append(struct)
+            elif node.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
+                # Recurse into guard blocks
+                sub_items = self._parse_guarded_block(
+                    node, source, header_path, header_include
+                )
+                result.constants.extend(sub_items.constants)
+                result.enums.extend(sub_items.enums)
+                result.structs.extend(sub_items.structs)
+                result.functions.extend(sub_items.functions)
+            elif node.type == "linkage_specification":
+                # extern "C" block – recurse into declaration list
+                for child in node.named_children:
+                    if child.type == "declaration_list":
+                        sub = self._parse_as_root(
+                            child, source, header_path, header_include
+                        )
+                        result.constants.extend(sub.constants)
+                        result.enums.extend(sub.enums)
+                        result.structs.extend(sub.structs)
+                        result.functions.extend(sub.functions)
+            elif node.type == "preproc_else":
+                # parse the else branch
+                for subchild in node.named_children:
+                    sub = self._parse_as_root(
+                        subchild, source, header_path, header_include
                     )
-                    if const:
-                        result.constants.append(const)
-                elif node.type == "type_definition":
-                    parsed = self._parse_typedef(
-                        node, source, header_path, header_include
-                    )
-                    for s in parsed.structs:
-                        result.structs.append(s)
-                    for e in parsed.enums:
-                        result.enums.append(e)
-                elif node.type == "declaration":
-                    func, struct = self._parse_declaration(
-                        node, source, header_path, header_include
-                    )
-                    if func:
-                        result.functions.append(func)
-                    if struct:
-                        result.structs.append(struct)
-                elif node.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
-                    # Recurse into guard blocks
-                    sub_items = self._parse_guarded_block(
-                        node, source, header_path, header_include
-                    )
-                    result.constants.extend(sub_items.constants)
-                    result.enums.extend(sub_items.enums)
-                    result.structs.extend(sub_items.structs)
-                    result.functions.extend(sub_items.functions)
-                elif node.type == "linkage_specification":
-                    # extern "C" block – recurse into declaration list
-                    for child in node.named_children:
-                        if child.type == "declaration_list":
-                            sub = self._parse_as_root(
-                                child, source, header_path, header_include
-                            )
-                            result.constants.extend(sub.constants)
-                            result.enums.extend(sub.enums)
-                            result.structs.extend(sub.structs)
-                            result.functions.extend(sub.functions)
-            except Exception:
-                pass  # skip unparseable nodes gracefully
+                    result.constants.extend(sub.constants)
+                    result.enums.extend(sub.enums)
+                    result.structs.extend(sub.structs)
+                    result.functions.extend(sub.functions)
+            elif node.type == "preproc_call":
+                # Other preprocessor calls (e.g. #pragma) - skip
+                i += 1
+                continue
+            elif node.type == "preproc_function_def":
+                # Function-like macros - skip
+                i += 1
+                continue
+            elif node.type == "preproc_directive":
+                # Other preprocessor directives (e.g. #undef, #error) - skip
+                i += 1
+                continue
+            elif node.type == "function_definition":
+                # C++ inline function definitions - skip (these are in C++ convenience headers)
+                i += 1
+                continue
+            elif node.type == "ERROR":
+                errors.append(
+                    f"Parse error at line {node.start_point.row + 1}: '{_node_text(node, source)}'"
+                )
+            else:
+                errors.append(
+                    f"Unhandled node type '{node.type}' at line {node.start_point.row + 1}: '{_node_text(node, source)[:80]}'"
+                )
             i += 1
+
+        if errors:
+            msg = "\n".join(f"  [ERROR] {header_path.name}: {err}" for err in errors)
+            raise RuntimeError(f"Parser encountered unsupported constructs:\n{msg}")
 
         return result
 
@@ -230,42 +265,88 @@ class HeaderParser:
     ) -> ParsedHeader:
         """Parse a subtree as if it were a root node."""
         result = ParsedHeader(header_path=header_path, header_include=header_include)
+        errors: list[str] = []
         for child in node.named_children:
-            try:
-                if child.type == "preproc_def":
-                    const = self._parse_define(
-                        child, source, header_path, header_include
+            if child.type == "comment":
+                continue
+            if child.type == "preproc_include":
+                continue
+            if child.type == "preproc_def":
+                const = self._parse_define(child, source, header_path, header_include)
+                if const:
+                    result.constants.append(const)
+            elif child.type == "type_definition":
+                parsed = self._parse_typedef(child, source, header_path, header_include)
+                result.structs.extend(parsed.structs)
+                result.enums.extend(parsed.enums)
+            elif child.type == "declaration":
+                func, struct = self._parse_declaration(
+                    child, source, header_path, header_include
+                )
+                if func:
+                    result.functions.append(func)
+                if struct:
+                    result.structs.append(struct)
+            elif child.type == "linkage_specification":
+                for decl_list in child.named_children:
+                    if decl_list.type == "declaration_list":
+                        sub = self._parse_as_root(
+                            decl_list, source, header_path, header_include
+                        )
+                        result.constants.extend(sub.constants)
+                        result.enums.extend(sub.enums)
+                        result.structs.extend(sub.structs)
+                        result.functions.extend(sub.functions)
+            elif child.type == "preproc_call":
+                # #pragma and similar - skip
+                continue
+            elif child.type == "preproc_function_def":
+                # Function-like macros - skip
+                continue
+            elif child.type == "preproc_directive":
+                # Other preprocessor directives (e.g. #undef, #error) - skip
+                continue
+            elif child.type == "function_definition":
+                # C++ inline function definitions - skip
+                continue
+            elif child.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
+                sub = self._parse_guarded_block(
+                    child, source, header_path, header_include
+                )
+                result.constants.extend(sub.constants)
+                result.enums.extend(sub.enums)
+                result.structs.extend(sub.structs)
+                result.functions.extend(sub.functions)
+            elif child.type == "preproc_else":
+                for subchild in child.named_children:
+                    sub = self._parse_as_root(
+                        subchild, source, header_path, header_include
                     )
-                    if const:
-                        result.constants.append(const)
-                elif child.type == "type_definition":
-                    parsed = self._parse_typedef(
-                        child, source, header_path, header_include
-                    )
-                    result.structs.extend(parsed.structs)
-                    result.enums.extend(parsed.enums)
-                elif child.type == "declaration":
-                    func, struct = self._parse_declaration(
-                        child, source, header_path, header_include
-                    )
-                    if func:
-                        result.functions.append(func)
-                    if struct:
-                        result.structs.append(struct)
-                elif child.type == "linkage_specification":
-                    for decl_list in child.named_children:
-                        if decl_list.type == "declaration_list":
-                            sub = self._parse_as_root(
-                                decl_list, source, header_path, header_include
-                            )
-                            result.constants.extend(sub.constants)
-                            result.enums.extend(sub.enums)
-                            result.structs.extend(sub.structs)
-                            result.functions.extend(sub.functions)
-                elif child.type == "comment":
-                    continue
-            except Exception:
-                pass
+                    result.constants.extend(sub.constants)
+                    result.enums.extend(sub.enums)
+                    result.structs.extend(sub.structs)
+                    result.functions.extend(sub.functions)
+            elif child.type == "ERROR":
+                errors.append(
+                    f"Parse error at line {child.start_point.row + 1}: '{_node_text(child, source)}'"
+                )
+            elif child.type in (
+                "identifier",
+                "binary_expression",
+                "preproc_defined",
+                "preproc_arg",
+                "unary_expression",
+                "number_literal",
+                "string_literal",
+            ):
+                continue
+            else:
+                errors.append(
+                    f"Unhandled node type '{child.type}' at line {child.start_point.row + 1}: '{_node_text(child, source)[:80]}'"
+                )
+        if errors:
+            msg = "\n".join(f"  [ERROR] {err}" for err in errors)
+            raise RuntimeError(f"Parser encountered unsupported constructs:\n{msg}")
         return result
 
     def _parse_define(
@@ -571,56 +652,83 @@ class HeaderParser:
     ) -> ParsedHeader:
         """Parse a preprocessor guarded block."""
         result = ParsedHeader(header_path=header_path, header_include=header_include)
+        errors: list[str] = []
         for child in node.named_children:
-            try:
-                if child.type in ("preproc_def",):
-                    const = self._parse_define(
-                        child, source, header_path, header_include
-                    )
-                    if const:
-                        result.constants.append(const)
-                elif child.type == "type_definition":
-                    parsed = self._parse_typedef(
-                        child, source, header_path, header_include
-                    )
-                    result.structs.extend(parsed.structs)
-                    result.enums.extend(parsed.enums)
-                elif child.type == "declaration":
-                    func, struct = self._parse_declaration(
-                        child, source, header_path, header_include
-                    )
-                    if func:
-                        result.functions.append(func)
-                    if struct:
-                        result.structs.append(struct)
-                elif child.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
-                    sub = self._parse_guarded_block(
-                        child, source, header_path, header_include
-                    )
-                    result.constants.extend(sub.constants)
-                    result.enums.extend(sub.enums)
-                    result.structs.extend(sub.structs)
-                    result.functions.extend(sub.functions)
-                elif child.type == "linkage_specification":
-                    for ls_child in child.named_children:
-                        if ls_child.type == "declaration_list":
-                            sub = self._parse_as_root(
-                                ls_child, source, header_path, header_include
-                            )
-                            result.constants.extend(sub.constants)
-                            result.enums.extend(sub.enums)
-                            result.structs.extend(sub.structs)
-                            result.functions.extend(sub.functions)
-                elif child.type == "preproc_else":
-                    # parse the else branch
-                    for subchild in child.named_children:
+            if child.type == "comment":
+                continue
+            if child.type == "preproc_include":
+                continue
+            if child.type == "preproc_def":
+                const = self._parse_define(child, source, header_path, header_include)
+                if const:
+                    result.constants.append(const)
+            elif child.type == "type_definition":
+                parsed = self._parse_typedef(child, source, header_path, header_include)
+                result.structs.extend(parsed.structs)
+                result.enums.extend(parsed.enums)
+            elif child.type == "declaration":
+                func, struct = self._parse_declaration(
+                    child, source, header_path, header_include
+                )
+                if func:
+                    result.functions.append(func)
+                if struct:
+                    result.structs.append(struct)
+            elif child.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
+                sub = self._parse_guarded_block(
+                    child, source, header_path, header_include
+                )
+                result.constants.extend(sub.constants)
+                result.enums.extend(sub.enums)
+                result.structs.extend(sub.structs)
+                result.functions.extend(sub.functions)
+            elif child.type == "linkage_specification":
+                for ls_child in child.named_children:
+                    if ls_child.type == "declaration_list":
                         sub = self._parse_as_root(
-                            subchild, source, header_path, header_include
+                            ls_child, source, header_path, header_include
                         )
                         result.constants.extend(sub.constants)
                         result.enums.extend(sub.enums)
                         result.structs.extend(sub.structs)
                         result.functions.extend(sub.functions)
-            except Exception:
-                pass
+            elif child.type == "preproc_call":
+                continue
+            elif child.type == "preproc_function_def":
+                continue
+            elif child.type == "preproc_directive":
+                continue
+            elif child.type == "function_definition":
+                continue
+            elif child.type == "preproc_else":
+                for subchild in child.named_children:
+                    sub = self._parse_as_root(
+                        subchild, source, header_path, header_include
+                    )
+                    result.constants.extend(sub.constants)
+                    result.enums.extend(sub.enums)
+                    result.structs.extend(sub.structs)
+                    result.functions.extend(sub.functions)
+            elif child.type == "ERROR":
+                errors.append(
+                    f"Parse error at line {child.start_point.row + 1}: '{_node_text(child, source)}'"
+                )
+            elif child.type in (
+                "identifier",
+                "binary_expression",
+                "preproc_defined",
+                "preproc_arg",
+                "unary_expression",
+                "number_literal",
+                "string_literal",
+            ):
+                # Preprocessor condition expression parts inside #if blocks - skip
+                continue
+            else:
+                errors.append(
+                    f"Unhandled node type '{child.type}' in guarded block at line {child.start_point.row + 1}: '{_node_text(child, source)[:80]}'"
+                )
+        if errors:
+            msg = "\n".join(f"  [ERROR] {err}" for err in errors)
+            raise RuntimeError(f"Parser encountered unsupported constructs:\n{msg}")
         return result

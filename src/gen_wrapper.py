@@ -1134,14 +1134,6 @@ def _generate_body(
                     call_args_buf.append(
                         f"reinterpret_cast<{t_stripped}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
                     )
-                elif (
-                    t_stripped.startswith("const occtl_")
-                    and t_stripped.endswith("*")
-                    and not t_stripped.endswith("**")
-                    and not t_stripped.startswith("const occtl_")
-                ):
-                    call_args_null.append(name)
-                    call_args_buf.append(name)
                 else:
                     t_clean = re.sub(r"\s+(const|volatile)\s*$", "", t_stripped)
                     if t_clean.endswith("*") and not t_clean.endswith("**"):

@@ -31,9 +31,9 @@ from gen_module import (
     part_count_for,
 )
 from gen_out_prim import (
+    generate_out_prim_doc_xml,
     generate_out_prim_headers,
     generate_out_prim_sources,
-    generate_out_prim_doc_xml,
 )
 from gen_tests import generate_all_tests
 from gen_values import (
@@ -43,10 +43,10 @@ from gen_values import (
     generate_value_type_source,
 )
 from gen_wrapper import (
+    _wrapper_class_name,
     generate_wrapper_doc_xml,
     generate_wrapper_header,
     generate_wrapper_source,
-    _wrapper_class_name,
 )
 from parser import CField, CStruct, HeaderParser, ParsedHeader
 from type_map import (
@@ -66,9 +66,12 @@ def _synthesize_missing_value_structs(
 ) -> None:
     """Synthesize CStruct entries for types in VALUE_STRUCT_TYPES that the
     parser failed to extract (tree-sitter edge cases)."""
-    from type_map import VALUE_STRUCT_TYPES, c_type_to_godot_class as _ctg
+    from type_map import VALUE_STRUCT_TYPES
+    from type_map import c_type_to_godot_class as _ctg
+
     collected_names = {s.type_name for s in collected}
     import re
+
     for ph in parsed_headers:
         header_text = ph.header_path.read_text() if ph.header_path else ""
         for vt in sorted(VALUE_STRUCT_TYPES):
@@ -76,7 +79,7 @@ def _synthesize_missing_value_structs(
                 continue
             # Find the last '{...} TYPE_NAME;' pattern by finding the closing
             # brace position first, then scanning backwards for a matching '{'.
-            closing = re.search(r'\}\s*' + re.escape(vt) + r'\s*;', header_text)
+            closing = re.search(r"\}\s*" + re.escape(vt) + r"\s*;", header_text)
             if not closing:
                 continue
             end_pos = closing.start()
@@ -85,9 +88,9 @@ def _synthesize_missing_value_structs(
             body_start = -1
             for i in range(end_pos - 1, -1, -1):
                 ch = header_text[i]
-                if ch == '}':
+                if ch == "}":
                     brace_depth += 1
-                elif ch == '{':
+                elif ch == "{":
                     if brace_depth == 0:
                         body_start = i + 1
                         break
@@ -96,14 +99,14 @@ def _synthesize_missing_value_structs(
                 continue
             body = header_text[body_start:end_pos]
             # Verify this is a typedef struct
-            prefix = header_text[max(0, body_start - 80):body_start].strip()
-            if not prefix.endswith('struct') and 'typedef' not in prefix:
+            prefix = header_text[max(0, body_start - 80) : body_start].strip()
+            if not prefix.endswith("struct") and "typedef" not in prefix:
                 # Check if the whole typedef is before the brace
-                before_text = header_text[max(0, body_start - 200):body_start]
-                if 'typedef' not in before_text or 'struct' not in before_text:
+                before_text = header_text[max(0, body_start - 200) : body_start]
+                if "typedef" not in before_text or "struct" not in before_text:
                     continue
-            body = re.sub(r'/\*.*?\*/', '', body, flags=re.DOTALL)
-            body = re.sub(r'//.*', '', body)
+            body = re.sub(r"/\*.*?\*/", "", body, flags=re.DOTALL)
+            body = re.sub(r"//.*", "", body)
             fields: list[CField] = []
             for line in body.split(";"):
                 line = line.strip()
@@ -117,17 +120,25 @@ def _synthesize_missing_value_structs(
                 if len(parts) == 2:
                     ftype, fname = parts
                     fname = fname.lstrip("*")
-                    arr_m = re.match(r'(\w+)\[(\d+)\]', fname)
+                    arr_m = re.match(r"(\w+)\[(\d+)\]", fname)
                     arr_size = 0
                     if arr_m:
                         fname = arr_m.group(1)
                         arr_size = int(arr_m.group(2))
-                    fields.append(CField(type_name=ftype.strip(), name=fname.strip(), array_size=arr_size))
+                    fields.append(
+                        CField(
+                            type_name=ftype.strip(),
+                            name=fname.strip(),
+                            array_size=arr_size,
+                        )
+                    )
             if not fields:
                 continue
             s = CStruct(
-                name=vt, type_name=vt,
-                is_opaque=False, fields=fields,
+                name=vt,
+                type_name=vt,
+                is_opaque=False,
+                fields=fields,
                 header_path=ph.header_path,
                 header_include=ph.header_include,
                 doc_comment="Synthesized",
@@ -172,7 +183,8 @@ def main() -> None:
         help="Directory containing OCCT-Light C headers (e.g. OCCT-Light/include/occtl)",
     )
     parser.add_argument(
-        "-o", "--output-dir",
+        "-o",
+        "--output-dir",
         type=Path,
         default=Path("."),
         help="Output directory (parent project root, e.g. ..)",
@@ -197,10 +209,10 @@ def main() -> None:
         print(f"Error: headers directory not found: {headers_dir}", file=sys.stderr)
         sys.exit(1)
 
-    # Collect header files (skip viz and umbrella)
+    # Collect header files (skip umbrella header and viz - not built by vcpkg)
     header_files: list[Path] = []
     for f in sorted(headers_dir.glob("occtl*.h")):
-        if f.name in ("occtl_viz.h", "occtl.h"):
+        if f.name in ("occtl.h", "occtl_viz.h"):
             continue
         header_files.append(f)
 
@@ -214,17 +226,15 @@ def main() -> None:
     hparser = HeaderParser()
     parsed_headers: list[ParsedHeader] = []
     for hf in header_files:
-        try:
-            ph = hparser.parse(hf)
-            parsed_headers.append(ph)
-            print(f"  Parsed {hf.name}: "
-                  f"{len(ph.constants)} constants, "
-                  f"{len(ph.enums)} enums, "
-                  f"{len(ph.structs)} structs, "
-                  f"{len(ph.functions)} functions")
-
-        except Exception as e:
-            print(f"  Warning: failed to parse {hf.name}: {e}")
+        ph = hparser.parse(hf)
+        parsed_headers.append(ph)
+        print(
+            f"  Parsed {hf.name}: "
+            f"{len(ph.constants)} constants, "
+            f"{len(ph.enums)} enums, "
+            f"{len(ph.structs)} structs, "
+            f"{len(ph.functions)} functions"
+        )
 
     if not parsed_headers:
         print("Error: no headers successfully parsed", file=sys.stderr)
@@ -239,6 +249,7 @@ def main() -> None:
 
     # Populate VALUE_STRUCT_TYPES for type_map lookups
     from type_map import VALUE_STRUCT_TYPES
+
     for s in all_value_structs:
         VALUE_STRUCT_TYPES.add(s.type_name)
 
@@ -319,12 +330,14 @@ def main() -> None:
             # Include for return type when it is a Ref<T> wrapper
             from gen_wrapper import (
                 OUT_PARAM_PRIM_TYPES,
-                _is_const_char_double_ptr, _out_param_wrapper_class,
+                _is_const_char_double_ptr,
+                _out_param_wrapper_class,
             )
+
             ret = f.return_type.strip()
-            ret_clean = re.sub(r'\s+(const|volatile)\s*$', '', ret)
+            ret_clean = re.sub(r"\s+(const|volatile)\s*$", "", ret)
             ret_clean = ret_clean.rstrip("* \t")
-            ret_clean = re.sub(r'^(const|volatile)\s+', '', ret_clean).strip()
+            ret_clean = re.sub(r"^(const|volatile)\s+", "", ret_clean).strip()
             ret_resolved = _resolve_typedef(ret_clean)
             if ret_clean in VALUE_STRUCT_TYPES or ret_resolved in VALUE_STRUCT_TYPES:
                 incl = f"{c_type_to_godot_class(ret_resolved)}.h"
@@ -333,13 +346,19 @@ def main() -> None:
             # Include for each parameter
             for p in f.params:
                 from type_map import is_out_param
+
                 base = p.type_name.strip()
-                base = re.sub(r'\s+(const|volatile)\s*$', '', base)  # strip trailing cv
+                base = re.sub(r"\s+(const|volatile)\s*$", "", base)  # strip trailing cv
                 base = base.rstrip("* \t")
-                base_clean = re.sub(r'^(const|volatile)\s+', '', base).strip()
+                base_clean = re.sub(r"^(const|volatile)\s+", "", base).strip()
                 resolved = _resolve_typedef(base_clean)
                 # Include for value struct / handle types
-                if resolved.endswith("_t") and resolved not in ENUM_TYPES and resolved not in UINT64_ID_TYPES and resolved not in CPP_TO_GODOT_TYPE:
+                if (
+                    resolved.endswith("_t")
+                    and resolved not in ENUM_TYPES
+                    and resolved not in UINT64_ID_TYPES
+                    and resolved not in CPP_TO_GODOT_TYPE
+                ):
                     if resolved in HANDLE_TYPES:
                         incl = f"{c_type_to_godot_class(resolved)}Handle.h"
                     elif resolved in VALUE_STRUCT_TYPES or resolved in all_types_map:
@@ -395,8 +414,12 @@ def main() -> None:
             written_count += 1
 
     # 4c. module.h / module.cpp  (entry point only)
-    mhdr = generate_module_h(wrapper_names, value_type_names, handle_class_names, out_prim_names)
-    msrc = generate_module_cpp(n_parts, wrapper_names, value_type_names, handle_class_names, out_prim_names)
+    mhdr = generate_module_h(
+        wrapper_names, value_type_names, handle_class_names, out_prim_names
+    )
+    msrc = generate_module_cpp(
+        n_parts, wrapper_names, value_type_names, handle_class_names, out_prim_names
+    )
     if _write_if_changed(autowrapper_dir / "module.h", mhdr):
         written_count += 1
     if _write_if_changed(autowrapper_dir / "module.cpp", msrc):
@@ -424,7 +447,9 @@ def main() -> None:
 
     # 6. XML docs
     if not args.skip_docs:
-        doc_files = generate_all_docs(parsed_headers, all_value_structs, all_handle_structs, output_dir)
+        doc_files = generate_all_docs(
+            parsed_headers, all_value_structs, all_handle_structs, output_dir
+        )
         # Out-param primitive docs
         for fname, xml in generate_out_prim_doc_xml():
             (output_dir / "doc_classes" / fname).write_text(xml, encoding="utf-8")

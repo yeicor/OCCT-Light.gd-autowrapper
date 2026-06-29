@@ -10,6 +10,11 @@ HANDLE_TYPES: dict[str, str] = {
     "occtl_node_iter_t": "occtl_node_iter_free",
     "occtl_select_iter_t": "occtl_select_iter_free",
     "occtl_select_group_iter_t": "occtl_select_group_iter_free",
+    "occtl_topo_explorer_iter_t": "occtl_topo_explorer_iter_free",
+    "occtl_topo_related_iter_t": "occtl_topo_related_iter_free",
+    "occtl_topo_axis_hit_iter_t": "occtl_topo_axis_hit_iter_free",
+    "occtl_topo_touch_iter_t": "occtl_topo_touch_iter_free",
+    "occtl_topo_intersection_iter_t": "occtl_topo_intersection_iter_free",
 }
 
 # Map handle type → header that declares its free function.
@@ -20,6 +25,11 @@ HANDLE_FREE_HEADERS: dict[str, str] = {
     "occtl_node_iter_t": "occtl/occtl_topo.h",
     "occtl_select_iter_t": "occtl/occtl_topo_build.h",
     "occtl_select_group_iter_t": "occtl/occtl_topo_build.h",
+    "occtl_topo_explorer_iter_t": "occtl/occtl_topo_relation.h",
+    "occtl_topo_related_iter_t": "occtl/occtl_topo_relation.h",
+    "occtl_topo_axis_hit_iter_t": "occtl/occtl_topo_relation.h",
+    "occtl_topo_touch_iter_t": "occtl/occtl_topo_relation.h",
+    "occtl_topo_intersection_iter_t": "occtl/occtl_topo_relation.h",
 }
 
 # ---------------------------------------------------------------
@@ -32,6 +42,11 @@ HANDLE_FREE_FUNCTIONS: dict[str, str] = {
     "occtl_node_iter_t": "occtl_node_iter_free",
     "occtl_select_iter_t": "occtl_select_iter_free",
     "occtl_select_group_iter_t": "occtl_select_group_iter_free",
+    "occtl_topo_explorer_iter_t": "occtl_topo_explorer_iter_free",
+    "occtl_topo_related_iter_t": "occtl_topo_related_iter_free",
+    "occtl_topo_axis_hit_iter_t": "occtl_topo_axis_hit_iter_free",
+    "occtl_topo_touch_iter_t": "occtl_topo_touch_iter_free",
+    "occtl_topo_intersection_iter_t": "occtl_topo_intersection_iter_free",
 }
 
 

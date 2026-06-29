@@ -37,6 +37,17 @@ def generate_all_tests(
         written.append(fname)
         test_paths.append(f"res://tests/{fname}")
 
+    # Clean up orphan test files (no longer generated)
+    expected_tests = {
+        f"test_{_wrapper_class_name(ph.header_include)}" for ph in parsed_headers
+    }
+    expected_tests.add("test_select_iter")
+    for f in tests_dir.iterdir():
+        if f.suffix == ".gd" and f.stem.startswith("test_Occtl"):
+            if f.stem not in expected_tests:
+                f.unlink()
+                print(f"  [cleanup] removed orphan test: {f.name}")
+
     # Include hand-written manual test files if they exist
     manual_tests = ["test_select_iter"]
     for mt in manual_tests:
