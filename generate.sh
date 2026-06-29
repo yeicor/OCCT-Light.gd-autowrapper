@@ -23,7 +23,7 @@ echo ""
 if ! command -v uv &>/dev/null; then
     echo "Installing uv package manager..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    export PATH="$HOME/.cargo/bin:$PATH"
+    export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 fi
 
 exec uv run src/main.py "${HEADERS_DIR}" -o "${OUTPUT_DIR}" "$@"
