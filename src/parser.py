@@ -664,6 +664,12 @@ class HeaderParser:
                     guard_expression=guard_e,
                 ), None
 
+        # If the text contains OCCTL_API but didn't match the function regex, raise
+        if "OCCTL_API" in text:
+            raise RuntimeError(
+                f"Unrecognized function declaration at line {node.start_point.row + 1}: {text[:120]}..."
+            )
+
         return None, None
 
     def _parse_guarded_block(
