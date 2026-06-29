@@ -2,13 +2,14 @@
 
 import re
 
-
 # ---------------------------------------------------------------
 # Known opaque handle types → their free function
 # ---------------------------------------------------------------
 HANDLE_TYPES: dict[str, str] = {
     "occtl_graph_t": "occtl_graph_free",
     "occtl_node_iter_t": "occtl_node_iter_free",
+    "occtl_select_iter_t": "occtl_select_iter_free",
+    "occtl_select_group_iter_t": "occtl_select_group_iter_free",
 }
 
 # Map handle type → header that declares its free function.
@@ -17,7 +18,47 @@ HANDLE_TYPES: dict[str, str] = {
 HANDLE_FREE_HEADERS: dict[str, str] = {
     "occtl_graph_t": "occtl/occtl_topo.h",
     "occtl_node_iter_t": "occtl/occtl_topo.h",
+    "occtl_select_iter_t": "occtl/occtl_topo_build.h",
+    "occtl_select_group_iter_t": "occtl/occtl_topo_build.h",
 }
+
+# ---------------------------------------------------------------
+# Registry of known free functions for all opaque handle types.
+# When a new opaque _t type is encountered, it's added to this
+# map with a generic free function if none is known.
+# ---------------------------------------------------------------
+HANDLE_FREE_FUNCTIONS: dict[str, str] = {
+    "occtl_graph_t": "occtl_graph_free",
+    "occtl_node_iter_t": "occtl_node_iter_free",
+    "occtl_select_iter_t": "occtl_select_iter_free",
+    "occtl_select_group_iter_t": "occtl_select_group_iter_free",
+}
+
+
+# ---------------------------------------------------------------
+# AUTOMATIC HANDLE DETECTION
+# Types ending in _t that are NOT in VALUE_STRUCT_TYPES,
+# UINT64_ID_TYPES, ENUM_TYPES, or CPP_TO_GODOT_TYPE
+# can be treated as opaque handles if they follow the
+# occtl_*_t naming convention for opaque pointers.
+# ---------------------------------------------------------------
+def is_auto_handle_type(c_type: str) -> bool:
+    """Check if a C type looks like an opaque handle type."""
+    base = c_type.strip()
+    if not base.endswith("_t"):
+        return False
+    if base in HANDLE_TYPES or base in UINT64_ID_TYPES or base in CPP_TO_GODOT_TYPE:
+        return False
+    if base in VALUE_STRUCT_TYPES:
+        return False
+    if base in ENUM_TYPES:
+        return False
+    if base in CALLBACK_TYPES:
+        return False
+    # Must match occtl_*_t pattern
+    if not base.startswith("occtl_"):
+        return False
+    return True
 
 
 # ---------------------------------------------------------------
@@ -102,7 +143,6 @@ VALUE_STRUCT_TYPES: set[str] = {
     "occtl_solid_view_t",
     "occtl_compound_view_t",
     "occtl_metadata_key_view_t",
-
     "occtl_geom_circle_t",
     "occtl_geom_ellipse_t",
     "occtl_geom_hyperbola_t",
@@ -138,10 +178,34 @@ CALLBACK_TYPES: set[str] = {
     "occtl_node_visitor_t",
     "occtl_ref_visitor_t",
     "occtl_rep_visitor_t",
+    "occtl_metadata_visitor_t",
 }
+
 
 def is_callback_type(c_type: str) -> bool:
     return c_type.strip() in CALLBACK_TYPES
+
+
+# ---------------------------------------------------------------
+# Size parameter name patterns — these params should be hidden
+# from GDScript when they follow an array pointer.
+# ---------------------------------------------------------------
+SIZE_PARAM_NAMES: set[str] = {
+    "count",
+    "size",
+    "len",
+    "length",
+    "num",
+    "capacity",
+    "cap",
+    "n",
+}
+
+
+def is_size_param(name: str) -> bool:
+    """Check if a parameter name suggests it's a size/count parameter."""
+    return name.strip().lower() in SIZE_PARAM_NAMES
+
 
 # ---------------------------------------------------------------
 # Enum types → treat as int in Godot (not Ref<T> wrappers).
@@ -253,9 +317,9 @@ def c_type_to_godot_class(c_type: str) -> str:
     """Convert occtl_point3_t → OcctlPoint3, occtl_transform_t → OcctlTransform, etc."""
     name = c_type.strip()
     name = _resolve_typedef(name)
-    name = re.sub(r'^(const|volatile)\s+', '', name)
-    name = re.sub(r'_t\s*\**$', '', name)
-    parts = re.split(r'[_\s]+', name)
+    name = re.sub(r"^(const|volatile)\s+", "", name)
+    name = re.sub(r"_t\s*\**$", "", name)
+    parts = re.split(r"[_\s]+", name)
     return "".join(p.capitalize() for p in parts)
 
 
@@ -297,21 +361,27 @@ def is_value_struct_type(c_type: str) -> bool:
     # so that the generated code calls ->to_c() on it.
     if base.endswith("_t"):
         return True
+    # Unknown types that look like struct pointers
     return False
 
 
 def _is_known_type(base: str) -> bool:
     """Check if a C type name is known to the type system."""
     base = _resolve_typedef(base)
-    return (base in HANDLE_TYPES or base in VALUE_STRUCT_TYPES or
-            base in UINT64_ID_TYPES or base in ENUM_TYPES or
-            base in CPP_TO_GODOT_TYPE or
-            base.endswith(">"))  # template types
+    return (
+        base in HANDLE_TYPES
+        or base in VALUE_STRUCT_TYPES
+        or base in UINT64_ID_TYPES
+        or base in ENUM_TYPES
+        or base in CPP_TO_GODOT_TYPE
+        or is_auto_handle_type(base)
+        or base.endswith(">")
+    )  # template types
 
 
 def is_opaque_ptr_t_type(c_type: str) -> bool:
     """Check if a C type is an opaque _t pointer type (no struct definition).
-    
+
     These types end with _t but are NOT in VALUE_STRUCT_TYPES (they have
     no generated wrapper class). They should be passed as int64_t in Godot
     and reinterpret_cast back to their C pointer type.
@@ -337,14 +407,14 @@ def godot_param_type(c_type: str) -> str:
     """Map a C parameter type to the Godot wrapper type."""
     base = c_type.strip()
     # Strip trailing cv-qualifiers on pointers (e.g. "const T* const" -> "const T*")
-    base = re.sub(r'\s+(const|volatile)\s*$', '', base)
+    base = re.sub(r"\s+(const|volatile)\s*$", "", base)
 
     # Handle pointers
-    ptr_match = re.match(r'^(\w[\w\s]*)\s*\*+$', base)
+    ptr_match = re.match(r"^(\w[\w\s]*)\s*\*+$", base)
     if ptr_match:
         inner = ptr_match.group(1).strip()
         # Strip leading 'const'/'volatile' qualifiers for type lookup
-        inner_clean = re.sub(r'^(const|volatile)\s+', '', inner).strip()
+        inner_clean = re.sub(r"^(const|volatile)\s+", "", inner).strip()
         typed = _resolve_typedef(inner_clean)
         if typed in HANDLE_TYPES:
             return f"Ref<{c_type_to_godot_class(typed)}Handle>"
@@ -362,6 +432,23 @@ def godot_param_type(c_type: str) -> str:
             return "String"
         if typed in ("uint8_t",) or inner in ("uint8_t",):
             return "PackedByteArray"
+        if typed in ("double",) or inner in ("double",):
+            return "PackedFloat64Array"
+        if typed in ("float",) or inner in ("float",):
+            return "PackedFloat32Array"
+        if typed in ("int32_t", "uint32_t", "int") or inner in (
+            "int32_t",
+            "uint32_t",
+            "int",
+        ):
+            return "PackedInt32Array"
+        if typed in ("int64_t", "uint64_t") or inner in ("int64_t", "uint64_t"):
+            return "PackedInt64Array"
+        if typed == "occtl_point3_t" or inner == "occtl_point3_t":
+            # For simplicity, we use Array of OcctlPoint3 for structured arrays
+            return "Array"
+        if typed == "occtl_point2_t" or inner == "occtl_point2_t":
+            return "Array"
         if typed in CPP_TO_GODOT_TYPE:
             return CPP_TO_GODOT_TYPE[typed]
         # Unknown pointer type — error
@@ -381,6 +468,8 @@ def godot_param_type(c_type: str) -> str:
         return f"Ref<{c_type_to_godot_class(typed)}>"
     if typed in ENUM_TYPES:
         return "int"
+    if is_auto_handle_type(typed):
+        return f"Ref<{c_type_to_godot_class(typed)}Handle>"
 
     raise ValueError(f"Unknown C type: {base}")
 
@@ -395,7 +484,7 @@ def param_in_type(c_type: str) -> str | None:
     base = c_type.strip()
     if base == "void*":
         return None
-    ptr_match = re.match(r'^(\w[\w\s]*)\s*\*+$', base)
+    ptr_match = re.match(r"^(\w[\w\s]*)\s*\*+$", base)
     if ptr_match:
         inner = ptr_match.group(1).strip()
         typed = _resolve_typedef(inner)
@@ -418,7 +507,7 @@ def is_out_param(c_type: str, name: str, parent_return_type: str) -> bool:
     when the function's return type is occtl_status_t or void."""
     base = c_type.strip()
     # Strip trailing cv-qualifiers (e.g. "T* const" -> "T*")
-    base_stripped = re.sub(r'\s+(const|volatile)\s*$', '', base)
+    base_stripped = re.sub(r"\s+(const|volatile)\s*$", "", base)
     # const T** is an out-param (writes a borrowed pointer, data is const)
     if base_stripped.endswith("**") and base.startswith("const "):
         return True
@@ -430,7 +519,7 @@ def is_out_param(c_type: str, name: str, parent_return_type: str) -> bool:
         return False
     if base_stripped.endswith("**"):
         return True
-    ptr_match = re.match(r'^(\w[\w\s]*)\s*\*+$', base_stripped)
+    ptr_match = re.match(r"^(\w[\w\s]*)\s*\*+$", base_stripped)
     if ptr_match:
         inner = ptr_match.group(1).strip()
         if inner in ("void", "char"):
@@ -444,8 +533,14 @@ def is_out_param(c_type: str, name: str, parent_return_type: str) -> bool:
             if inner in CPP_TO_GODOT_TYPE or inner in ENUM_TYPES:
                 # Standard _t types (uint8_t, int32_t, enum _t types) — continue to normal checks
                 pass
-            elif _resolve_typedef(inner) in VALUE_STRUCT_TYPES or inner in UINT64_ID_TYPES:
+            elif (
+                _resolve_typedef(inner) in VALUE_STRUCT_TYPES
+                or inner in UINT64_ID_TYPES
+            ):
                 return True
+            elif is_auto_handle_type(inner):
+                # Auto-detected opaque _t types are like handles
+                return False
             else:
                 # Opaque _t types (not in VALUE_STRUCT_TYPES) are like handles
                 return False

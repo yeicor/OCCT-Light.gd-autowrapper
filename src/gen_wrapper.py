@@ -29,6 +29,7 @@ from type_map import (
     c_type_to_godot_class,
     godot_param_type,
     godot_return_type,
+    is_auto_handle_type,
     is_callback_type,
     is_opaque_ptr_t_type,
     is_out_param,
@@ -109,6 +110,7 @@ BRIDGE_FUNCTION_NAMES: dict[str, str] = {
     "occtl_node_visitor_t": "_occtl_node_visitor_bridge",
     "occtl_ref_visitor_t": "_occtl_ref_visitor_bridge",
     "occtl_rep_visitor_t": "_occtl_rep_visitor_bridge",
+    "occtl_metadata_visitor_t": "_occtl_metadata_visitor_bridge",
 }
 
 CALLBACK_BRIDGE_SOURCE: dict[str, str] = {
@@ -130,6 +132,13 @@ OCCTL_CALL occtl_status_t _occtl_ref_visitor_bridge(occtl_ref_id_t ref, void* us
 OCCTL_CALL occtl_status_t _occtl_rep_visitor_bridge(occtl_rep_id_t rep, void* user_data) {
     auto* ctx = static_cast<_CallbackContext*>(user_data);
     Variant _result = ctx->callable.call(static_cast<int64_t>(rep.bits));
+    return static_cast<occtl_status_t>(static_cast<int64_t>(_result));
+}
+""",
+    "occtl_metadata_visitor_t": """
+OCCTL_CALL occtl_status_t _occtl_metadata_visitor_bridge(const char* key, void* user_data) {
+    auto* ctx = static_cast<_CallbackContext*>(user_data);
+    Variant _result = ctx->callable.call(String(key));
     return static_cast<occtl_status_t>(static_cast<int64_t>(_result));
 }
 """,
@@ -174,6 +183,8 @@ TWO_CALL_PACKED_RETURN: dict[str, str] = {
     "occtl_uid_t": "PackedInt64Array",
     "occtl_ref_uid_t": "PackedInt64Array",
     "occtl_ref_id_t": "PackedInt64Array",
+    "occtl_rep_uid_t": "PackedInt64Array",
+    "occtl_rep_id_t": "PackedInt64Array",
     "occtl_joint_id_t": "PackedInt64Array",
     "int64_t": "PackedInt64Array",
     "double": "PackedFloat64Array",
@@ -502,7 +513,12 @@ def _in_param_decl(p: CParameter) -> str | None:
         base_raw = _c_type_strip_ptr(t_stripped).strip()
         base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
         if is_value_struct_type(base):
-            return f"    {base_raw} _{p.name}_c = {p.name}->to_c();"
+            base_no_const = (
+                base_raw.replace("const ", "", 1)
+                if base_raw.startswith("const ")
+                else base_raw
+            )
+            return f"    {base_no_const} _{p.name}_c = {{}};\n    const {base_no_const}* _{p.name}_ptr = nullptr;\n    if ({p.name}.is_valid()) {{ _{p.name}_c = {p.name}->to_c(); _{p.name}_ptr = &_{p.name}_c; }}"
         if base in UINT64_ID_TYPES:
             return f"    {base} _{p.name}_c = {{static_cast<uint64_t>({p.name})}};"
         if base in HANDLE_TYPES:
@@ -520,7 +536,7 @@ def _in_param_call_arg(p: CParameter) -> str:
         base_raw = _c_type_strip_ptr(t).strip()
         base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
         if is_value_struct_type(base):
-            return f"&_{name}_c"
+            return f"_{name}_ptr"
         if base in UINT64_ID_TYPES:
             return f"&_{name}_c"
         if base in HANDLE_TYPES:
@@ -595,6 +611,83 @@ def _func_return_type_mapped(f: CFunction) -> str:
 
 
 # ---------------------------------------------------------------
+# String + Size pairing — detect const char* + size_t pairs
+# that should be collapsed into a single String parameter.
+# ---------------------------------------------------------------
+
+# Suffixes for size params that follow a string parameter
+_STRING_SIZE_SUFFIXES = {"len", "length", "size", "count"}
+
+
+def _is_string_len_pair(f: CFunction, string_idx: int, size_idx: int) -> bool:
+    """Check if params[string_idx] (const char*) and params[size_idx] (size_t)
+    form a string+length pair that should be collapsed."""
+    p_str = f.params[string_idx]
+    p_sz = f.params[size_idx]
+    t_str = p_str.type_name.strip()
+    t_sz = p_sz.type_name.strip()
+    # The string param must be const char* (NOT mutable char* which is an output buffer)
+    if not t_str.startswith("const "):
+        return False
+    base_str = _c_type_strip_ptr(t_str).strip()
+    if re.sub(r"^(const|volatile)\s+", "", base_str).strip() != "char":
+        return False
+    if not t_str.endswith("*") or t_str.endswith("**"):
+        return False
+    # The size param must be size_t (non-pointer scalar)
+    if t_sz != "size_t":
+        return False
+    # The size param should not be an out-param
+    if is_out_param(t_sz, p_sz.name, f.return_type.strip()):
+        return False
+    # Further guard: make sure the size param name suggests it's related to the string
+    sname = p_str.name.lower()
+    szname = p_sz.name.lower()
+    # Size param name should be the string name + a suffix like Len, Size, Count
+    if szname.startswith(sname) and szname != sname:
+        suffix = szname[len(sname) :]
+        if suffix.lower() in _STRING_SIZE_SUFFIXES:
+            return True
+    # Alternative pattern: szname is exactly sname + one of the recognized suffixes
+    for suf in _STRING_SIZE_SUFFIXES:
+        if szname == sname + suf:
+            return True
+    return False
+
+
+def _find_string_len_pairs(f: CFunction) -> list[tuple[int, int]]:
+    """Find all (string_idx, size_idx) pairs in the function params."""
+    pairs = []
+    params = f.params
+    i = 0
+    while i < len(params) - 1:
+        p = params[i]
+        t = p.type_name.strip()
+        base = _c_type_strip_ptr(t).strip()
+        inner = re.sub(r"^(const|volatile)\s+", "", base).strip()
+        if inner == "char" and t.endswith("*") and not t.endswith("**"):
+            # Check if the following param is a size_t that pairs with this string
+            for j in range(i + 1, min(i + 3, len(params))):
+                if _is_string_len_pair(f, i, j):
+                    pairs.append((i, j))
+                    i = j + 1
+                    break
+            else:
+                i += 1
+        else:
+            i += 1
+    return pairs
+
+
+def _is_in_string_len_pair(f: CFunction, p_idx: int) -> bool:
+    """Check if param at p_idx is part of a string+length pair."""
+    for str_idx, size_idx in _find_string_len_pairs(f):
+        if p_idx == str_idx or p_idx == size_idx:
+            return True
+    return False
+
+
+# ---------------------------------------------------------------
 # Method declarations — only handle** and const occtl_error_t**
 # are stripped from method args; all other out-params stay as Ref<T> params.
 # ---------------------------------------------------------------
@@ -637,13 +730,50 @@ def _is_buffer_triplet_param(f: CFunction, p: CParameter) -> bool:
     return False
 
 
+def _get_string_len_indices(string_len_pairs: list) -> set:
+    """Return set of all indices that are part of string+size pairs."""
+    indices = set()
+    for str_idx, size_idx in string_len_pairs:
+        indices.add(str_idx)
+        indices.add(size_idx)
+    return indices
+
+
+def _build_kept_params(
+    f: CFunction, ret: str, string_len_pairs: list, string_len_indices: set
+) -> list:
+    """Build the list of params to keep, preserving original order.
+
+    Strips out-params (handle**), buffer triplet params, and size params
+    from string+size pairs, while keeping string params at their original positions.
+    """
+    kept = []
+    for i, p in enumerate(f.params):
+        if _is_stripped_out_param(p, ret):
+            continue
+        if _is_buffer_triplet_param(f, p):
+            continue
+        if i in string_len_indices:
+            # Check if this is the SIZE part of a string+size pair
+            is_size = False
+            for str_idx, size_idx in string_len_pairs:
+                if i == size_idx:
+                    is_size = True
+                    break
+            if is_size:
+                continue  # skip size params entirely
+            # String param - keep at original position
+            kept.append(p)
+            continue
+        kept.append(p)
+    return kept
+
+
 def _method_args_decl(f: CFunction) -> str:
     ret = f.return_type.strip()
-    kept_params = [
-        p
-        for p in f.params
-        if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)
-    ]
+    string_len_pairs = _find_string_len_pairs(f)
+    string_len_indices = _get_string_len_indices(string_len_pairs)
+    kept_params = _build_kept_params(f, ret, string_len_pairs, string_len_indices)
     callback_pairs = _find_callback_userdata_pairs(f.params)
     # Build set of param indices to exclude (user_data part of callback pairs)
     exclude_indices = {ud_idx for _, ud_idx in callback_pairs}
@@ -699,11 +829,9 @@ def _method_args_decl(f: CFunction) -> str:
 
 def _method_arg_names(f: CFunction) -> str:
     ret = f.return_type.strip()
-    kept_params = [
-        p
-        for p in f.params
-        if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)
-    ]
+    string_len_pairs = _find_string_len_pairs(f)
+    string_len_indices = _get_string_len_indices(string_len_pairs)
+    kept_params = _build_kept_params(f, ret, string_len_pairs, string_len_indices)
     callback_pairs = _find_callback_userdata_pairs(f.params)
     exclude_indices = {ud_idx for _, ud_idx in callback_pairs}
     names = []
@@ -723,17 +851,63 @@ def _method_arg_names(f: CFunction) -> str:
 
 
 def _method_defvals(f: CFunction) -> str:
-    """Return DEFVAL(...) string for trailing nullable params."""
+    """Return DEFVAL(...) string for trailing nullable params
+    and parameters with C default values.
+
+    Any const value-struct pointer param is automatically nullable."""
     ret = f.return_type.strip()
-    kept = [p for p in f.params if not _is_stripped_out_param(p, ret)]
+    string_len_pairs = _find_string_len_pairs(f)
+    string_len_indices = _get_string_len_indices(string_len_pairs)
+    kept = _build_kept_params(f, ret, string_len_pairs, string_len_indices)
     nullable = set(DEFAULT_NULLABLE_PARAMS.get(f.name, set()))
     defvals = []
     for p in kept:
+        # Auto-detect nullable const value-struct pointer params
+        t = p.type_name.strip()
+        if t.startswith("const ") and t.endswith("*") and not t.endswith("**"):
+            base_raw = _c_type_strip_ptr(t).strip()
+            base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
+            if is_value_struct_type(base) or p.name in nullable:
+                defvals.append("DEFVAL(Variant())")
+                continue
         if p.name in nullable:
             defvals.append("DEFVAL(Variant())")
+        elif p.default_value:
+            gd_val = _c_default_to_godot(p.default_value)
+            defvals.append(f"DEFVAL({gd_val})")
     if not defvals:
         return ""
     return ", " + ", ".join(defvals)
+
+
+def _c_default_to_godot(c_val: str) -> str:
+    """Convert a C default value expression to a Godot-compatible
+    DEFVAL expression."""
+    v = c_val.strip()
+    # Remove C-style casts
+    v = re.sub(r"\(\w+\s*\**\)", "", v).strip()
+    # NULL / nullptr → Variant()
+    if v.lower() in ("null", "nullptr", "0"):
+        return "Variant()"
+    # true/false → Godot bool literal
+    if v.lower() in ("true", "false"):
+        return v.lower()
+    # String literals
+    if v.startswith('"') and v.endswith('"'):
+        return v
+    # Constants (will evaluate at compile time in C++)
+    if v.isupper() and "_" in v:
+        return v
+    # Numeric values — strip C suffixes (u, l, f, etc.)
+    v_clean = v.rstrip("uUlLfF ")
+    try:
+        # Try parsing as number
+        float(v_clean)
+        return v_clean
+    except ValueError:
+        pass
+    # Fall back to the raw value
+    return v
 
 
 def _wrapper_class_name(header_include: str) -> str:
@@ -859,8 +1033,21 @@ def _generate_body(
         call_args_null = []
         call_args_buf = []
         string_convs = []  # deferred CharString declarations
+        string_len_pairs = _find_string_len_pairs(f)
         for j, p in enumerate(f.params):
             name = p.name if p.name else ""
+            # Check if this param is the SIZE part of a string+size pair
+            is_size_in_string_pair = False
+            for str_idx, size_idx in string_len_pairs:
+                if j == size_idx:
+                    str_name = f.params[str_idx].name
+                    size_arg = f"static_cast<size_t>({str_name}.utf8().length())"
+                    call_args_null.append(size_arg)
+                    call_args_buf.append(size_arg)
+                    is_size_in_string_pair = True
+                    break
+            if is_size_in_string_pair:
+                continue
             if j in buffer_indices:
                 # Buffer param: nullptr in first call, data() in second
                 call_args_null.append("nullptr")
@@ -898,28 +1085,20 @@ def _generate_body(
                     base_r = _c_type_strip_ptr(t_stripped).strip()
                     b = re.sub(r"^(const|volatile)\s+", "", base_r).strip()
                     if is_value_struct_type(b):
-                        if (
-                            f.name in DEFAULT_NULLABLE_PARAMS
-                            and p.name in DEFAULT_NULLABLE_PARAMS[f.name]
-                        ):
-                            base_no_const = (
-                                base_r.replace("const ", "", 1)
-                                if base_r.startswith("const ")
-                                else base_r
-                            )
-                            lines.append(f"    {base_no_const} _{name}_c = {{}};")
-                            lines.append(
-                                f"    const {base_no_const}* _{name}_ptr = nullptr;"
-                            )
-                            lines.append(
-                                f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
-                            )
-                            call_args_null.append(f"_{name}_ptr")
-                            call_args_buf.append(f"_{name}_ptr")
-                        else:
-                            lines.append(f"    {base_r} _{name}_c = {name}->to_c();")
-                            call_args_null.append(f"&_{name}_c")
-                            call_args_buf.append(f"&_{name}_c")
+                        base_no_const = (
+                            base_r.replace("const ", "", 1)
+                            if base_r.startswith("const ")
+                            else base_r
+                        )
+                        lines.append(f"    {base_no_const} _{name}_c = {{}};")
+                        lines.append(
+                            f"    const {base_no_const}* _{name}_ptr = nullptr;"
+                        )
+                        lines.append(
+                            f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
+                        )
+                        call_args_null.append(f"_{name}_ptr")
+                        call_args_buf.append(f"_{name}_ptr")
                     elif b in HANDLE_TYPES:
                         arg = f"reinterpret_cast<const {b}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
                         call_args_null.append(arg)
@@ -1178,6 +1357,19 @@ def _generate_body(
         if cb_handled:
             continue
 
+        # Check if this param is the SIZE part of a string+size pair
+        string_len_pairs = _find_string_len_pairs(f)
+        is_size_in_string_pair = False
+        for str_idx, size_idx in string_len_pairs:
+            if p is f.params[size_idx]:
+                # Replace the size argument with the string's actual length
+                str_name = f.params[str_idx].name
+                call_args.append(f"static_cast<size_t>({str_name}.utf8().length())")
+                is_size_in_string_pair = True
+                break
+        if is_size_in_string_pair:
+            continue
+
         if is_out_param(t, p.name, ret):
             base = _c_type_strip_ptr(t).strip()
             if t.endswith("**"):
@@ -1235,7 +1427,30 @@ def _generate_body(
                     | ENUM_TYPES
                     | set(OUT_PARAM_PRIM_TYPES.keys())
                 ):
-                    lines.append(f"    {resolved} {local} = {{}};")
+                    # Initialize versioned structs with their init function
+                    # so struct_version is set correctly.
+                    # Only call init if the function exists in the parsed
+                    # header (check by constructing the expected name).
+                    # Initialize versioned structs with their init function
+                    # so struct_version is set correctly.
+                    # Only call init if the function exists in the parsed
+                    # header (check by constructing the expected name).
+                    _needs_init = (
+                        resolved.startswith("occtl_")
+                        and resolved.endswith("_t")
+                        and resolved in VALUE_STRUCT_TYPES
+                        and parsed is not None
+                        and any(
+                            fn.name == f"occtl_{resolved[6:-2]}_init"
+                            for fn in parsed.functions
+                        )
+                    )
+                    if _needs_init:
+                        _fn = f"occtl_{resolved[6:-2]}_init"
+                        lines.append(f"    {resolved} {local} = {{}};")
+                        lines.append(f"    ::{_fn}(&{local});")
+                    else:
+                        lines.append(f"    {resolved} {local} = {{}};")
                     call_args.append(f"&{local}")
                 else:
                     lines.append(f"    {base} {local} = {{}};")
@@ -1254,26 +1469,17 @@ def _generate_body(
                     lines.append(f"    const uint8_t* _{name}_c = {name}.ptr();")
                     call_args.append(f"_{name}_c")
                 elif is_value_struct_type(base):
-                    if (
-                        f.name in DEFAULT_NULLABLE_PARAMS
-                        and p.name in DEFAULT_NULLABLE_PARAMS[f.name]
-                    ):
-                        base_no_const = (
-                            base_raw.replace("const ", "", 1)
-                            if base_raw.startswith("const ")
-                            else base_raw
-                        )
-                        lines.append(f"    {base_no_const} _{name}_c = {{}};")
-                        lines.append(
-                            f"    const {base_no_const}* _{name}_ptr = nullptr;"
-                        )
-                        lines.append(
-                            f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
-                        )
-                        call_args.append(f"_{name}_ptr")
-                    else:
-                        lines.append(f"    {base_raw} _{name}_c = {name}->to_c();")
-                        call_args.append(f"&_{name}_c")
+                    base_no_const = (
+                        base_raw.replace("const ", "", 1)
+                        if base_raw.startswith("const ")
+                        else base_raw
+                    )
+                    lines.append(f"    {base_no_const} _{name}_c = {{}};")
+                    lines.append(f"    const {base_no_const}* _{name}_ptr = nullptr;")
+                    lines.append(
+                        f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
+                    )
+                    call_args.append(f"_{name}_ptr")
                 elif base in HANDLE_TYPES:
                     call_args.append(
                         f"reinterpret_cast<const {base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
@@ -1317,9 +1523,17 @@ def _generate_body(
                 if t_clean.endswith("*"):
                     base = _c_type_strip_ptr(t_clean).strip()
                     if base in HANDLE_TYPES:
-                        call_args.append(
-                            f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
-                        )
+                        # For _free functions, use release() to prevent double-free
+                        # in the handle's destructor.
+                        _is_free_fn = f.name.endswith("_free")
+                        if _is_free_fn:
+                            call_args.append(
+                                f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->release() : 0))"
+                            )
+                        else:
+                            call_args.append(
+                                f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
+                            )
                     elif base == "char":
                         lines.append(
                             f"    godot::CharString _{name}_cs = {name}.utf8();"
@@ -1882,7 +2096,7 @@ def _describe_param(p: CParameter, ret: str) -> str:
         inner = t[len("const ") : -1].strip()
         if is_value_struct_type(inner):
             cls = c_type_to_godot_class(inner)
-            base_desc = f"A [{cls}]."
+            base_desc = f"An optional [{cls}]. Pass null to use defaults."
         elif inner in UINT64_ID_TYPES:
             base_desc = f"A {_C_TYPE_DOC_DESC.get(inner, inner)}."
         elif inner in HANDLE_TYPES:
@@ -1960,11 +2174,20 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         if ret_mapped != "void":
             methods.append(f'\t\t\t<return type="{ret_mapped}" />')
         ret = f.return_type.strip()
-        kept_params = [
-            p
-            for p in f.params
-            if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)
-        ]
+        # Filter out string-length-pair size params and buffer triplet params
+        kept_params = []
+        for i, p in enumerate(f.params):
+            if _is_stripped_out_param(p, ret) or _is_buffer_triplet_param(f, p):
+                continue
+            if _is_in_string_len_pair(f, i):
+                # Keep the string param but skip the size param
+                for str_idx, size_idx in _find_string_len_pairs(f):
+                    if i == size_idx:
+                        break  # skip size param
+                else:
+                    kept_params.append(p)
+            else:
+                kept_params.append(p)
         for i, p in enumerate(kept_params):
             gt = _c_type_to_godot_doc_type(p.type_name.strip())
             methods.append(
@@ -2046,5 +2269,50 @@ def generate_gdscript_tests(
             lines.append('    if v < 0: return "Failed: enum value negative"')
             lines.append('    return ""')
             lines.append("")
+
+    # Tests for functions with string+length pair auto-collapse
+    method_names = _function_method_names(parsed.functions)
+    for f in parsed.functions:
+        pairs = _find_string_len_pairs(f)
+        if not pairs:
+            continue
+        mname = method_names[f.name]
+        lines.append(f"static func test_{mname}_string_pair() -> String:")
+        # Build arg list: use empty string for string params, defaults for others
+        ret = f.return_type.strip()
+        string_len_indices = _get_string_len_indices(pairs)
+        kept = _build_kept_params(f, ret, pairs, string_len_indices)
+        args = []
+        for p in kept:
+            t = p.type_name.strip()
+            if _is_in_string_len_pair(f, f.params.index(p)):
+                args.append('"test"')
+            elif t == "bool":
+                args.append("false")
+            elif t in ("double", "float"):
+                args.append("0.0")
+            elif t.endswith("*") and not t.endswith("**"):
+                # Pointer types (handles, out-params, buffers) become Ref<T>
+                # or arrays in GDScript, where null is a valid default.
+                args.append("null")
+            else:
+                # Non-pointer: check if this is a value struct/handle type (Ref<T>)
+                base = re.sub(r"\s+(const|volatile)\s*$", "", t)
+                base = re.sub(r"^(const|volatile)\s+", "", base).strip()
+                typed = _resolve_typedef(base)
+                if (
+                    typed in HANDLE_TYPES
+                    or is_auto_handle_type(typed)
+                    or is_value_struct_type(typed)
+                ):
+                    args.append("null")
+                else:
+                    # Non-pointer primitive (int, occtl_node_id_t, enum, etc.)
+                    args.append("0")
+        # Create a local instance since test methods are static (cannot access _w)
+        lines.append(f"    var _w = {cls}.new()")
+        lines.append(f"    _w.{mname}({', '.join(args)})")
+        lines.append('    return ""')
+        lines.append("")
 
     return "\n".join(lines)

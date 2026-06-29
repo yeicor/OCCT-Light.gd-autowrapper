@@ -11,10 +11,10 @@ from pathlib import Path
 from tree_sitter import Language, Node, Parser
 from tree_sitter_cpp import language as cpp_language
 
-
 # ---------------------------------------------------------------
 # Data model
 # ---------------------------------------------------------------
+
 
 @dataclass
 class CField:
@@ -29,7 +29,7 @@ class CDeclaration:
     header_path: Path
     header_include: str
     doc_comment: str = ""
-    guard_directive: str = ""   # e.g. "#ifdef", "#ifndef"
+    guard_directive: str = ""  # e.g. "#ifdef", "#ifndef"
     guard_expression: str = ""
 
 
@@ -46,7 +46,7 @@ class CEnumValue:
 
 @dataclass
 class CEnum(CDeclaration):
-    enum_name: str = ""      # full typedef name e.g. occtl_status_t
+    enum_name: str = ""  # full typedef name e.g. occtl_status_t
     values: list[CEnumValue] = field(default_factory=list)
 
 
@@ -54,7 +54,7 @@ class CEnum(CDeclaration):
 class CStruct(CDeclaration):
     is_opaque: bool = False
     fields: list[CField] = field(default_factory=list)
-    type_name: str = ""       # the typedef name e.g. occtl_point3_t
+    type_name: str = ""  # the typedef name e.g. occtl_point3_t
 
 
 @dataclass
@@ -62,6 +62,7 @@ class CParameter:
     type_name: str
     name: str
     is_out: bool = False
+    default_value: str = ""
 
 
 @dataclass
@@ -90,7 +91,7 @@ _FUNC_MACRO = "OCCTL_API"  # we look for function_declarator in declarations wit
 
 
 def _node_text(node: Node, source: bytes) -> str:
-    return source[node.start_byte:node.end_byte].decode("utf-8", "ignore").strip()
+    return source[node.start_byte : node.end_byte].decode("utf-8", "ignore").strip()
 
 
 def _extract_comment(node: Node, source: bytes) -> str:
@@ -177,24 +178,32 @@ class HeaderParser:
                     i += 1
                     continue
                 elif node.type == "preproc_def":
-                    const = self._parse_define(node, source, header_path, header_include)
+                    const = self._parse_define(
+                        node, source, header_path, header_include
+                    )
                     if const:
                         result.constants.append(const)
                 elif node.type == "type_definition":
-                    parsed = self._parse_typedef(node, source, header_path, header_include)
+                    parsed = self._parse_typedef(
+                        node, source, header_path, header_include
+                    )
                     for s in parsed.structs:
                         result.structs.append(s)
                     for e in parsed.enums:
                         result.enums.append(e)
                 elif node.type == "declaration":
-                    func, struct = self._parse_declaration(node, source, header_path, header_include)
+                    func, struct = self._parse_declaration(
+                        node, source, header_path, header_include
+                    )
                     if func:
                         result.functions.append(func)
                     if struct:
                         result.structs.append(struct)
                 elif node.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
                     # Recurse into guard blocks
-                    sub_items = self._parse_guarded_block(node, source, header_path, header_include)
+                    sub_items = self._parse_guarded_block(
+                        node, source, header_path, header_include
+                    )
                     result.constants.extend(sub_items.constants)
                     result.enums.extend(sub_items.enums)
                     result.structs.extend(sub_items.structs)
@@ -203,7 +212,9 @@ class HeaderParser:
                     # extern "C" block – recurse into declaration list
                     for child in node.named_children:
                         if child.type == "declaration_list":
-                            sub = self._parse_as_root(child, source, header_path, header_include)
+                            sub = self._parse_as_root(
+                                child, source, header_path, header_include
+                            )
                             result.constants.extend(sub.constants)
                             result.enums.extend(sub.enums)
                             result.structs.extend(sub.structs)
@@ -214,21 +225,29 @@ class HeaderParser:
 
         return result
 
-    def _parse_as_root(self, node: Node, source: bytes, header_path: Path, header_include: str) -> ParsedHeader:
+    def _parse_as_root(
+        self, node: Node, source: bytes, header_path: Path, header_include: str
+    ) -> ParsedHeader:
         """Parse a subtree as if it were a root node."""
         result = ParsedHeader(header_path=header_path, header_include=header_include)
         for child in node.named_children:
             try:
                 if child.type == "preproc_def":
-                    const = self._parse_define(child, source, header_path, header_include)
+                    const = self._parse_define(
+                        child, source, header_path, header_include
+                    )
                     if const:
                         result.constants.append(const)
                 elif child.type == "type_definition":
-                    parsed = self._parse_typedef(child, source, header_path, header_include)
+                    parsed = self._parse_typedef(
+                        child, source, header_path, header_include
+                    )
                     result.structs.extend(parsed.structs)
                     result.enums.extend(parsed.enums)
                 elif child.type == "declaration":
-                    func, struct = self._parse_declaration(child, source, header_path, header_include)
+                    func, struct = self._parse_declaration(
+                        child, source, header_path, header_include
+                    )
                     if func:
                         result.functions.append(func)
                     if struct:
@@ -236,7 +255,9 @@ class HeaderParser:
                 elif child.type == "linkage_specification":
                     for decl_list in child.named_children:
                         if decl_list.type == "declaration_list":
-                            sub = self._parse_as_root(decl_list, source, header_path, header_include)
+                            sub = self._parse_as_root(
+                                decl_list, source, header_path, header_include
+                            )
                             result.constants.extend(sub.constants)
                             result.enums.extend(sub.enums)
                             result.structs.extend(sub.structs)
@@ -247,10 +268,12 @@ class HeaderParser:
                 pass
         return result
 
-    def _parse_define(self, node: Node, source: bytes, header_path: Path, header_include: str) -> CConstant | None:
+    def _parse_define(
+        self, node: Node, source: bytes, header_path: Path, header_include: str
+    ) -> CConstant | None:
         """Parse a #define directive."""
         text = _node_text(node, source)
-        m = re.match(r'#\s*define\s+(\w+)\s*(.*)', text)
+        m = re.match(r"#\s*define\s+(\w+)\s*(.*)", text)
         if not m:
             return None
         name = m.group(1)
@@ -258,24 +281,29 @@ class HeaderParser:
         if not value or value.startswith("(") and value.endswith(")"):
             pass
         # Filter out function-like macros
-        if '(' in name:
+        if "(" in name:
             return None
         guard_d, guard_e = _extract_guard_info(node, source)
         doc = _extract_comment(node, source)
         return CConstant(
-            name=name, value=value,
-            header_path=header_path, header_include=header_include,
+            name=name,
+            value=value,
+            header_path=header_path,
+            header_include=header_include,
             doc_comment=doc,
-            guard_directive=guard_d, guard_expression=guard_e,
+            guard_directive=guard_d,
+            guard_expression=guard_e,
         )
 
-    def _parse_typedef(self, node: Node, source: bytes, header_path: Path, header_include: str) -> ParsedHeader:
+    def _parse_typedef(
+        self, node: Node, source: bytes, header_path: Path, header_include: str
+    ) -> ParsedHeader:
         """Parse a typedef declaration."""
         result = ParsedHeader(header_path=header_path, header_include=header_include)
         text = _node_text(node, source)
 
         # Find the last identifier before ';' - that's the typedef name
-        all_ids = re.findall(r'\b(\w+)\b', text.rstrip(";").strip())
+        all_ids = re.findall(r"\b(\w+)\b", text.rstrip(";").strip())
         if not all_ids:
             return result
         typedef_name = all_ids[-1]
@@ -283,19 +311,19 @@ class HeaderParser:
         guard_d, guard_e = _extract_guard_info(node, source)
 
         # Strip comments for keyword detection (doc comments may contain "enum")
-        text_stripped = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
-        text_stripped = re.sub(r'//.*', '', text_stripped)
+        text_stripped = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+        text_stripped = re.sub(r"//.*", "", text_stripped)
 
         # Check for enum typedef
-        if re.search(r'\benum\b', text_stripped) and "{" in text_stripped:
+        if re.search(r"\benum\b", text_stripped) and "{" in text_stripped:
             values = []
             # Extract enum body
-            body_m = re.search(r'\{(.*?)\}', text, re.DOTALL)
+            body_m = re.search(r"\{(.*?)\}", text, re.DOTALL)
             if body_m:
                 body = body_m.group(1)
                 # Strip C comments from enum body
-                body = re.sub(r'/\*.*?\*/', '', body, flags=re.DOTALL)
-                body = re.sub(r'//.*', '', body)
+                body = re.sub(r"/\*.*?\*/", "", body, flags=re.DOTALL)
+                body = re.sub(r"//.*", "", body)
                 for entry in body.split(","):
                     entry = entry.strip()
                     if not entry:
@@ -313,38 +341,56 @@ class HeaderParser:
                         values.append(CEnumValue(name=ename, value=evalue))
             enum_name = typedef_name
             # Extract the C tag name if any
-            tag_m = re.search(r'enum\s+(\w+)\s*\{', text)
+            tag_m = re.search(r"enum\s+(\w+)\s*\{", text)
             if tag_m:
                 pass
-            result.enums.append(CEnum(
-                name=enum_name, enum_name=enum_name, values=values,
-                header_path=header_path, header_include=header_include,
-                doc_comment=doc,
-                guard_directive=guard_d, guard_expression=guard_e,
-            ))
+            result.enums.append(
+                CEnum(
+                    name=enum_name,
+                    enum_name=enum_name,
+                    values=values,
+                    header_path=header_path,
+                    header_include=header_include,
+                    doc_comment=doc,
+                    guard_directive=guard_d,
+                    guard_expression=guard_e,
+                )
+            )
             return result
 
         # Check for struct typedef with body
         if "struct" in text and "{" in text:
             fields = self._extract_struct_fields(text)
-            result.structs.append(CStruct(
-                name=typedef_name, type_name=typedef_name,
-                is_opaque=False, fields=fields,
-                header_path=header_path, header_include=header_include,
-                doc_comment=doc,
-                guard_directive=guard_d, guard_expression=guard_e,
-            ))
+            result.structs.append(
+                CStruct(
+                    name=typedef_name,
+                    type_name=typedef_name,
+                    is_opaque=False,
+                    fields=fields,
+                    header_path=header_path,
+                    header_include=header_include,
+                    doc_comment=doc,
+                    guard_directive=guard_d,
+                    guard_expression=guard_e,
+                )
+            )
             return result
 
         # Forward declaration: typedef struct X X_t;
         if "struct" in text and "{" not in text:
-            result.structs.append(CStruct(
-                name=typedef_name, type_name=typedef_name,
-                is_opaque=True, fields=[],
-                header_path=header_path, header_include=header_include,
-                doc_comment=doc,
-                guard_directive=guard_d, guard_expression=guard_e,
-            ))
+            result.structs.append(
+                CStruct(
+                    name=typedef_name,
+                    type_name=typedef_name,
+                    is_opaque=True,
+                    fields=[],
+                    header_path=header_path,
+                    header_include=header_include,
+                    doc_comment=doc,
+                    guard_directive=guard_d,
+                    guard_expression=guard_e,
+                )
+            )
             return result
 
         return result
@@ -352,13 +398,13 @@ class HeaderParser:
     def _extract_struct_fields(self, text: str) -> list[CField]:
         """Extract fields from a struct definition text."""
         fields = []
-        body_m = re.search(r'\{(.*?)\}', text, re.DOTALL)
+        body_m = re.search(r"\{(.*?)\}", text, re.DOTALL)
         if not body_m:
             return fields
         body = body_m.group(1)
         # Strip C comments from the body
-        body = re.sub(r'/\*.*?\*/', '', body, flags=re.DOTALL)
-        body = re.sub(r'//.*', '', body)
+        body = re.sub(r"/\*.*?\*/", "", body, flags=re.DOTALL)
+        body = re.sub(r"//.*", "", body)
         # Split by semicolons, handle nested structs
         for line in body.split(";"):
             line = line.strip()
@@ -375,19 +421,27 @@ class HeaderParser:
                 ftype, fname = parts
                 fname = fname.lstrip("*")
                 # Handle array types like m[12]
-                arr_m = re.match(r'(\w+)\[(\d+)\]', fname)
+                arr_m = re.match(r"(\w+)\[(\d+)\]", fname)
                 arr_size = 0
                 if arr_m:
                     fname = arr_m.group(1)
                     arr_size = int(arr_m.group(2))
                 assert ftype.strip(), f"Empty field type in {text}"
-                assert fname.strip(), f"Empty field name in struct field with type '{ftype}'"
-                fields.append(CField(type_name=ftype.strip(), name=fname.strip(), array_size=arr_size))
+                assert fname.strip(), (
+                    f"Empty field name in struct field with type '{ftype}'"
+                )
+                fields.append(
+                    CField(
+                        type_name=ftype.strip(), name=fname.strip(), array_size=arr_size
+                    )
+                )
             elif len(parts) == 1 and parts[0]:
                 pass
         return fields
 
-    def _parse_declaration(self, node: Node, source: bytes, header_path: Path, header_include: str) -> tuple[CFunction | None, CStruct | None]:
+    def _parse_declaration(
+        self, node: Node, source: bytes, header_path: Path, header_include: str
+    ) -> tuple[CFunction | None, CStruct | None]:
         """Parse a declaration node - might be a function or a standalone struct."""
         text = _node_text(node, source).strip()
         if not text:
@@ -398,46 +452,58 @@ class HeaderParser:
 
         # Check if this is a standalone struct definition (not typedef)
         if text.startswith("struct ") and "{" in text:
-            m = re.match(r'struct\s+(\w+)\s*\{', text)
+            m = re.match(r"struct\s+(\w+)\s*\{", text)
             if m:
                 name = m.group(1)
                 fields = self._extract_struct_fields(text)
                 return None, CStruct(
-                    name=name, type_name=name,
-                    is_opaque=False, fields=fields,
-                    header_path=header_path, header_include=header_include,
+                    name=name,
+                    type_name=name,
+                    is_opaque=False,
+                    fields=fields,
+                    header_path=header_path,
+                    header_include=header_include,
                     doc_comment=doc,
-                    guard_directive=guard_d, guard_expression=guard_e,
+                    guard_directive=guard_d,
+                    guard_expression=guard_e,
                 )
 
         # Check for typedef struct with body (tree-sitter may emit as declaration)
         if text.startswith("typedef struct ") and "{" in text:
-            all_ids = re.findall(r'\b(\w+)\b', text.rstrip(";").strip())
+            all_ids = re.findall(r"\b(\w+)\b", text.rstrip(";").strip())
             typedef_name = all_ids[-1] if all_ids else None
             if typedef_name:
                 fields = self._extract_struct_fields(text)
                 return None, CStruct(
-                    name=typedef_name, type_name=typedef_name,
-                    is_opaque=False, fields=fields,
-                    header_path=header_path, header_include=header_include,
+                    name=typedef_name,
+                    type_name=typedef_name,
+                    is_opaque=False,
+                    fields=fields,
+                    header_path=header_path,
+                    header_include=header_include,
                     doc_comment=doc,
-                    guard_directive=guard_d, guard_expression=guard_e,
+                    guard_directive=guard_d,
+                    guard_expression=guard_e,
                 )
 
         # Check for function declaration with OCCTL_API
         if "OCCTL_API" in text:
             decl = text
             # Remove OCCTL_API, OCCTL_CALL macros and __declspec
-            decl = re.sub(r'\bOCCTL_API\b', '', decl)
-            decl = re.sub(r'\bOCCTL_CALL\b', '', decl)
-            decl = re.sub(r'__declspec\s*\([^)]*\)', '', decl)
-            decl = re.sub(r'\bGDE_EXPORT\b', '', decl)
-            decl = re.sub(r'\bextern\s+"C"\b', '', decl)
-            decl = re.sub(r'\bOCCTL_NO_EXPORT\b', '', decl)
+            decl = re.sub(r"\bOCCTL_API\b", "", decl)
+            decl = re.sub(r"\bOCCTL_CALL\b", "", decl)
+            decl = re.sub(r"__declspec\s*\([^)]*\)", "", decl)
+            decl = re.sub(r"\bGDE_EXPORT\b", "", decl)
+            decl = re.sub(r'\bextern\s+"C"\b', "", decl)
+            decl = re.sub(r"\bOCCTL_NO_EXPORT\b", "", decl)
             decl = decl.strip().rstrip(";").strip()
 
             # Parse: return_type name(params)
-            m = re.match(r'^(const\s+\S+\s*\*?|\S+(?:\s*\*)?)\s+(\w+)\s*\((.*)\)\s*$', decl, re.DOTALL)
+            m = re.match(
+                r"^(const\s+\S+\s*\*?|\S+(?:\s*\*)?)\s+(\w+)\s*\((.*)\)\s*$",
+                decl,
+                re.DOTALL,
+            )
             if m:
                 ret_type = m.group(1).strip()
                 func_name = m.group(2).strip()
@@ -456,42 +522,81 @@ class HeaderParser:
                         else:
                             ptype = parts[0]
                             pname = ""
-                        assert ptype.strip(), f"Empty parameter type for function {func_name}"
-                        params.append(CParameter(
-                            type_name=ptype.strip(),
-                            name=pname.strip(),
-                        ))
+                        assert ptype.strip(), (
+                            f"Empty parameter type for function {func_name}"
+                        )
+                        # Check for default value
+                        default_value = ""
+                        if "=" in p:
+                            eq_idx = p.index("=")
+                            # Extract the default value part
+                            default_value = p[eq_idx + 1 :].strip()
+                            # Remove trailing commas
+                            default_value = default_value.rstrip(",")
+                            # Re-parse the type+name without the default
+                            p_before_default = p[:eq_idx].strip()
+                            parts = p_before_default.rsplit(None, 1)
+                            if len(parts) == 2:
+                                ptype, pname = parts
+                            else:
+                                ptype = parts[0]
+                                pname = ""
+
+                        assert ptype.strip(), (
+                            f"Empty parameter type for function {func_name}"
+                        )
+                        params.append(
+                            CParameter(
+                                type_name=ptype.strip(),
+                                name=pname.strip(),
+                                default_value=default_value.strip(),
+                            )
+                        )
 
                 return CFunction(
-                    name=func_name, return_type=ret_type, params=params,
-                    header_path=header_path, header_include=header_include,
+                    name=func_name,
+                    return_type=ret_type,
+                    params=params,
+                    header_path=header_path,
+                    header_include=header_include,
                     doc_comment=doc,
-                    guard_directive=guard_d, guard_expression=guard_e,
+                    guard_directive=guard_d,
+                    guard_expression=guard_e,
                 ), None
 
         return None, None
 
-    def _parse_guarded_block(self, node: Node, source: bytes, header_path: Path, header_include: str) -> ParsedHeader:
+    def _parse_guarded_block(
+        self, node: Node, source: bytes, header_path: Path, header_include: str
+    ) -> ParsedHeader:
         """Parse a preprocessor guarded block."""
         result = ParsedHeader(header_path=header_path, header_include=header_include)
         for child in node.named_children:
             try:
                 if child.type in ("preproc_def",):
-                    const = self._parse_define(child, source, header_path, header_include)
+                    const = self._parse_define(
+                        child, source, header_path, header_include
+                    )
                     if const:
                         result.constants.append(const)
                 elif child.type == "type_definition":
-                    parsed = self._parse_typedef(child, source, header_path, header_include)
+                    parsed = self._parse_typedef(
+                        child, source, header_path, header_include
+                    )
                     result.structs.extend(parsed.structs)
                     result.enums.extend(parsed.enums)
                 elif child.type == "declaration":
-                    func, struct = self._parse_declaration(child, source, header_path, header_include)
+                    func, struct = self._parse_declaration(
+                        child, source, header_path, header_include
+                    )
                     if func:
                         result.functions.append(func)
                     if struct:
                         result.structs.append(struct)
                 elif child.type in ("preproc_ifdef", "preproc_ifndef", "preproc_if"):
-                    sub = self._parse_guarded_block(child, source, header_path, header_include)
+                    sub = self._parse_guarded_block(
+                        child, source, header_path, header_include
+                    )
                     result.constants.extend(sub.constants)
                     result.enums.extend(sub.enums)
                     result.structs.extend(sub.structs)
@@ -499,7 +604,9 @@ class HeaderParser:
                 elif child.type == "linkage_specification":
                     for ls_child in child.named_children:
                         if ls_child.type == "declaration_list":
-                            sub = self._parse_as_root(ls_child, source, header_path, header_include)
+                            sub = self._parse_as_root(
+                                ls_child, source, header_path, header_include
+                            )
                             result.constants.extend(sub.constants)
                             result.enums.extend(sub.enums)
                             result.structs.extend(sub.structs)
@@ -507,7 +614,9 @@ class HeaderParser:
                 elif child.type == "preproc_else":
                     # parse the else branch
                     for subchild in child.named_children:
-                        sub = self._parse_as_root(subchild, source, header_path, header_include)
+                        sub = self._parse_as_root(
+                            subchild, source, header_path, header_include
+                        )
                         result.constants.extend(sub.constants)
                         result.enums.extend(sub.enums)
                         result.structs.extend(sub.structs)

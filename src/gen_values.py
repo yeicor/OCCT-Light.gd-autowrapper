@@ -58,9 +58,19 @@ def _field_godot_type(field: CField) -> str:
     if t.endswith("*"):
         inner = t[:-1].strip().replace("const ", "", 1).strip()
         if inner in UINT64_ID_TYPES:
-            return "int64_t"
+            return "PackedInt64Array"
         if inner in VALUE_STRUCT_TYPES:
-            return f"Ref<{c_type_to_godot_class(inner)}>"
+            return "Array"
+        if inner == "double":
+            return "PackedFloat64Array"
+        if inner == "float":
+            return "PackedFloat32Array"
+        if inner in ("int32_t", "uint32_t", "int"):
+            return "PackedInt32Array"
+        if inner in ("int64_t", "uint64_t"):
+            return "PackedInt64Array"
+        if inner == "uint8_t":
+            return "PackedByteArray"
         return "int64_t"
     if _is_uint64_id(t):
         return "int64_t"
@@ -269,6 +279,7 @@ def generate_value_type_header(struct: CStruct) -> str:
         "#include <godot_cpp/variant/aabb.hpp>",
         "#include <godot_cpp/variant/color.hpp>",
         "#include <cstdint>",
+        "#include <vector>",
         f'#include "occtl/{struct.header_include}"',
         "",
     ]
@@ -309,6 +320,14 @@ def generate_value_type_header(struct: CStruct) -> str:
             lines.append(f"    {arr_type} {clean};")
         else:
             lines.append(f"    {gt} {clean};")
+
+        t = field.type_name.strip()
+        if t.endswith("*") and not t.startswith("const ") and not t.endswith("**"):
+            t = "const " + t
+        if t.startswith("const ") and t.endswith("*") and gt == "Array":
+            # Add a mutable cache for structured arrays
+            inner = t[len("const ") : -1].strip()
+            lines.append(f"    mutable std::vector<{inner}> _cache_{clean};")
 
     lines.append("")
     # Getters and setters
@@ -413,7 +432,40 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         if t == "const void*":
             lines.append(f"    result.{clean} = nullptr;")
         elif t.startswith("const ") and t.endswith("*"):
-            lines.append(f"    // const pointer field {clean}: not convertible")
+            gt = _field_godot_type(field)
+            if gt.startswith("Packed"):
+                inner = t[len("const ") : -1].strip()
+                # Check if inner is a UINT64_ID struct type — needs cast from int64_t*
+                if inner in UINT64_ID_TYPES and gt == "PackedInt64Array":
+                    lines.append(
+                        f"    result.{clean} = reinterpret_cast<const {inner}*>({clean}.ptr());"
+                    )
+                elif inner == "uint32_t" and gt == "PackedInt32Array":
+                    lines.append(
+                        f"    result.{clean} = reinterpret_cast<const uint32_t*>({clean}.ptr());"
+                    )
+                elif inner == "uint64_t" and gt == "PackedInt64Array":
+                    lines.append(
+                        f"    result.{clean} = reinterpret_cast<const uint64_t*>({clean}.ptr());"
+                    )
+                else:
+                    lines.append(f"    result.{clean} = {clean}.ptr();")
+            elif gt == "Array":
+                inner = t[len("const ") : -1].strip()
+                sub_cls = c_type_to_godot_class(inner)
+                lines.append(f"    _cache_{clean}.resize({clean}.size());")
+                lines.append(f"    for (int _i = 0; _i < {clean}.size(); _i++) {{")
+                lines.append(f"        Ref<{sub_cls}> _item = {clean}[_i];")
+                lines.append(
+                    f"        if (_item.is_valid()) _cache_{clean}[_i] = _item->to_c();"
+                )
+                lines.append(f"        else _cache_{clean}[_i] = {{}};")
+                lines.append(f"    }}")
+                lines.append(f"    result.{clean} = _cache_{clean}.data();")
+            else:
+                lines.append(
+                    f"    // const pointer field {clean}: not convertible (type {gt})"
+                )
         elif t.endswith("*"):
             inner = t[:-1].strip()
             if inner in UINT64_ID_TYPES:
@@ -479,20 +531,28 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
                 f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
             )
         elif t.startswith("const ") and t.endswith("*"):
-            inner = t[len("const ") : -1].strip()
-            if _is_uint64_id(inner):
-                lines.append(
-                    f"    r->{clean} = static_cast<int64_t>(val.{clean}->bits);"
-                )
-            elif inner in VALUE_STRUCT_TYPES:
-                sub_cls = c_type_to_godot_class(inner)
-                lines.append(f"    r->{clean} = {sub_cls}::from_c(*val.{clean});")
-            elif inner == "char":
-                lines.append(f"    r->{clean} = String(val.{clean});")
+            gt = _field_godot_type(field)
+            if gt.startswith("Packed") or gt == "Array":
+                lines.append(f"    // array field {clean} is not populated from C")
             else:
-                lines.append(
-                    f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
-                )
+                inner = t[len("const ") : -1].strip()
+                if _is_uint64_id(inner):
+                    lines.append(
+                        f"    if (val.{clean}) r->{clean} = static_cast<int64_t>(val.{clean}->bits);"
+                    )
+                elif inner in VALUE_STRUCT_TYPES:
+                    sub_cls = c_type_to_godot_class(inner)
+                    lines.append(
+                        f"    if (val.{clean}) r->{clean} = {sub_cls}::from_c(*val.{clean});"
+                    )
+                elif inner == "char":
+                    lines.append(
+                        f"    if (val.{clean}) r->{clean} = String(val.{clean});"
+                    )
+                else:
+                    lines.append(
+                        f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+                    )
         elif t.endswith("*") and not t.startswith("const"):
             inner = t[:-1].strip()
             if inner == "char":
@@ -557,18 +617,26 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
                 f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
             )
         elif t.startswith("const ") and t.endswith("*"):
-            inner = t[len("const ") : -1].strip()
-            if _is_uint64_id(inner):
-                lines.append(f"    {clean} = static_cast<int64_t>(val.{clean}->bits);")
-            elif inner in VALUE_STRUCT_TYPES:
-                sub_cls = c_type_to_godot_class(inner)
-                lines.append(f"    {clean} = {sub_cls}::from_c(*val.{clean});")
-            elif inner == "char":
-                lines.append(f"    {clean} = String(val.{clean});")
+            gt = _field_godot_type(field)
+            if gt.startswith("Packed") or gt == "Array":
+                lines.append(f"    // array field {clean} is not populated from C")
             else:
-                lines.append(
-                    f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
-                )
+                inner = t[len("const ") : -1].strip()
+                if _is_uint64_id(inner):
+                    lines.append(
+                        f"    if (val.{clean}) {clean} = static_cast<int64_t>(val.{clean}->bits);"
+                    )
+                elif inner in VALUE_STRUCT_TYPES:
+                    sub_cls = c_type_to_godot_class(inner)
+                    lines.append(
+                        f"    if (val.{clean}) {clean} = {sub_cls}::from_c(*val.{clean});"
+                    )
+                elif inner == "char":
+                    lines.append(f"    if (val.{clean}) {clean} = String(val.{clean});")
+                else:
+                    lines.append(
+                        f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+                    )
         elif t.endswith("*") and not t.startswith("const"):
             inner = t[:-1].strip()
             if inner == "char":
