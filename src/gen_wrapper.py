@@ -961,7 +961,11 @@ def _generate_out_param_copy_line(
     name = p.name if p.name else "out"
     wrapper_cls = _out_param_wrapper_class(base, t)
     if wrapper_cls is None:
-        return ""
+        raise ValueError(
+            f"No out-param wrapper class for type '{t}' (base='{base}', resolved='{_resolve_typedef(base)}'). "
+            f"Function has an out-param '{name}' with an unsupported C type. "
+            f"Either add the type to OUT_PARAM_PRIM_TYPES, VALUE_STRUCT_TYPES, or provide a wrapper class."
+        )
     if resolved in VALUE_STRUCT_TYPES:
         return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
     if resolved in UINT64_ID_TYPES:
@@ -1663,7 +1667,13 @@ def _c_to_godot_return(c_type: str, expr: str) -> str:
         return f"static_cast<int>({expr})"
     if t in ("int64_t", "uint64_t"):
         return f"static_cast<int64_t>({expr})"
-    return expr
+    if t in ("double", "float"):
+        return expr
+    raise ValueError(
+        f"Unknown C return type '{c_type}' in _c_to_godot_return. "
+        f"Cannot convert expression '{expr}' to Godot type. "
+        f"Either add to ENUM_TYPES, UINT64_ID_TYPES, VALUE_STRUCT_TYPES, or CPP_TO_GODOT_TYPE."
+    )
 
 
 # ---------------------------------------------------------------
