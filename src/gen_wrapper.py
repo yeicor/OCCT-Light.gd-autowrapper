@@ -569,11 +569,14 @@ def _func_return_type_mapped(f: CFunction) -> str:
         p = handle_outs[0]
         base = _c_type_strip_ptr(p.type_name).strip()
         inner = re.sub(r"^(const|volatile)\s+", "", base.rstrip("* \t")).strip()
-        if inner in HANDLE_TYPES or is_auto_handle_type(inner):
+        if inner in HANDLE_TYPES:
             return f"Ref<{c_type_to_godot_class(base)}Handle>"
         # Single const char** → returns String (single C string from double-ptr)
         if inner == "char":
             return "String"
+        # Auto-handle types (opaque _t without generated class) → return raw int64 handle
+        if is_auto_handle_type(inner):
+            return "int64_t"
         # const T** view pairs return Array of Ref<T>
         view_pairs = _find_const_view_pairs(f)
         if view_pairs:
@@ -1555,7 +1558,12 @@ def _generate_body(
                     count_idx = const_view_ptr_to_count[p_idx]
                     count_name = f.params[count_idx].name
                     inner_type = re.sub(r"^(const|volatile)\s+", "", base).strip()
-                    lines.append(f"    const {inner_type}* _{name}_ptr = nullptr;")
+                    # Preserve constness: const T** → const T*, T** → T*
+                    ptr_is_const = t.startswith("const ")
+                    if ptr_is_const:
+                        lines.append(f"    const {inner_type}* _{name}_ptr = nullptr;")
+                    else:
+                        lines.append(f"    {inner_type}* _{name}_ptr = nullptr;")
                     lines.append(f"    size_t _{count_name}_cnt = 0;")
                     call_args.append(f"&_{name}_ptr")
                     call_args.append(f"&_{count_name}_cnt")
@@ -1589,10 +1597,12 @@ def _generate_body(
                         # const occtl_error_t** → return as Ref<OcctlError>
                         lines.append(f"    const {resolved_base}* {local} = nullptr;")
                         call_args.append(f"&{local}")
-                    elif resolved_base in HANDLE_TYPES or is_auto_handle_type(
-                        resolved_base
-                    ):
+                    elif resolved_base in HANDLE_TYPES:
                         # Handle** → passed as pointer-to-pointer, handled in return section
+                        lines.append(f"    {base}* {local} = nullptr;")
+                        call_args.append(f"&{local}")
+                    elif is_auto_handle_type(resolved_base):
+                        # Auto-handle type (no generated class) → raw pointer, return int64
                         lines.append(f"    {base}* {local} = nullptr;")
                         call_args.append(f"&{local}")
                     else:
@@ -1798,6 +1808,10 @@ def _generate_body(
 
     # Copy non-handle out-param values into Godot wrapper refs
     for p in non_handle_out_params:
+        # Skip count params from const view pairs (already handled by view pair return code)
+        p_idx = f.params.index(p)
+        if p_idx in const_view_count_indices:
+            continue
         t = p.type_name.strip()
         base = _c_type_strip_ptr(t).strip()
         name = p.name if p.name else "out"
@@ -1886,7 +1900,7 @@ def _generate_body(
         base = _c_type_strip_ptr(p.type_name).strip()
         inner = re.sub(r"^(const|volatile)\s+", "", base.rstrip("* \t")).strip()
         local = f"_{p.name}_val"
-        if inner in HANDLE_TYPES or is_auto_handle_type(inner):
+        if inner in HANDLE_TYPES:
             cls = c_type_to_godot_class(base) + "Handle"
             lines.append(f"    if (_status != OCCTL_OK) {{ return Ref<{cls}>(); }}")
             lines.append(f"    if (!{local}) {{ return Ref<{cls}>(); }}")
@@ -1896,6 +1910,13 @@ def _generate_body(
                 f"    _h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local})));"
             )
             lines.append(f"    return _h;")
+        elif is_auto_handle_type(inner):
+            # Auto-handle type (no generated class) → return raw pointer as int64
+            lines.append(f"    if (_status != OCCTL_OK) {{ return 0; }}")
+            lines.append(f"    if (!{local}) {{ return 0; }}")
+            lines.append(
+                f"    return static_cast<int64_t>(reinterpret_cast<uintptr_t>({local}));"
+            )
         elif inner in UINT64_ID_TYPES:
             lines.append(f"    if (_status != OCCTL_OK) {{ return 0; }}")
             lines.append(f"    return static_cast<int64_t>({local}->bits);")
