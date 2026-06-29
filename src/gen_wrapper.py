@@ -23,14 +23,17 @@ from type_map import (
     CPP_TO_GODOT_TYPE,
     ENUM_TYPES,
     HANDLE_TYPES,
+    INPUT_PTR_SIZE_ARRAY_TYPES,
     UINT64_ID_TYPES,
     VALUE_STRUCT_TYPES,
     _resolve_typedef,
     c_type_to_godot_class,
     godot_param_type,
     godot_return_type,
+    input_ptr_size_godot_type,
     is_auto_handle_type,
     is_callback_type,
+    is_input_ptr_size_type,
     is_opaque_ptr_t_type,
     is_out_param,
     is_value_struct_type,
@@ -688,6 +691,73 @@ def _is_in_string_len_pair(f: CFunction, p_idx: int) -> bool:
 
 
 # ---------------------------------------------------------------
+# Input pointer+size array detection
+# Detect (const T* data, size_t count) pairs and collapse them
+# into a single array parameter (PackedInt64Array, etc.).
+# ---------------------------------------------------------------
+
+
+def _find_input_ptr_size_pairs(f: CFunction) -> list[tuple[int, int]]:
+    """Find all (ptr_idx, size_idx) pairs where ptr is an array input
+    and size is the element count.
+
+    Matches consecutive: const <element_type>* <name>, size_t <count>
+    where element_type is in INPUT_PTR_SIZE_ARRAY_TYPES.
+    """
+    pairs = []
+    params = f.params
+    i = 0
+    while i < len(params) - 1:
+        p = params[i]
+        t = p.type_name.strip()
+        # Must be const <T>*  (non-const, single ptr)
+        if not t.startswith("const "):
+            i += 1
+            continue
+        if not t.endswith("*") or t.endswith("**"):
+            i += 1
+            continue
+        base = _c_type_strip_ptr(t).strip()
+        inner = re.sub(r"^(const|volatile)\s+", "", base).strip()
+        if not is_input_ptr_size_type(inner):
+            i += 1
+            continue
+        # Next param must be size_t (non-pointer)
+        if i + 1 >= len(params):
+            i += 1
+            continue
+        next_p = params[i + 1]
+        if next_p.type_name.strip() != "size_t":
+            i += 1
+            continue
+        # Size param must not be an out-param
+        if is_out_param(next_p.type_name, next_p.name, f.return_type.strip()):
+            i += 1
+            continue
+        # Found a pair
+        pairs.append((i, i + 1))
+        i += 2
+        continue
+    return pairs
+
+
+def _is_in_input_ptr_size_pair(f: CFunction, idx: int) -> bool:
+    """Check if param at idx is part of an input pointer+size pair."""
+    for ptr_idx, size_idx in _find_input_ptr_size_pairs(f):
+        if idx == ptr_idx or idx == size_idx:
+            return True
+    return False
+
+
+def _input_ptr_size_element_type(f: CFunction, ptr_idx: int) -> str:
+    """Get the C element type for the pointer at ptr_idx."""
+    t = f.params[ptr_idx].type_name.strip()
+    base = _c_type_strip_ptr(t).strip()
+    inner = re.sub(r"^(const|volatile)\s+", "", base).strip()
+    return inner
+
+
+# ---------------------------------------------------------------
 # Method declarations — only handle** and const occtl_error_t**
 # are stripped from method args; all other out-params stay as Ref<T> params.
 # ---------------------------------------------------------------
@@ -744,15 +814,22 @@ def _build_kept_params(
 ) -> list:
     """Build the list of params to keep, preserving original order.
 
-    Strips out-params (handle**), buffer triplet params, and size params
-    from string+size pairs, while keeping string params at their original positions.
+    Strips out-params (handle**), buffer triplet params, size params
+    from string+size pairs, and size params from input ptr+size pairs,
+    while keeping string/array params at their original positions.
     """
+    input_ptr_size_pairs = _find_input_ptr_size_pairs(f)
+    input_ptr_size_indices = {size_idx for _, size_idx in input_ptr_size_pairs}
+
     kept = []
     for i, p in enumerate(f.params):
         if _is_stripped_out_param(p, ret):
             continue
         if _is_buffer_triplet_param(f, p):
             continue
+        # Skip size params from input ptr+size pairs
+        if i in input_ptr_size_indices:
+            continue  # skip size params entirely
         if i in string_len_indices:
             # Check if this is the SIZE part of a string+size pair
             is_size = False
@@ -806,6 +883,23 @@ def _method_args_decl(f: CFunction) -> str:
             continue
         if is_ud:
             continue  # skip user_data param
+        # Input pointer+size pairs use PackedArray type
+        input_ptr_size_pairs = _find_input_ptr_size_pairs(f)
+        is_input_ptr = False
+        for ptr_idx, _size_idx in input_ptr_size_pairs:
+            if p is f.params[ptr_idx]:
+                is_input_ptr = True
+                break
+        if is_input_ptr:
+            elem_type = _input_ptr_size_element_type(f, f.params.index(p))
+            arr_type = input_ptr_size_godot_type(elem_type)
+            if arr_type:
+                if arr_type == "Array":
+                    args.append(f"const Array& {p.name}")
+                else:
+                    args.append(f"const {arr_type}& {p.name}")
+                continue
+
         # Out-params (non-handle) use Ref<T> wrapper classes
         if is_out_param(t, p.name, ret):
             base = _c_type_strip_ptr(t).strip()
@@ -1329,6 +1423,11 @@ def _generate_body(
         lines.append("    _CallbackContext _ctx;")
         lines.append("    _ctx.callable = callable;")
 
+    # Detect input ptr+size pairs for array-like parameters
+    input_ptr_size_pairs = _find_input_ptr_size_pairs(f)
+    input_ptr_size_indices = {ptr_idx for ptr_idx, _ in input_ptr_size_pairs}
+    input_size_indices = {size_idx for _, size_idx in input_ptr_size_pairs}
+
     # Build call_args preserving C parameter order
     call_args = []
     c_func_name = f.name
@@ -1352,6 +1451,46 @@ def _generate_body(
                 break
         if cb_handled:
             continue
+
+        # Input ptr+size pair handling
+        if p is not None:
+            p_idx = f.params.index(p)
+            if p_idx in input_ptr_size_indices:
+                # This is the pointer param of an input ptr+size pair
+                # Generate: reinterpret_cast<const elem_type*>(name.ptr())
+                elem_type = _input_ptr_size_element_type(f, p_idx)
+                arr_type = input_ptr_size_godot_type(elem_type)
+                if arr_type in (
+                    "PackedInt64Array",
+                    "PackedFloat64Array",
+                    "PackedInt32Array",
+                    "PackedFloat32Array",
+                    "PackedByteArray",
+                ):
+                    if elem_type in UINT64_ID_TYPES:
+                        # occtl_node_id_t etc. are structs with a bits field
+                        # The PackedInt64Array stores int64_t, we reinterpret_cast to the C struct
+                        call_args.append(
+                            f"reinterpret_cast<const {elem_type}*>(static_cast<const void*>({name}.ptr()))"
+                        )
+                    else:
+                        call_args.append(f"{name}.ptr()")
+                else:
+                    # Fallback for Array types
+                    call_args.append(
+                        f"reinterpret_cast<const {elem_type}*>(static_cast<const void*>({name}.ptr()))"
+                    )
+                continue
+            if p_idx in input_size_indices:
+                # This is the size param of an input ptr+size pair
+                # Find the corresponding pointer param name
+                ptr_name = ""
+                for ptr_idx, size_idx in input_ptr_size_pairs:
+                    if p_idx == size_idx:
+                        ptr_name = f.params[ptr_idx].name
+                        break
+                call_args.append(f"static_cast<size_t>({ptr_name}.size())")
+                continue
 
         # Check if this param is the SIZE part of a string+size pair
         string_len_pairs = _find_string_len_pairs(f)

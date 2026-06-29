@@ -205,6 +205,30 @@ def is_callback_type(c_type: str) -> bool:
 # Size parameter name patterns — these params should be hidden
 # from GDScript when they follow an array pointer.
 # ---------------------------------------------------------------
+# ---------------------------------------------------------------
+# Input pointer+size array types: element C type -> Godot array type.
+# Used to auto-detect (const T* data, size_t count) pairs and
+# collapse them into a single array parameter.
+# ---------------------------------------------------------------
+INPUT_PTR_SIZE_ARRAY_TYPES: dict[str, str] = {
+    "occtl_node_id_t": "PackedInt64Array",
+    "occtl_uid_t": "PackedInt64Array",
+    "occtl_ref_id_t": "PackedInt64Array",
+    "occtl_rep_id_t": "PackedInt64Array",
+    "occtl_rep_uid_t": "PackedInt64Array",
+    "occtl_joint_id_t": "PackedInt64Array",
+    "occtl_ref_uid_t": "PackedInt64Array",
+    "double": "PackedFloat64Array",
+    "float": "PackedFloat32Array",
+    "int32_t": "PackedInt32Array",
+    "uint32_t": "PackedInt32Array",
+    "int64_t": "PackedInt64Array",
+    "uint64_t": "PackedInt64Array",
+    "occtl_point3_t": "Array",  # Array[OcctlPoint3] at runtime
+    "occtl_point2_t": "Array",  # Array[OcctlPoint2] at runtime
+}
+
+
 SIZE_PARAM_NAMES: set[str] = {
     "count",
     "size",
@@ -215,6 +239,20 @@ SIZE_PARAM_NAMES: set[str] = {
     "cap",
     "n",
 }
+
+
+def is_input_ptr_size_type(c_type: str) -> bool:
+    """Check if a C type can be the element type of an input pointer+size pair."""
+    base = c_type.strip()
+    resolved = _resolve_typedef(base)
+    return resolved in INPUT_PTR_SIZE_ARRAY_TYPES
+
+
+def input_ptr_size_godot_type(c_type: str) -> str | None:
+    """Return the Godot array type for an input pointer+size element type."""
+    base = c_type.strip()
+    resolved = _resolve_typedef(base)
+    return INPUT_PTR_SIZE_ARRAY_TYPES.get(resolved)
 
 
 def is_size_param(name: str) -> bool:
