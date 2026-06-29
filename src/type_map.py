@@ -584,8 +584,14 @@ def is_out_param(c_type: str, name: str, parent_return_type: str) -> bool:
             return True
         if inner.endswith("_t"):
             if inner in CPP_TO_GODOT_TYPE or inner in ENUM_TYPES:
-                # Standard _t types (uint8_t, int32_t, enum _t types) — continue to normal checks
-                pass
+                # Standard _t types (uint8_t, int32_t, enum types) —
+                # defer to name/return-type heuristics since these types
+                # can be either in-params or out-params depending on context.
+                if name.startswith("out_"):
+                    return True
+                if parent_return_type.strip() in ("occtl_status_t", "void"):
+                    return True
+                return False
             elif (
                 _resolve_typedef(inner) in VALUE_STRUCT_TYPES
                 or inner in UINT64_ID_TYPES
