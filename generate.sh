@@ -19,10 +19,11 @@ echo "Headers: ${HEADERS_DIR}"
 echo "Output:  ${OUTPUT_DIR}"
 echo ""
 
-if command -v uv &>/dev/null; then
-    exec uv run src/main.py "${HEADERS_DIR}" -o "${OUTPUT_DIR}" "$@"
+# Ensure uv is available
+if ! command -v uv &>/dev/null; then
+    echo "Installing uv package manager..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.cargo/bin:$PATH"
 fi
 
-echo "uv not found, falling back to pip..."
-pip install tree-sitter tree-sitter-cpp
-exec python3 src/main.py "${HEADERS_DIR}" -o "${OUTPUT_DIR}" "$@"
+exec uv run src/main.py "${HEADERS_DIR}" -o "${OUTPUT_DIR}" "$@"
