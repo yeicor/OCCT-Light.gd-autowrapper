@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoHlrOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_hlr_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_hlr_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_root">
+			<return type="int64_t" />
+			<description>
+				Returns the [member root] value.
+			</description>
+		</method>
+		<method name="set_root">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member root] value.
+			</description>
+		</method>
+		<method name="get_projection_frame">
+			<return type="Ref<OcctlAxis3Placement>" />
+			<description>
+				Returns the [member projection_frame] value.
+			</description>
+		</method>
+		<method name="set_projection_frame">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis3Placement>" />
+			<description>
+				Sets the [member projection_frame] value.
+			</description>
+		</method>
+		<method name="get_focus">
+			<return type="double" />
+			<description>
+				Returns the [member focus] value.
+			</description>
+		</method>
+		<method name="set_focus">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member focus] value.
+			</description>
+		</method>
+		<method name="get_include_hidden">
+			<return type="int" />
+			<description>
+				Returns the [member include_hidden] value.
+			</description>
+		</method>
+		<method name="set_include_hidden">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member include_hidden] value.
+			</description>
+		</method>
+		<method name="get_include_smooth">
+			<return type="int" />
+			<description>
+				Returns the [member include_smooth] value.
+			</description>
+		</method>
+		<method name="set_include_smooth">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member include_smooth] value.
+			</description>
+		</method>
+		<method name="get_include_outline">
+			<return type="int" />
+			<description>
+				Returns the [member include_outline] value.
+			</description>
+		</method>
+		<method name="set_include_outline">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member include_outline] value.
+			</description>
+		</method>
+		<method name="get_mode">
+			<return type="int" />
+			<description>
+				Returns the [member mode] value.
+			</description>
+		</method>
+		<method name="set_mode">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member mode] value.
+			</description>
+		</method>
+	</methods>
+</class>

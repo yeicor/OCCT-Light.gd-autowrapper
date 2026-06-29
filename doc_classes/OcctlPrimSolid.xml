@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlPrimSolid" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_prim_solid.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_prim_solid.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_PRIM_SOLID_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_prim_solid.h @brief OCCT-Light: analytic primitive solid construction API. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_PRIM_BOX_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_PRIM_BOX_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_PRIM_SPHERE_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_PRIM_SPHERE_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_PRIM_CYLINDER_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_PRIM_CYLINDER_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_PRIM_CONE_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_PRIM_CONE_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_PRIM_TORUS_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_PRIM_TORUS_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_PRIM_WEDGE_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_PRIM_WEDGE_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_PRIM_HALFSPACE_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_PRIM_HALFSPACE_INFO_INIT.
+			</description>
+		</method>
+		<method name="box_info_init">
+			<argument index="0" name="info" type="Ref<OcctlPrimBoxInfo>" />
+			<description>
+				Runtime initialiser for #occtl_prim_box_info_t. Sets all fields to #OCCTL_PRIM_BOX_INFO_INIT. @param[out] info  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_prim_make_box /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="make_box">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlPrimBoxInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Builds an axis-aligned box solid and inserts it into @p graph. The result is appended as a bare Solid root (no enclosing Product wrapper). @param[in,out] graph     Borrows it. Must be non-NULL. @param[in]     info      Borrows it. Must be non-NULL with a recognised @c struct_version and strictly positive @c dx / @c dy / @c dz. @param[out]    out_solid Borrows it (caller-allocated slot). Must be non-NULL. On success receives the new Solid NodeId; on failure set to #OCCTL_NODE_ID_INVALID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any pointer argument is NULL, @c p_next is non-NULL. @retval OCCTL_VERSION_MISMATCH  @c struct_version is unrecognised. @retval OCCTL_GEOMETRY_INVALID  Any dimension is non-positive or below the library's geometric precision. @retval OCCTL_TOPOLOGY_INVALID  The resulting topology was rejected. @retval OCCTL_INTERNAL          An unexpected internal error occurred. @threadsafe No — mutates @p graph. @sa occtl_prim_make_sphere, occtl_prim_make_cylinder /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlPrimBoxInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="sphere_info_init">
+			<argument index="0" name="info" type="Ref<OcctlPrimSphereInfo>" />
+			<description>
+				Runtime initialiser for #occtl_prim_sphere_info_t. Sets all fields to #OCCTL_PRIM_SPHERE_INFO_INIT. @param[out] info  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_prim_make_sphere /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="make_sphere">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlPrimSphereInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Builds a sphere or spherical wedge solid and inserts it into @p graph. @param[in,out] graph     Borrows it. Must be non-NULL. @param[in]     info      Borrows it. Must be non-NULL with a recognised @c struct_version. @param[out]    out_solid Borrows it. Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any pointer argument is NULL, @c p_next is non-NULL. @retval OCCTL_VERSION_MISMATCH  @c struct_version is unrecognised. @retval OCCTL_GEOMETRY_INVALID  @c radius is non-positive or angles are outside the legal range. @retval OCCTL_TOPOLOGY_INVALID  The resulting topology was rejected. @retval OCCTL_INTERNAL          An unexpected internal error occurred. @threadsafe No. @sa occtl_prim_sphere_info_init, occtl_prim_make_box /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlPrimSphereInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="cylinder_info_init">
+			<argument index="0" name="info" type="Ref<OcctlPrimCylinderInfo>" />
+			<description>
+				Runtime initialiser for #occtl_prim_cylinder_info_t. Sets all fields to #OCCTL_PRIM_CYLINDER_INFO_INIT. @param[out] info  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_prim_make_cylinder /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="make_cylinder">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlPrimCylinderInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Builds a cylinder or partial-cylinder solid. @param[in,out] graph     Borrows it. Must be non-NULL. @param[in]     info      Borrows it. Must be non-NULL with a recognised @c struct_version. @param[out]    out_solid Borrows it. Must be non-NULL. On success receives the new Solid NodeId; on failure set to #OCCTL_NODE_ID_INVALID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any pointer argument is NULL, @c p_next is non-NULL. @retval OCCTL_VERSION_MISMATCH  @c struct_version is unrecognised. @retval OCCTL_GEOMETRY_INVALID  @c radius or @c height is non-positive. @retval OCCTL_TOPOLOGY_INVALID  The resulting topology was rejected. @retval OCCTL_INTERNAL          An unexpected internal error occurred. @threadsafe No. @sa occtl_prim_cylinder_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlPrimCylinderInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="cone_info_init">
+			<argument index="0" name="info" type="Ref<OcctlPrimConeInfo>" />
+			<description>
+				Runtime initialiser for #occtl_prim_cone_info_t. Sets all fields to #OCCTL_PRIM_CONE_INFO_INIT. @param[out] info  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_prim_make_cone /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="make_cone">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlPrimConeInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Builds a cone or truncated cone solid. @param[in,out] graph     Borrows it. Must be non-NULL. @param[in]     info      Borrows it. Must be non-NULL with a recognised @c struct_version. @param[out]    out_solid Borrows it. Must be non-NULL. On success receives the new Solid NodeId; on failure set to #OCCTL_NODE_ID_INVALID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any pointer argument is NULL. @retval OCCTL_VERSION_MISMATCH  @c struct_version is unrecognised. @retval OCCTL_GEOMETRY_INVALID  Inputs are degenerate (e.g. @c r1 == @c r2 == 0, @c height non-positive, half-angle out of range). @retval OCCTL_TOPOLOGY_INVALID  The resulting topology was rejected. @retval OCCTL_INTERNAL          An unexpected internal error occurred. @threadsafe No. @sa occtl_prim_cone_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlPrimConeInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="torus_info_init">
+			<argument index="0" name="info" type="Ref<OcctlPrimTorusInfo>" />
+			<description>
+				Runtime initialiser for #occtl_prim_torus_info_t. Sets all fields to #OCCTL_PRIM_TORUS_INFO_INIT. @param[out] info  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_prim_make_torus /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="make_torus">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlPrimTorusInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Builds a torus or torus segment solid. @param[in,out] graph     Borrows it. Must be non-NULL. @param[in]     info      Borrows it. Must be non-NULL with a recognised @c struct_version. @param[out]    out_solid Borrows it. Must be non-NULL. On success receives the new Solid NodeId; on failure set to #OCCTL_NODE_ID_INVALID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any pointer argument is NULL. @retval OCCTL_VERSION_MISMATCH  @c struct_version is unrecognised. @retval OCCTL_GEOMETRY_INVALID  Radii are degenerate (@c r2 >= @c r1 or non-positive), or angles are outside the legal range. @retval OCCTL_TOPOLOGY_INVALID  The resulting topology was rejected. @retval OCCTL_INTERNAL          An unexpected internal error occurred. @threadsafe No. @sa occtl_prim_torus_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlPrimTorusInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="wedge_info_init">
+			<argument index="0" name="info" type="Ref<OcctlPrimWedgeInfo>" />
+			<description>
+				Runtime initialiser for #occtl_prim_wedge_info_t. Sets all fields to #OCCTL_PRIM_WEDGE_INFO_INIT. @param[out] info  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_prim_make_wedge /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="make_wedge">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlPrimWedgeInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Builds a right-angular wedge solid. @param[in,out] graph     Borrows it. Must be non-NULL. @param[in]     info      Borrows it. Must be non-NULL with a recognised @c struct_version. @param[out]    out_solid Borrows it. Must be non-NULL. On success receives the new Solid NodeId; on failure set to #OCCTL_NODE_ID_INVALID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any pointer argument is NULL. @retval OCCTL_VERSION_MISMATCH  @c struct_version is unrecognised. @retval OCCTL_GEOMETRY_INVALID  Inputs are degenerate (any size non-positive, @c ltx outside @c [0, dx]). @retval OCCTL_TOPOLOGY_INVALID  The resulting topology was rejected. @retval OCCTL_INTERNAL          An unexpected internal error occurred. @threadsafe No. @sa occtl_prim_wedge_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlPrimWedgeInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="halfspace_info_init">
+			<argument index="0" name="info" type="Ref<OcctlPrimHalfspaceInfo>" />
+			<description>
+				Runtime initialiser for #occtl_prim_halfspace_info_t. Sets all fields to #OCCTL_PRIM_HALFSPACE_INFO_INIT. @param[out] info  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_prim_make_halfspace /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="make_halfspace">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlPrimHalfspaceInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Builds a half-space solid bounded by @c info->face on the side of @c info->reference_point. @param[in,out] graph     Borrows it. Must be non-NULL. @param[in]     info      Borrows it. Must be non-NULL with a recognised @c struct_version. @param[out]    out_solid Borrows it. Must be non-NULL. On success receives the new Solid NodeId; on failure set to #OCCTL_NODE_ID_INVALID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any pointer argument is NULL, @c p_next is non-NULL, or @c reference_point contains a non-finite component. @retval OCCTL_VERSION_MISMATCH  @c struct_version is unrecognised. @retval OCCTL_NOT_FOUND         @c face refers to a removed or absent node. @retval OCCTL_WRONG_KIND        @c face is not of kind #OCCTL_KIND_FACE. @retval OCCTL_GEOMETRY_INVALID  Construction failed (reference point on the face surface, etc.). @retval OCCTL_TOPOLOGY_INVALID  The resulting topology was rejected. @retval OCCTL_INTERNAL          An unexpected internal error occurred. @threadsafe No. @sa occtl_prim_halfspace_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlPrimHalfspaceInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="OCCTL_PRIM_BOX_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_PRIM_BOX_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_PRIM_SPHERE_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_PRIM_SPHERE_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_PRIM_CYLINDER_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_PRIM_CYLINDER_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_PRIM_CONE_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_PRIM_CONE_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_PRIM_TORUS_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_PRIM_TORUS_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_PRIM_WEDGE_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_PRIM_WEDGE_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_PRIM_HALFSPACE_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_PRIM_HALFSPACE_INFO_VERSION_1.
+		</constant>
+	</constants>
+</class>

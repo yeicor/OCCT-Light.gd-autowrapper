@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlBoolOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_bool_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_bool_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_fuzzy_value">
+			<return type="double" />
+			<description>
+				Returns the [member fuzzy_value] value.
+			</description>
+		</method>
+		<method name="set_fuzzy_value">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member fuzzy_value] value.
+			</description>
+		</method>
+		<method name="get_run_parallel">
+			<return type="int" />
+			<description>
+				Returns the [member run_parallel] value.
+			</description>
+		</method>
+		<method name="set_run_parallel">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member run_parallel] value.
+			</description>
+		</method>
+		<method name="get_simplify_result">
+			<return type="int" />
+			<description>
+				Returns the [member simplify_result] value.
+			</description>
+		</method>
+		<method name="set_simplify_result">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member simplify_result] value.
+			</description>
+		</method>
+		<method name="get_simplify_angular_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member simplify_angular_tolerance] value.
+			</description>
+		</method>
+		<method name="set_simplify_angular_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member simplify_angular_tolerance] value.
+			</description>
+		</method>
+		<method name="get_build_history">
+			<return type="int" />
+			<description>
+				Returns the [member build_history] value.
+			</description>
+		</method>
+		<method name="set_build_history">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member build_history] value.
+			</description>
+		</method>
+	</methods>
+</class>

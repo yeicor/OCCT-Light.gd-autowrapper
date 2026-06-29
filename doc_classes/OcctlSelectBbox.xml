@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlSelectBbox" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_select_bbox_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_select_bbox_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_min">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member min] value.
+			</description>
+		</method>
+		<method name="set_min">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member min] value.
+			</description>
+		</method>
+		<method name="get_max">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member max] value.
+			</description>
+		</method>
+		<method name="set_max">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member max] value.
+			</description>
+		</method>
+	</methods>
+</class>

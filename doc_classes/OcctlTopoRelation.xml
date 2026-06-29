@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoRelation" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_topo_relation.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_topo_relation.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_TOPO_RELATION_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_topo_relation.h @brief OCCT-Light: Topology relation queries, hit tests, and contact analysis. Defines enums, structs, iterators, and functions for computing spatial relationships between topology entities: distance pairs, adjacency, connectivity, axis hits, touch points, intersection tests, and geometric classification. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_CHILD_EXPLORER_CONFIG_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_CHILD_EXPLORER_CONFIG_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_PARENT_EXPLORER_CONFIG_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_PARENT_EXPLORER_CONFIG_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_RELATION_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_RELATION_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="wire_order_edges">
+			<return type="Array[Ref[OcctlOrientedNode]]" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="wire" type="int64_t" />
+			<description>
+				Lists a wire's edges in endpoint-chaining order. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_oriented_node_t entries. Each returned entry contains an Edge node ID and the coedge orientation of that edge inside @p wire.  The order matches #occtl_topo_wire_explorer_create. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  wire      Wire node ID. @param[out] out_buf   Borrows it.  May be NULL on the sizing call. @param[in]  cap       Capacity of @p out_buf in entries. @param[out] out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND        @p wire is invalid or removed. @retval OCCTL_WRONG_KIND       @p wire is not a wire. @retval OCCTL_BUFFER_TOO_SMALL @p out_buf is non-NULL and @p cap is too small. @threadsafe Yes (read-only on graph). @sa occtl_topo_wire_explorer_create, occtl_topo_make_wire /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param wire] A node.
+				    [return] Array[Ref[OcctlOrientedNode]] result.
+		</description>
+		</method>
+		<method name="child_explorer_config_init">
+			<argument index="0" name="config" type="Ref<OcctlTopoChildExplorerConfig>" />
+			<description>
+				Initialises @p config to default values via #OCCTL_TOPO_CHILD_EXPLORER_CONFIG_INIT. NULL-tolerant. @param[out] config Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_child_explorer_create /
+				    [param config] Output parameter.
+		</description>
+		</method>
+		<method name="child_explorer_create">
+			<return type="Ref<OcctlTopoExplorerIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="config" type="Ref<OcctlTopoChildExplorerConfig>" />
+			<description>
+				Creates a downward depth-first child explorer starting from @p root. The explorer accumulates location and orientation along reference chains and yields each visited node with its accumulated transform and orientation.  Use #occtl_topo_explorer_iter_next to step and #occtl_topo_explorer_iter_free to release. @param[in]  graph       Must be non-NULL. @param[in]  root        Root node ID for the traversal. @param[in]  config      Borrows it.  May be NULL for defaults (recursive, all kinds, location+orientation accumulated). @param[out] out_iter    Owns it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL, or @c config->p_next is non-NULL. @retval OCCTL_NOT_FOUND         @p root is invalid or removed. @retval OCCTL_VERSION_MISMATCH  @c config->struct_version unsupported. @retval OCCTL_OUT_OF_RANGE      @c config->mode, @c config->target_kind, or @c config->avoid_kind is not valid. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on graph). @sa occtl_topo_explorer_iter_next, occtl_topo_parent_explorer_create /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param config] An optional [OcctlTopoChildExplorerConfig]. Pass null to use defaults.
+				    [return] A new [OcctlTopoExplorerIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="parent_explorer_config_init">
+			<argument index="0" name="config" type="Ref<OcctlTopoParentExplorerConfig>" />
+			<description>
+				Initialises @p config to default values via #OCCTL_TOPO_PARENT_EXPLORER_CONFIG_INIT. NULL-tolerant. @param[out] config Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_parent_explorer_create /
+				    [param config] Output parameter.
+		</description>
+		</method>
+		<method name="parent_explorer_create">
+			<return type="Ref<OcctlTopoExplorerIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="config" type="Ref<OcctlTopoParentExplorerConfig>" />
+			<description>
+				Creates an upward parent explorer starting from @p node. The explorer walks the reverse reference indices upward from the starting node, accumulating location and orientation along each parent chain. @param[in]  graph       Must be non-NULL. @param[in]  node        Starting node ID. @param[in]  config      Borrows it.  May be NULL for defaults. @param[out] out_iter    Owns it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL, or @c config->p_next is non-NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_VERSION_MISMATCH  @c config->struct_version unsupported. @retval OCCTL_OUT_OF_RANGE      @c config->mode, @c config->target_kind, or @c config->avoid_kind is not valid. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on graph). @sa occtl_topo_explorer_iter_next, occtl_topo_child_explorer_create /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param node] A node.
+				    [param config] An optional [OcctlTopoParentExplorerConfig]. Pass null to use defaults.
+				    [return] A new [OcctlTopoExplorerIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="explorer_iter_next">
+			<return type="int" />
+			<argument index="0" name="iter" type="Ref<OcctlTopoExplorerIterHandle>" />
+			<argument index="1" name="out_node" type="int64_t" />
+			<argument index="2" name="out_transform" type="Ref<OcctlTransform>" />
+			<argument index="3" name="out_orientation" type="int" />
+			<description>
+				Advances the explorer iterator to the next node. Writes the current node's definition ID, accumulated transform, and accumulated orientation. @param[in,out] iter            Borrows it.  Must be non-NULL. @param[out]    out_node        Borrows it.  Must be non-NULL. @param[out]    out_transform   Borrows it.  Must be non-NULL. @param[out]    out_orientation Borrows it.  Must be non-NULL. @retval OCCTL_OK                Next value written. @retval OCCTL_NOT_FOUND         Exhausted; out params set to invalid/identity. @retval OCCTL_INVALID_ARGUMENT  An out-param is NULL. @threadsafe No (mutates iter; concurrent reads on distinct iters OK). @sa occtl_topo_child_explorer_create, occtl_topo_parent_explorer_create, occtl_topo_explorer_iter_free /
+				    [param iter] Input parameter.
+				    [param out_node] Output parameter.
+				    [param out_transform] Output parameter.
+				    [param out_orientation] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="explorer_iter_free">
+			<argument index="0" name="iter" type="Ref<OcctlTopoExplorerIterHandle>" />
+			<description>
+				Releases an explorer iterator. @param[in] iter Owns it.  NULL is a no-op. @threadsafe Yes. @sa occtl_topo_explorer_iter_next /
+				    [param iter] Input parameter.
+		</description>
+		</method>
+		<method name="relation_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoRelationOptions>" />
+			<description>
+				Runtime initialiser for #occtl_topo_relation_options_t. Sets all fields to #OCCTL_TOPO_RELATION_OPTIONS_INIT. @param[out] options Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_topo_touch_iter_create /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="related_iter_create">
+			<return type="Ref<OcctlTopoRelatedIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<description>
+				Creates an iterator over the semantic neighbours of @p node. Neighbours are definition IDs without accumulated location or orientation.  Each yield includes a #occtl_relation_kind_t that describes the semantic relationship. @param[in]  graph    Must be non-NULL. @param[in]  node     Node to query neighbours for. @param[out] out_iter Owns it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on graph). @sa occtl_topo_related_iter_next, occtl_topo_related_iter_free /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param node] A node.
+				    [return] A new [OcctlTopoRelatedIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="distance_pair">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node_a" type="int64_t" />
+			<argument index="2" name="node_b" type="int64_t" />
+			<argument index="3" name="out_pair" type="Ref<OcctlTopoDistancePair>" />
+			<description>
+				Computes the closest-distance pair between two graph nodes. The calculation is delegated to OCCT and returns the minimum distance, closest points, and best-effort support-node IDs for the first closest solution. @param[in]  graph    Borrows it.  Must be non-NULL. @param[in]  node_a   First node to query. @param[in]  node_b   Second node to query. @param[out] out_pair Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_pair is NULL. @retval OCCTL_NOT_FOUND        @p node_a or @p node_b is invalid or removed. @retval OCCTL_GEOMETRY_INVALID OCCT could not compute a closest solution. @threadsafe Yes (read-only on graph; may populate internal shape caches). @sa occtl_topo_related_iter_create, occtl_graph_pair_distance_get /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param node_a] A node.
+				    [param node_b] A node.
+				    [param out_pair] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="closest_point_to_point">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="point" type="Ref<OcctlPoint3>" />
+			<argument index="3" name="out_closest" type="Ref<OcctlPoint3>" />
+			<argument index="4" name="out_distance" type="PackedFloat64Array" />
+			<description>
+				Finds the closest point on a graph node to a world-space point. The graph is not mutated. The returned point lies on @p node, and @p out_distance receives the world-space distance from @p point when requested. @param[in]  graph        Borrows it.  Must be non-NULL. @param[in]  node         Node to search. @param[in]  point        Query point. @param[out] out_closest  Borrows it.  Must be non-NULL.  Receives the closest point on @p node. @param[out] out_distance Borrows it.  May be NULL.  Receives the minimum distance. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_closest is NULL. @retval OCCTL_NOT_FOUND        @p node is invalid or removed. @retval OCCTL_GEOMETRY_INVALID OCCT could not compute a closest solution. @threadsafe Yes (read-only on graph; may populate internal shape caches). @sa occtl_topo_distance_pair, occtl_graph_pair_distance_get /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param node] A node.
+				    [param point] A [OcctlPoint3].
+				    [param out_closest] Output parameter.
+				    [param out_distance] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="axis_intersect_faces">
+			<return type="Ref<OcctlTopoAxisHitIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="axis" type="Ref<OcctlAxis1Placement>" />
+			<argument index="3" name="min_parameter" type="double" />
+			<argument index="4" name="max_parameter" type="double" />
+			<argument index="5" name="tolerance" type="double" />
+			<description>
+				Creates an iterator over faces intersected by an axis under @p root. The calculation is delegated to OCCT's face/curve intersector.  Hits are ordered by signed axis parameter and include the hit point, UV parameters, and a best-effort oriented surface normal. @param[in]  graph         Borrows it.  Must be non-NULL. @param[in]  root          Root shape node whose faces are tested. @param[in]  axis          Directed axis used as the query line. @param[in]  min_parameter Inclusive lower signed axis parameter. @param[in]  max_parameter Inclusive upper signed axis parameter. @param[in]  tolerance     Intersection tolerance.  Must be non-negative. @param[out] out_iter      Owns it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_iter is NULL, @p tolerance is negative, the parameter interval is invalid, or @p axis direction is zero/non-finite. @retval OCCTL_NOT_FOUND        @p root is invalid or removed. @retval OCCTL_GEOMETRY_INVALID OCCT could not complete the intersection. @retval OCCTL_OUT_OF_MEMORY    Allocation failed. @threadsafe Yes (read-only on graph; uses local OCCT intersector state). @sa occtl_topo_axis_hit_iter_next, occtl_topo_axis_hit_iter_free /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param axis] A [OcctlAxis1Placement].
+				    [param min_parameter] Input parameter.
+				    [param max_parameter] Input parameter.
+				    [param tolerance] Input parameter.
+				    [return] A new [OcctlTopoAxisHitIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="touch_iter_create">
+			<return type="Ref<OcctlTopoTouchIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node_a" type="int64_t" />
+			<argument index="2" name="node_b" type="int64_t" />
+			<argument index="3" name="options" type="Ref<OcctlTopoRelationOptions>" />
+			<description>
+				Creates an iterator over contact solutions between two graph nodes. The calculation is delegated to OCCT `BRepExtrema_DistShapeShape`.  When the minimum distance is greater than the requested tolerance, the iterator is valid but empty.  Results are original-graph support nodes plus the OCCT contact / closest points; the queried graph is not mutated. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  node_a   First node to query. @param[in]  node_b   Second node to query. @param[in]  options  Borrows it. May be NULL for defaults. @param[out] out_iter Owns it. Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL, or @p options contains an invalid @c p_next, tolerance, or 0/1 flag. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported @c struct_version. @retval OCCTL_NOT_FOUND         @p node_a or @p node_b is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute distance/contact solutions. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on graph; may populate internal shape caches). @sa occtl_topo_touch_iter_next, occtl_topo_touch_iter_free, occtl_topo_distance_pair /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param node_a] A node.
+				    [param node_b] A node.
+				    [param options] An optional [OcctlTopoRelationOptions]. Pass null to use defaults.
+				    [return] A new [OcctlTopoTouchIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="intersection_iter_create">
+			<return type="Ref<OcctlTopoIntersectionIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node_a" type="int64_t" />
+			<argument index="2" name="node_b" type="int64_t" />
+			<argument index="3" name="options" type="Ref<OcctlTopoRelationOptions>" />
+			<description>
+				Creates an iterator over topology generated by intersecting two graph nodes. The calculation is delegated to OCCT section/common algorithms.  Generated intersection topology is inserted into @p graph as fresh topology roots so returned NodeIds are meaningful in the caller's graph.  Section edges and vertices are returned first.  When @p options is NULL or @c include_overlaps is 1, an OCCT common result is also used to return overlap faces when the two inputs have area/volume overlap.  The iterator is valid but empty when no requested intersection topology is produced. @param[in,out] graph    Borrows it. Must be non-NULL. @param[in]     node_a   First node to intersect. @param[in]     node_b   Second node to intersect. @param[in]     options  Borrows it. May be NULL for defaults. @param[out]    out_iter Owns it. Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL, or @p options contains an invalid @c p_next, tolerance, or 0/1 flag. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported @c struct_version. @retval OCCTL_NOT_FOUND         @p node_a or @p node_b is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute the intersection. @retval OCCTL_TOPOLOGY_INVALID  the generated topology could not be inserted. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (may mutate @p graph by inserting generated topology). @sa occtl_topo_intersection_iter_next, occtl_topo_intersection_iter_free, occtl_topo_touch_iter_create /
+				    [param graph] Input parameter.
+				    [param node_a] A node.
+				    [param node_b] A node.
+				    [param options] An optional [OcctlTopoRelationOptions]. Pass null to use defaults.
+				    [return] A new [OcctlTopoIntersectionIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="is_same_geometry">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node_a" type="int64_t" />
+			<argument index="2" name="node_b" type="int64_t" />
+			<argument index="3" name="tolerance" type="double" />
+			<argument index="4" name="out_is_same_geometry" type="PackedInt32Array" />
+			<description>
+				Tests whether two edge or face nodes share the same geometric support. This is a geometry predicate, not topological identity: two different bounded edges/faces may compare equal when OCCT reports coincident support within @p tolerance.  Node kinds must match and must be Edge or Face. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  node_a    First edge or face node. @param[in]  node_b    Second edge or face node. @param[in]  tolerance Linear tolerance.  Must be non-negative. @param[out] out_is_same_geometry  Borrows it.  Receives 1 for same geometry, 0 otherwise. Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_is_same_geometry is NULL, or @p tolerance is negative/non-finite. @retval OCCTL_NOT_FOUND        @p node_a or @p node_b is invalid or removed. @retval OCCTL_WRONG_KIND       Nodes are not both edges or both faces. @threadsafe Yes (read-only on graph; may use local OCCT projection state). @sa occtl_topo_distance_pair, occtl_topo_axis_intersect_faces /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param node_a] A node.
+				    [param node_b] A node.
+				    [param tolerance] Input parameter.
+				    [param out_is_same_geometry] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="common_vertices">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node_a" type="int64_t" />
+			<argument index="2" name="node_b" type="int64_t" />
+			<description>
+				Lists vertex nodes common to two graph roots. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. The order follows the first root's OCCT vertex traversal order.  Duplicate vertex uses are collapsed. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  node_a    First root node. @param[in]  node_b    Second root node. @param[out] out_buf   Borrows it.  May be NULL on the sizing call. @param[in]  cap       Capacity of @p out_buf in entries. @param[out] out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND        @p node_a or @p node_b is invalid or removed. @retval OCCTL_BUFFER_TOO_SMALL @p out_buf is non-NULL and @p cap is too small. @threadsafe No (may update OCCT internal caches). @sa occtl_graph_descendant_vertices_get, occtl_topo_related_iter_create /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param node_a] A node.
+				    [param node_b] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="adjacent_edges">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<description>
+				Lists edges adjacent to @p edge through shared vertices. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. The input edge itself is not included. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  edge      Edge node ID. @param[out] out_buf   Borrows it.  May be NULL on the sizing call. @param[in]  cap       Capacity of @p out_buf in entries. @param[out] out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND        @p edge is invalid or removed. @retval OCCTL_WRONG_KIND       @p edge is not an edge. @retval OCCTL_BUFFER_TOO_SMALL @p out_buf is non-NULL and @p cap is too small. @threadsafe Yes (read-only on graph). @sa occtl_topo_connected_edges, occtl_topo_adjacent_faces /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param edge] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="adjacent_faces">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<description>
+				Lists faces adjacent to @p face through shared edges. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. The input face itself is not included. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  face      Face node ID. @param[out] out_buf   Borrows it.  May be NULL on the sizing call. @param[in]  cap       Capacity of @p out_buf in entries. @param[out] out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND        @p face is invalid or removed. @retval OCCTL_WRONG_KIND       @p face is not a face. @retval OCCTL_BUFFER_TOO_SMALL @p out_buf is non-NULL and @p cap is too small. @threadsafe Yes (read-only on graph). @sa occtl_topo_connected_faces, occtl_topo_adjacent_edges /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param face] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="connected_edges">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="seed_edge" type="int64_t" />
+			<description>
+				Lists all edges connected to @p seed_edge through shared vertices. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. The seed edge is included in the result. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  seed_edge Edge where the walk starts. @param[out] out_buf   Borrows it.  May be NULL on the sizing call. @param[in]  cap       Capacity of @p out_buf in entries. @param[out] out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND        @p seed_edge is invalid or removed. @retval OCCTL_WRONG_KIND       @p seed_edge is not an edge. @retval OCCTL_BUFFER_TOO_SMALL @p out_buf is non-NULL and @p cap is too small. @threadsafe Yes (read-only on graph). @sa occtl_topo_connected_faces, occtl_topo_common_vertices /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param seed_edge] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="connected_faces">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="seed_face" type="int64_t" />
+			<description>
+				Lists all faces connected to @p seed_face through shared edges. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. The seed face is included in the result. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  seed_face Face where the walk starts. @param[out] out_buf   Borrows it.  May be NULL on the sizing call. @param[in]  cap       Capacity of @p out_buf in entries. @param[out] out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND        @p seed_face is invalid or removed. @retval OCCTL_WRONG_KIND       @p seed_face is not a face. @retval OCCTL_BUFFER_TOO_SMALL @p out_buf is non-NULL and @p cap is too small. @threadsafe Yes (read-only on graph). @sa occtl_topo_connected_edges, occtl_topo_common_vertices /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param seed_face] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="graph_distance">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="sources" type="int64_t" />
+			<argument index="3" name="source_count" type="int" />
+			<argument index="4" name="target" type="int64_t" />
+			<argument index="5" name="out_distance" type="PackedInt32Array" />
+			<description>
+				Computes same-kind topological graph distance under a shared root. Distance is the minimum number of adjacency hops from any source node to @p target while walking only peers of the same kind reachable from @p root. Supported peer kinds are Vertex, Edge, Wire, Face, Shell, and Solid. Vertex/Edge/Wire peers connect through shared vertices; Face peers connect through shared edges; Shell/Solid peers connect through shared faces. A source node has distance 0 from itself.  If @p target is reachable from @p root but not connected to any source peer, the function succeeds and writes -1 to @p out_distance. @param[in]  graph        Borrows it.  Must be non-NULL. @param[in]  root         Root that defines the peer set.  Must be active. @param[in]  sources      Borrows it.  Array of source nodes.  Must be non-NULL and contain @p source_count entries. @param[in]  source_count Number of entries in @p sources.  Must be non-zero. @param[in]  target       Target node.  Must have the same kind as all sources. @param[out] out_distance Borrows it.  Must be non-NULL.  Receives the hop count, or -1 when unreachable within the peer graph. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p sources, or @p out_distance is NULL, or @p source_count is zero. @retval OCCTL_NOT_FOUND         @p root, @p target, or a source is invalid, removed, or not reachable from @p root. @retval OCCTL_WRONG_KIND        Sources and target are not the same kind, or the kind is not supported for this query. @threadsafe No (may populate graph caches for descendant vertices). @sa occtl_topo_connected_edges, occtl_topo_connected_faces, occtl_topo_common_vertices /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param sources] A node.
+				    [param source_count] Input parameter.
+				    [param target] A node.
+				    [param out_distance] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="classify_point">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="solid" type="int64_t" />
+			<argument index="2" name="point" type="Ref<OcctlPoint3>" />
+			<argument index="3" name="tolerance" type="double" />
+			<argument index="4" name="out_class" type="int" />
+			<description>
+				Classifies a 3D point relative to a solid node. Classification is graph-native and delegates to OCCT BRepGraphAlgo_SolidClassifier. @param[in]  graph     Borrows it.  Must be non-NULL. @param[in]  solid     Solid node to classify against. @param[in]  point     Point to classify. @param[in]  tolerance Tolerance for boundary detection.  Must be non-negative. @param[out] out_class Borrows it.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_class is NULL, or @p tolerance is negative. @retval OCCTL_NOT_FOUND        @p solid is invalid or removed. @retval OCCTL_WRONG_KIND       @p solid is not a solid. @threadsafe Yes (read-only on graph; may build classifier-local caches). @sa occtl_topo_is_inside, occtl_topo_distance_pair /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param solid] A node.
+				    [param point] A [OcctlPoint3].
+				    [param tolerance] Input parameter.
+				    [param out_class] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="is_inside">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="solid" type="int64_t" />
+			<argument index="2" name="point" type="Ref<OcctlPoint3>" />
+			<argument index="3" name="tolerance" type="double" />
+			<argument index="4" name="include_boundary" type="int" />
+			<argument index="5" name="out_is_inside" type="PackedInt32Array" />
+			<description>
+				Tests whether a 3D point is inside a solid node. @param[in]  graph            Borrows it.  Must be non-NULL. @param[in]  solid            Solid node to test. @param[in]  point            Point to test. @param[in]  tolerance        Tolerance for boundary detection.  Must be non-negative. @param[in]  include_boundary 1 treats boundary points as inside; 0 does not. @param[out] out_is_inside    Borrows it.  Receives 1 or 0.  Must be non-NULL. @retval OCCTL_OK               On success. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_is_inside is NULL, @p tolerance is negative, or @p include_boundary is not 0 or 1. @retval OCCTL_NOT_FOUND        @p solid is invalid or removed. @retval OCCTL_WRONG_KIND       @p solid is not a solid. @threadsafe Yes (read-only on graph; may build classifier-local caches). @sa occtl_topo_classify_point /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param solid] A node.
+				    [param point] A [OcctlPoint3].
+				    [param tolerance] Input parameter.
+				    [param include_boundary] Input parameter.
+				    [param out_is_inside] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="axis_hit_iter_next">
+			<return type="int" />
+			<argument index="0" name="iter" type="Ref<OcctlTopoAxisHitIterHandle>" />
+			<argument index="1" name="out_hit" type="Ref<OcctlTopoAxisHit>" />
+			<description>
+				Advances an axis-hit iterator. @param[in,out] iter    Borrows it.  Must be non-NULL. @param[out]    out_hit Borrows it.  Must be non-NULL. @retval OCCTL_OK               Next hit written. @retval OCCTL_NOT_FOUND        Iterator exhausted. @retval OCCTL_INVALID_ARGUMENT @p iter or @p out_hit is NULL. @threadsafe No (mutates iterator). @sa occtl_topo_axis_intersect_faces, occtl_topo_axis_hit_iter_free /
+				    [param iter] Input parameter.
+				    [param out_hit] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="axis_hit_iter_free">
+			<argument index="0" name="iter" type="Ref<OcctlTopoAxisHitIterHandle>" />
+			<description>
+				Releases an axis-hit iterator. @param[in] iter Owns it.  May be NULL. @threadsafe Yes. @sa occtl_topo_axis_intersect_faces /
+				    [param iter] Input parameter.
+		</description>
+		</method>
+		<method name="touch_iter_next">
+			<return type="int" />
+			<argument index="0" name="iter" type="Ref<OcctlTopoTouchIterHandle>" />
+			<argument index="1" name="out_hit" type="Ref<OcctlTopoTouchHit>" />
+			<description>
+				Advances a touch iterator. @param[in,out] iter    Borrows it. Must be non-NULL. @param[out]    out_hit Borrows it. Must be non-NULL. @retval OCCTL_OK                Next hit written. @retval OCCTL_NOT_FOUND         Iterator exhausted. @retval OCCTL_INVALID_ARGUMENT  @p iter or @p out_hit is NULL. @threadsafe No (mutates iterator). @sa occtl_topo_touch_iter_create, occtl_topo_touch_iter_free /
+				    [param iter] Input parameter.
+				    [param out_hit] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="touch_iter_free">
+			<argument index="0" name="iter" type="Ref<OcctlTopoTouchIterHandle>" />
+			<description>
+				Releases a touch iterator. @param[in] iter Owns it. May be NULL. @threadsafe Yes. @sa occtl_topo_touch_iter_create /
+				    [param iter] Input parameter.
+		</description>
+		</method>
+		<method name="intersection_iter_next">
+			<return type="int" />
+			<argument index="0" name="iter" type="Ref<OcctlTopoIntersectionIterHandle>" />
+			<argument index="1" name="out_node" type="int64_t" />
+			<description>
+				Advances an intersection iterator. @param[in,out] iter     Borrows it. Must be non-NULL. @param[out]    out_node Borrows it. Must be non-NULL. @retval OCCTL_OK                Next generated node written. @retval OCCTL_NOT_FOUND         Iterator exhausted. @retval OCCTL_INVALID_ARGUMENT  @p iter or @p out_node is NULL. @threadsafe No (mutates iterator). @sa occtl_topo_intersection_iter_create, occtl_topo_intersection_iter_free /
+				    [param iter] Input parameter.
+				    [param out_node] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="intersection_iter_free">
+			<argument index="0" name="iter" type="Ref<OcctlTopoIntersectionIterHandle>" />
+			<description>
+				Releases an intersection iterator. @param[in] iter Owns it. May be NULL. @threadsafe Yes. @sa occtl_topo_intersection_iter_create /
+				    [param iter] Input parameter.
+		</description>
+		</method>
+		<method name="related_iter_next">
+			<return type="int" />
+			<argument index="0" name="iter" type="Ref<OcctlTopoRelatedIterHandle>" />
+			<argument index="1" name="out_node" type="int64_t" />
+			<argument index="2" name="out_kind" type="int" />
+			<description>
+				Advances the related-iterator to the next semantic neighbour. @param[in,out] iter      Borrows it.  Must be non-NULL. @param[out]    out_node   Borrows it.  Must be non-NULL. @param[out]    out_kind   Borrows it.  Must be non-NULL. @retval OCCTL_OK                Next value written. @retval OCCTL_NOT_FOUND         Exhausted; out params set to invalid. @retval OCCTL_INVALID_ARGUMENT  An out-param is NULL. @threadsafe No (mutates iter; concurrent reads on distinct iters OK). @sa occtl_topo_related_iter_create, occtl_topo_related_iter_free /
+				    [param iter] Input parameter.
+				    [param out_node] Output parameter.
+				    [param out_kind] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="related_iter_free">
+			<argument index="0" name="iter" type="Ref<OcctlTopoRelatedIterHandle>" />
+			<description>
+				Releases a related-iterator. @param[in] iter Owns it.  NULL is a no-op. @threadsafe Yes. @sa occtl_topo_related_iter_next /
+				    [param iter] Input parameter.
+		</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="OCCTL_TOPO_CHILD_EXPLORER_CONFIG_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_CHILD_EXPLORER_CONFIG_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_PARENT_EXPLORER_CONFIG_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_PARENT_EXPLORER_CONFIG_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_RELATION_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_RELATION_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_CONTINUITY_C0" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_CONTINUITY_C1" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_CONTINUITY_C2" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_CONTINUITY_C3" value="3">
+			Enum value = 3 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_CONTINUITY_CN" value="4">
+			Enum value = 4 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_CONTINUITY_G1" value="5">
+			Enum value = 5 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_CONTINUITY_G2" value="6">
+			Enum value = 6 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_CONTINUITY_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoRelation.occtl_shape_continuity_t].
+		</constant>
+		<constant name="OCCTL_ORIENTATION_FORWARD" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoRelation.occtl_orientation_t].
+		</constant>
+		<constant name="OCCTL_ORIENTATION_REVERSED" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoRelation.occtl_orientation_t].
+		</constant>
+		<constant name="OCCTL_ORIENTATION_INTERNAL" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoRelation.occtl_orientation_t].
+		</constant>
+		<constant name="OCCTL_ORIENTATION_EXTERNAL" value="3">
+			Enum value = 3 Defined in [enum OcctlTopoRelation.occtl_orientation_t].
+		</constant>
+		<constant name="OCCTL_ORIENTATION_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoRelation.occtl_orientation_t].
+		</constant>
+		<constant name="OCCTL_TOPO_EXPLORER_RECURSIVE" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoRelation.occtl_topo_explorer_traversal_t].
+		</constant>
+		<constant name="OCCTL_TOPO_EXPLORER_DIRECT_CHILDREN" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoRelation.occtl_topo_explorer_traversal_t].
+		</constant>
+		<constant name="OCCTL_TOPO_EXPLORER_TRAVERSAL_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoRelation.occtl_topo_explorer_traversal_t].
+		</constant>
+		<constant name="OCCTL_RELATION_BOUNDARY_EDGE" value="0">
+			Enum value = 0 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_ADJACENT_FACE" value="1">
+			Enum value = 1 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_OUTER_WIRE" value="2">
+			Enum value = 2 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_REFERENCED_BY" value="3">
+			Enum value = 3 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_INCIDENT_VERTEX" value="4">
+			Enum value = 4 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_WIRE_COEDGE" value="5">
+			Enum value = 5 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_OWNING_FACE" value="6">
+			Enum value = 6 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_INCIDENT_EDGE" value="7">
+			Enum value = 7 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_PARENT_EDGE" value="8">
+			Enum value = 8 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_SEAM_PAIR" value="9">
+			Enum value = 9 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_RELATION_KIND_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Kind identifier. Defined in [enum OcctlTopoRelation.occtl_relation_kind_t].
+		</constant>
+		<constant name="OCCTL_TOPO_POINT_CLASS_IN" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoRelation.occtl_topo_point_class_t].
+		</constant>
+		<constant name="OCCTL_TOPO_POINT_CLASS_OUT" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoRelation.occtl_topo_point_class_t].
+		</constant>
+		<constant name="OCCTL_TOPO_POINT_CLASS_ON" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoRelation.occtl_topo_point_class_t].
+		</constant>
+		<constant name="OCCTL_TOPO_POINT_CLASS_UNKNOWN" value="3">
+			Enum value = 3 Defined in [enum OcctlTopoRelation.occtl_topo_point_class_t].
+		</constant>
+		<constant name="OCCTL_TOPO_POINT_CLASS_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoRelation.occtl_topo_point_class_t].
+		</constant>
+	</constants>
+</class>

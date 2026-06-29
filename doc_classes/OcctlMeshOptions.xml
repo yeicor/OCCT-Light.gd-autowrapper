@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlMeshOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_mesh_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_mesh_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_deflection">
+			<return type="double" />
+			<description>
+				Returns the [member deflection] value.
+			</description>
+		</method>
+		<method name="set_deflection">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member deflection] value.
+			</description>
+		</method>
+		<method name="get_angle">
+			<return type="double" />
+			<description>
+				Returns the [member angle] value.
+			</description>
+		</method>
+		<method name="set_angle">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member angle] value.
+			</description>
+		</method>
+		<method name="get_deflection_interior">
+			<return type="double" />
+			<description>
+				Returns the [member deflection_interior] value.
+			</description>
+		</method>
+		<method name="set_deflection_interior">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member deflection_interior] value.
+			</description>
+		</method>
+		<method name="get_angle_interior">
+			<return type="double" />
+			<description>
+				Returns the [member angle_interior] value.
+			</description>
+		</method>
+		<method name="set_angle_interior">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member angle_interior] value.
+			</description>
+		</method>
+		<method name="get_min_size">
+			<return type="double" />
+			<description>
+				Returns the [member min_size] value.
+			</description>
+		</method>
+		<method name="set_min_size">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member min_size] value.
+			</description>
+		</method>
+		<method name="get_in_parallel">
+			<return type="int" />
+			<description>
+				Returns the [member in_parallel] value.
+			</description>
+		</method>
+		<method name="set_in_parallel">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member in_parallel] value.
+			</description>
+		</method>
+		<method name="get_relative">
+			<return type="int" />
+			<description>
+				Returns the [member relative] value.
+			</description>
+		</method>
+		<method name="set_relative">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member relative] value.
+			</description>
+		</method>
+		<method name="get_internal_vertices_mode">
+			<return type="int" />
+			<description>
+				Returns the [member internal_vertices_mode] value.
+			</description>
+		</method>
+		<method name="set_internal_vertices_mode">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member internal_vertices_mode] value.
+			</description>
+		</method>
+		<method name="get_control_surface_deflection">
+			<return type="int" />
+			<description>
+				Returns the [member control_surface_deflection] value.
+			</description>
+		</method>
+		<method name="set_control_surface_deflection">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member control_surface_deflection] value.
+			</description>
+		</method>
+		<method name="get_control_surface_deflection_all">
+			<return type="int" />
+			<description>
+				Returns the [member control_surface_deflection_all] value.
+			</description>
+		</method>
+		<method name="set_control_surface_deflection_all">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member control_surface_deflection_all] value.
+			</description>
+		</method>
+		<method name="get_clean_model">
+			<return type="int" />
+			<description>
+				Returns the [member clean_model] value.
+			</description>
+		</method>
+		<method name="set_clean_model">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member clean_model] value.
+			</description>
+		</method>
+		<method name="get_adjust_min_size">
+			<return type="int" />
+			<description>
+				Returns the [member adjust_min_size] value.
+			</description>
+		</method>
+		<method name="set_adjust_min_size">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member adjust_min_size] value.
+			</description>
+		</method>
+		<method name="get_force_face_deflection">
+			<return type="int" />
+			<description>
+				Returns the [member force_face_deflection] value.
+			</description>
+		</method>
+		<method name="set_force_face_deflection">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member force_face_deflection] value.
+			</description>
+		</method>
+		<method name="get_allow_quality_decrease">
+			<return type="int" />
+			<description>
+				Returns the [member allow_quality_decrease] value.
+			</description>
+		</method>
+		<method name="set_allow_quality_decrease">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member allow_quality_decrease] value.
+			</description>
+		</method>
+		<method name="get_use_bbox">
+			<return type="int" />
+			<description>
+				Returns the [member use_bbox] value.
+			</description>
+		</method>
+		<method name="set_use_bbox">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_bbox] value.
+			</description>
+		</method>
+		<method name="get_bbox">
+			<return type="Ref<OcctlAabb3>" />
+			<description>
+				Returns the [member bbox] value.
+			</description>
+		</method>
+		<method name="set_bbox">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAabb3>" />
+			<description>
+				Sets the [member bbox] value.
+			</description>
+		</method>
+		<method name="get_deviation_coefficient">
+			<return type="double" />
+			<description>
+				Returns the [member deviation_coefficient] value.
+			</description>
+		</method>
+		<method name="set_deviation_coefficient">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member deviation_coefficient] value.
+			</description>
+		</method>
+		<method name="get_deviation_angle">
+			<return type="double" />
+			<description>
+				Returns the [member deviation_angle] value.
+			</description>
+		</method>
+		<method name="set_deviation_angle">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member deviation_angle] value.
+			</description>
+		</method>
+	</methods>
+</class>

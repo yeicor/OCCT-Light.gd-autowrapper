@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTriangulationView" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_triangulation_view_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_triangulation_view_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_nodes">
+			<return type="PackedFloat64Array" />
+			<description>
+				Returns the [member nodes] value.
+			</description>
+		</method>
+		<method name="set_nodes">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedFloat64Array" />
+			<description>
+				Sets the [member nodes] value.
+			</description>
+		</method>
+		<method name="get_node_count">
+			<return type="int" />
+			<description>
+				Returns the [member node_count] value.
+			</description>
+		</method>
+		<method name="set_node_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member node_count] value.
+			</description>
+		</method>
+		<method name="get_normals">
+			<return type="PackedFloat64Array" />
+			<description>
+				Returns the [member normals] value.
+			</description>
+		</method>
+		<method name="set_normals">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedFloat64Array" />
+			<description>
+				Sets the [member normals] value.
+			</description>
+		</method>
+		<method name="get_uvs">
+			<return type="PackedFloat64Array" />
+			<description>
+				Returns the [member uvs] value.
+			</description>
+		</method>
+		<method name="set_uvs">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedFloat64Array" />
+			<description>
+				Sets the [member uvs] value.
+			</description>
+		</method>
+		<method name="get_triangles">
+			<return type="PackedInt32Array" />
+			<description>
+				Returns the [member triangles] value.
+			</description>
+		</method>
+		<method name="set_triangles">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedInt32Array" />
+			<description>
+				Sets the [member triangles] value.
+			</description>
+		</method>
+		<method name="get_triangle_count">
+			<return type="int" />
+			<description>
+				Returns the [member triangle_count] value.
+			</description>
+		</method>
+		<method name="set_triangle_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member triangle_count] value.
+			</description>
+		</method>
+		<method name="get_deflection">
+			<return type="double" />
+			<description>
+				Returns the [member deflection] value.
+			</description>
+		</method>
+		<method name="set_deflection">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member deflection] value.
+			</description>
+		</method>
+		<method name="get_source_uid">
+			<return type="int64_t" />
+			<description>
+				Returns the [member source_uid] value.
+			</description>
+		</method>
+		<method name="set_source_uid">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member source_uid] value.
+			</description>
+		</method>
+	</methods>
+</class>

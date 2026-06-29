@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlIoIges" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_io_iges.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_io_iges.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_IO_IGES_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_io_iges.h @brief OCCT-Light: IGES file I/O (US PRO/IP 100 / ANSI). Reads and writes IGES 5.3 files via OCCT's @c DEIGES_Provider / @c DEIGES_ConfigurationNode.  OCAF is linked privately and never reaches the public surface. UIDs are *not* preserved across the round-trip — the IGES file format has no UID slot.  Use #occtl_uid_to_bytes / #occtl_uid_from_bytes for an out-of-band UID handshake if persistent identity is required. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_IO_IGES_READ_OPTIONS_INIT">
+			<return type="double" />
+			<description>
+				Constant wrapper for #define OCCTL_IO_IGES_READ_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_IO_IGES_WRITE_OPTIONS_INIT">
+			<return type="double" />
+			<description>
+				Constant wrapper for #define OCCTL_IO_IGES_WRITE_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="read_options_init">
+			<argument index="0" name="options" type="Ref<OcctlIoIgesReadOptions>" />
+			<description>
+				Initialises @p options to default values matching #OCCTL_IO_IGES_READ_OPTIONS_INIT. NULL-tolerant. @param[out] options  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_io_iges_read /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="write_options_init">
+			<argument index="0" name="options" type="Ref<OcctlIoIgesWriteOptions>" />
+			<description>
+				Initialises @p options to default values matching #OCCTL_IO_IGES_WRITE_OPTIONS_INIT. NULL-tolerant. @param[out] options  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_io_iges_write /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="read">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="path" type="String" />
+			<argument index="1" name="out_root" type="int64_t" />
+			<argument index="2" name="options" type="Ref<OcctlIoIgesReadOptions>" />
+			<description>
+				Reads an IGES file and ingests it into a freshly-created graph. @param[in]  path        Borrows it.  NUL-terminated UTF-8 path to the file.  Must be non-NULL. @param[out] out_graph   Owns it.  Receives a new graph on success; NULL on failure. @param[out] out_root    Borrows it.  Receives the NodeId of the root entity. @param[in]  options     Borrows it.  May be NULL for defaults. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p path, @p out_graph, or @p out_root is NULL. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_IO_ERROR          File not found or unreadable. @retval OCCTL_FORMAT_ERROR      File contents were not a valid IGES stream. @threadsafe Yes. @sa occtl_io_iges_write, occtl_de_read /
+				    [param path] Input parameter.
+				    [param out_root] Output parameter.
+				    [param options] An optional [OcctlIoIgesReadOptions]. Pass null to use defaults.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="write">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="path" type="String" />
+			<argument index="3" name="options" type="Ref<OcctlIoIgesWriteOptions>" />
+			<description>
+				Writes the topology rooted at @p root to an IGES file. @param[in] graph    Borrows it.  Must be non-NULL. @param[in] root     Root node id to serialise. @param[in] path     Borrows it.  NUL-terminated UTF-8 path; existing file is overwritten. @param[in] options  Borrows it.  May be NULL for defaults. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p path is NULL. @retval OCCTL_NOT_FOUND         @p root is invalid or has been removed. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_IO_ERROR          Filesystem failure or unwritable file. @threadsafe Yes (read-only on graph). @sa occtl_io_iges_read, occtl_de_write /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param path] Input parameter.
+				    [param options] An optional [OcctlIoIgesWriteOptions]. Pass null to use defaults.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="OCCTL_IO_IGES_READ_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_IO_IGES_READ_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_IO_IGES_WRITE_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_IO_IGES_WRITE_OPTIONS_VERSION_1.
+		</constant>
+	</constants>
+</class>

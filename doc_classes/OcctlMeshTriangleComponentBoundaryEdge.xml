@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlMeshTriangleComponentBoundaryEdge" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_mesh_triangle_component_boundary_edge_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_mesh_triangle_component_boundary_edge_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_triangle">
+			<return type="int" />
+			<description>
+				Returns the [member triangle] value.
+			</description>
+		</method>
+		<method name="set_triangle">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member triangle] value.
+			</description>
+		</method>
+		<method name="get_local_edge">
+			<return type="int" />
+			<description>
+				Returns the [member local_edge] value.
+			</description>
+		</method>
+		<method name="set_local_edge">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member local_edge] value.
+			</description>
+		</method>
+		<method name="get_node0">
+			<return type="int" />
+			<description>
+				Returns the [member node0] value.
+			</description>
+		</method>
+		<method name="set_node0">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member node0] value.
+			</description>
+		</method>
+		<method name="get_node1">
+			<return type="int" />
+			<description>
+				Returns the [member node1] value.
+			</description>
+		</method>
+		<method name="set_node1">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member node1] value.
+			</description>
+		</method>
+		<method name="get_adjacent_triangle">
+			<return type="int" />
+			<description>
+				Returns the [member adjacent_triangle] value.
+			</description>
+		</method>
+		<method name="set_adjacent_triangle">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member adjacent_triangle] value.
+			</description>
+		</method>
+	</methods>
+</class>

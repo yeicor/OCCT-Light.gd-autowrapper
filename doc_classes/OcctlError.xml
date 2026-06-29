@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlError" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_error_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_error_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_status">
+			<return type="int" />
+			<description>
+				Returns the [member status] value.
+			</description>
+		</method>
+		<method name="set_status">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member status] value.
+			</description>
+		</method>
+		<method name="get_message">
+			<return type="String" />
+			<description>
+				Returns the [member message] value.
+			</description>
+		</method>
+		<method name="set_message">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member message] value.
+			</description>
+		</method>
+		<method name="get_source">
+			<return type="int64_t" />
+			<description>
+				Returns the [member source] value.
+			</description>
+		</method>
+		<method name="set_source">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member source] value.
+			</description>
+		</method>
+		<method name="get_extended">
+			<return type="int" />
+			<description>
+				Returns the [member extended] value.
+			</description>
+		</method>
+		<method name="set_extended">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member extended] value.
+			</description>
+		</method>
+		<method name="from_values">
+			<return type="RefCounted" />
+			<argument index="0" name="status" type="int" />
+			<argument index="1" name="message" type="String" />
+			<description>
+				Constructs a [OcctlError] from Godot-native components.
+				[param status] Input int value.
+				[param message] Input String value.
+				[return] A new [OcctlError] with fields populated.
+			</description>
+		</method>
+	</methods>
+</class>

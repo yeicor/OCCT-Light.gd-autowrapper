@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlAxis2Placement" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_axis2_placement_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_axis2_placement_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_location">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member location] value.
+			</description>
+		</method>
+		<method name="set_location">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member location] value.
+			</description>
+		</method>
+		<method name="get_x_dir">
+			<return type="Ref<OcctlDirection3>" />
+			<description>
+				Returns the [member x_dir] value.
+			</description>
+		</method>
+		<method name="set_x_dir">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlDirection3>" />
+			<description>
+				Sets the [member x_dir] value.
+			</description>
+		</method>
+		<method name="get_x_dir_ref">
+			<return type="Ref<OcctlDirection3>" />
+			<description>
+				Returns the [member x_dir_ref] value.
+			</description>
+		</method>
+		<method name="set_x_dir_ref">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlDirection3>" />
+			<description>
+				Sets the [member x_dir_ref] value.
+			</description>
+		</method>
+		<method name="from_components">
+			<return type="RefCounted" />
+			<argument index="0" name="point" type="Vector3" />
+			<argument index="1" name="z_dir" type="Vector3" />
+			<argument index="2" name="x_dir" type="Vector3" />
+			<description>
+				Constructs a [OcctlAxis2Placement] from Godot-native components.
+				[param point] Input Vector3 value.
+				[param z_dir] Input Vector3 value.
+				[param x_dir] Input Vector3 value.
+				[return] A new [OcctlAxis2Placement] with fields populated.
+			</description>
+		</method>
+	</methods>
+</class>

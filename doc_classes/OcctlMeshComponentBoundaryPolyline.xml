@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlMeshComponentBoundaryPolyline" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_mesh_component_boundary_polyline_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_mesh_component_boundary_polyline_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_first_point">
+			<return type="int" />
+			<description>
+				Returns the [member first_point] value.
+			</description>
+		</method>
+		<method name="set_first_point">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member first_point] value.
+			</description>
+		</method>
+		<method name="get_point_count">
+			<return type="int" />
+			<description>
+				Returns the [member point_count] value.
+			</description>
+		</method>
+		<method name="set_point_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member point_count] value.
+			</description>
+		</method>
+		<method name="get_is_closed">
+			<return type="int" />
+			<description>
+				Returns the [member is_closed] value.
+			</description>
+		</method>
+		<method name="set_is_closed">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_closed] value.
+			</description>
+		</method>
+	</methods>
+</class>

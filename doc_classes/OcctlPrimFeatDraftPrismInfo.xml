@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlPrimFeatDraftPrismInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_prim_feat_draft_prism_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_prim_feat_draft_prism_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_base_shape">
+			<return type="int64_t" />
+			<description>
+				Returns the [member base_shape] value.
+			</description>
+		</method>
+		<method name="set_base_shape">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member base_shape] value.
+			</description>
+		</method>
+		<method name="get_profile_face">
+			<return type="int64_t" />
+			<description>
+				Returns the [member profile_face] value.
+			</description>
+		</method>
+		<method name="set_profile_face">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member profile_face] value.
+			</description>
+		</method>
+		<method name="get_sketch_face">
+			<return type="int64_t" />
+			<description>
+				Returns the [member sketch_face] value.
+			</description>
+		</method>
+		<method name="set_sketch_face">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member sketch_face] value.
+			</description>
+		</method>
+		<method name="get_taper_angle">
+			<return type="double" />
+			<description>
+				Returns the [member taper_angle] value.
+			</description>
+		</method>
+		<method name="set_taper_angle">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member taper_angle] value.
+			</description>
+		</method>
+		<method name="get_combine">
+			<return type="int" />
+			<description>
+				Returns the [member combine] value.
+			</description>
+		</method>
+		<method name="set_combine">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member combine] value.
+			</description>
+		</method>
+		<method name="get_modify">
+			<return type="int" />
+			<description>
+				Returns the [member modify] value.
+			</description>
+		</method>
+		<method name="set_modify">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member modify] value.
+			</description>
+		</method>
+		<method name="get_until_kind">
+			<return type="int" />
+			<description>
+				Returns the [member until_kind] value.
+			</description>
+		</method>
+		<method name="set_until_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member until_kind] value.
+			</description>
+		</method>
+		<method name="get_until_shape">
+			<return type="int64_t" />
+			<description>
+				Returns the [member until_shape] value.
+			</description>
+		</method>
+		<method name="set_until_shape">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member until_shape] value.
+			</description>
+		</method>
+		<method name="get_length">
+			<return type="double" />
+			<description>
+				Returns the [member length] value.
+			</description>
+		</method>
+		<method name="set_length">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member length] value.
+			</description>
+		</method>
+	</methods>
+</class>

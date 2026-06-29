@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlIoPlyWriteOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_io_ply_write_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_io_ply_write_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_system_coordinate_system">
+			<return type="int" />
+			<description>
+				Returns the [member system_coordinate_system] value.
+			</description>
+		</method>
+		<method name="set_system_coordinate_system">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member system_coordinate_system] value.
+			</description>
+		</method>
+		<method name="get_file_coordinate_system">
+			<return type="int" />
+			<description>
+				Returns the [member file_coordinate_system] value.
+			</description>
+		</method>
+		<method name="set_file_coordinate_system">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member file_coordinate_system] value.
+			</description>
+		</method>
+		<method name="get_write_normals">
+			<return type="int" />
+			<description>
+				Returns the [member write_normals] value.
+			</description>
+		</method>
+		<method name="set_write_normals">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member write_normals] value.
+			</description>
+		</method>
+		<method name="get_write_colors">
+			<return type="int" />
+			<description>
+				Returns the [member write_colors] value.
+			</description>
+		</method>
+		<method name="set_write_colors">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member write_colors] value.
+			</description>
+		</method>
+		<method name="get_write_texcoords">
+			<return type="int" />
+			<description>
+				Returns the [member write_texcoords] value.
+			</description>
+		</method>
+		<method name="set_write_texcoords">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member write_texcoords] value.
+			</description>
+		</method>
+		<method name="get_write_part_id">
+			<return type="int" />
+			<description>
+				Returns the [member write_part_id] value.
+			</description>
+		</method>
+		<method name="set_write_part_id">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member write_part_id] value.
+			</description>
+		</method>
+		<method name="get_write_face_id">
+			<return type="int" />
+			<description>
+				Returns the [member write_face_id] value.
+			</description>
+		</method>
+		<method name="set_write_face_id">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member write_face_id] value.
+			</description>
+		</method>
+		<method name="get_comment">
+			<return type="String" />
+			<description>
+				Returns the [member comment] value.
+			</description>
+		</method>
+		<method name="set_comment">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member comment] value.
+			</description>
+		</method>
+		<method name="get_author">
+			<return type="String" />
+			<description>
+				Returns the [member author] value.
+			</description>
+		</method>
+		<method name="set_author">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member author] value.
+			</description>
+		</method>
+	</methods>
+</class>

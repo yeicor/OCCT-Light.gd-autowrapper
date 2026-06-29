@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlGraphMassProperties" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_graph_mass_properties_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_graph_mass_properties_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_linear_length">
+			<return type="double" />
+			<description>
+				Returns the [member linear_length] value.
+			</description>
+		</method>
+		<method name="set_linear_length">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member linear_length] value.
+			</description>
+		</method>
+		<method name="get_surface_area">
+			<return type="double" />
+			<description>
+				Returns the [member surface_area] value.
+			</description>
+		</method>
+		<method name="set_surface_area">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member surface_area] value.
+			</description>
+		</method>
+		<method name="get_volume">
+			<return type="double" />
+			<description>
+				Returns the [member volume] value.
+			</description>
+		</method>
+		<method name="set_volume">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member volume] value.
+			</description>
+		</method>
+		<method name="get_mass">
+			<return type="double" />
+			<description>
+				Returns the [member mass] value.
+			</description>
+		</method>
+		<method name="set_mass">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member mass] value.
+			</description>
+		</method>
+		<method name="get_centre_of_mass">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member centre_of_mass] value.
+			</description>
+		</method>
+		<method name="set_centre_of_mass">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member centre_of_mass] value.
+			</description>
+		</method>
+		<method name="get_inertia">
+			<return type="PackedFloat64Array" />
+			<description>
+				Returns the [member inertia] value.
+			</description>
+		</method>
+		<method name="set_inertia">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedFloat64Array" />
+			<description>
+				Sets the [member inertia] value.
+			</description>
+		</method>
+	</methods>
+</class>

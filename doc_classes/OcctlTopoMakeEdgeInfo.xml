@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoMakeEdgeInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_make_edge_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_make_edge_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_start_vertex">
+			<return type="int64_t" />
+			<description>
+				Returns the [member start_vertex] value.
+			</description>
+		</method>
+		<method name="set_start_vertex">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member start_vertex] value.
+			</description>
+		</method>
+		<method name="get_end_vertex">
+			<return type="int64_t" />
+			<description>
+				Returns the [member end_vertex] value.
+			</description>
+		</method>
+		<method name="set_end_vertex">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member end_vertex] value.
+			</description>
+		</method>
+		<method name="get_curve">
+			<return type="int64_t" />
+			<description>
+				Returns the [member curve] value.
+			</description>
+		</method>
+		<method name="set_curve">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member curve] value.
+			</description>
+		</method>
+		<method name="get_first">
+			<return type="double" />
+			<description>
+				Returns the [member first] value.
+			</description>
+		</method>
+		<method name="set_first">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member first] value.
+			</description>
+		</method>
+		<method name="get_last">
+			<return type="double" />
+			<description>
+				Returns the [member last] value.
+			</description>
+		</method>
+		<method name="set_last">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member last] value.
+			</description>
+		</method>
+		<method name="get_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member tolerance] value.
+			</description>
+		</method>
+		<method name="set_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member tolerance] value.
+			</description>
+		</method>
+	</methods>
+</class>

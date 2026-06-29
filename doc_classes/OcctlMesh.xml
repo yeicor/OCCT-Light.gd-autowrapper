@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlMesh" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_mesh.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_mesh.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_MESH_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_mesh.h @brief OCCT-Light: mesh (triangulation) module public API. Generates surface tessellations and edge polylines for a graph and exposes the cached results — face triangulations, edge polygons, coedge polygons-on-triangulation — as POD views into library-owned memory. @par Indexing convention. Triangle vertex indices and polygon-on-triangulation node indices are **0-indexed** in this ABI (matching NumPy / WASM / C# conventions). View pointers expose the converted buffers directly. @par Lifetime. Mesh views borrow from the source graph. Their pointers remain valid until the graph is mutated (any builder call, any subsequent #occtl_mesh_generate, or graph free) — see each accessor for the exact contract. @sa occtl_topo_face_has_triangulation (in @c occtl_topo.h) — predicate for whether a face has a cached triangulation. @see ../../docs/design/MODULES.md §8 for the module charter. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_MESH_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Static initialiser for #occtl_mesh_options_t. Suitable for @code occtl_mesh_options_t opts = OCCTL_MESH_OPTIONS_INIT; @endcode The angular-deflection default uses #OCCTL_ANGLE_20_DEG_RAD (20 degrees). /.
+			</description>
+		</method>
+		<method name="const_OCCTL_MESH_FROM_BUFFERS_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_MESH_FROM_BUFFERS_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_MESH_TRIANGLE_ADJACENCY_BOUNDARY">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_MESH_TRIANGLE_ADJACENCY_BOUNDARY.
+			</description>
+		</method>
+		<method name="const_OCCTL_MESH_TRIANGLE_COMPONENTS_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_MESH_TRIANGLE_COMPONENTS_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_MESH_TRIANGLE_PLANE_COMPONENTS_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_MESH_TRIANGLE_PLANE_COMPONENTS_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_MESH_TRIANGLE_SPHERE_COMPONENTS_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_MESH_TRIANGLE_SPHERE_COMPONENTS_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_MESH_TRIANGLE_CYLINDER_COMPONENTS_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_MESH_TRIANGLE_CYLINDER_COMPONENTS_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="options_init">
+			<argument index="0" name="options" type="Ref<OcctlMeshOptions>" />
+			<description>
+				Runtime initialiser for #occtl_mesh_options_t. Sets all fields to #OCCTL_MESH_OPTIONS_INIT. @param[out] options Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="model_metadata_set">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="key" type="String" />
+			<argument index="2" name="value" type="String" />
+			<description>
+				Sets mesh-model metadata on the owning graph. This is a mesh-module spelling for graph-level document/model metadata used by mesh exchange formats such as 3MF, glTF, OBJ, and VRML.  The data is stored in the graph metadata storage, so it survives graph clone and native graph snapshots and is visible through #occtl_graph_metadata_get. @param[in,out] graph    Borrows it. Must be non-NULL. @param[in]     key      Metadata key bytes. Borrowed; copied internally. Must be non-NULL and non-empty. @param[in]     keyLen   Length of @p key in bytes. @param[in]     value    Metadata value bytes. Borrowed; copied internally. May be NULL only when @p valueLen is 0. @param[in]     valueLen Length of @p value in bytes. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL; @p key is NULL/empty; or @p value is NULL when @p valueLen > 0. @threadsafe No (mutates graph metadata). @sa occtl_mesh_model_metadata_get, occtl_graph_metadata_set /
+				    [param graph] Input parameter.
+				    [param key] Input parameter.
+				    [param value] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="model_metadata_get">
+			<return type="String" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="key" type="String" />
+			<description>
+				Retrieves mesh-model metadata from the owning graph. Uses the two-call string buffer pattern: call once with @p buf == NULL to learn @p out_required, then call again with a buffer of at least that many bytes.  The written value is NUL-terminated; @p out_required includes the NUL terminator. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  key          Metadata key bytes. Borrowed; must be non-NULL and non-empty. @param[in]  keyLen       Length of @p key in bytes. @param[out] buf          Owns it (caller-allocated). May be NULL to query required size. @param[in]  bufSize      Size of @p buf in bytes. @param[out] out_required Borrows it. Must be non-NULL. Receives required size including NUL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_required is NULL, or @p key is NULL/empty. @retval OCCTL_NOT_FOUND         @p key is not set on @p graph. @retval OCCTL_BUFFER_TOO_SMALL  @p buf is non-NULL and @p bufSize is too small. @threadsafe Yes (read-only on graph metadata). @sa occtl_mesh_model_metadata_set, occtl_mesh_model_metadata_keys /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param key] Input parameter.
+				    [return] String result.
+		</description>
+		</method>
+		<method name="model_metadata_keys">
+			<return type="Array[Ref[OcctlMetadataKeyView]]" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<description>
+				Lists mesh-model metadata keys. Uses the two-call buffer pattern: pass @p out_keys as NULL with @p cap 0 to learn the key count, then call again with an array of at least that many entries.  Returned key pointers borrow from the graph metadata storage and are not necessarily NUL-terminated; use @c key_len. @param[in]  graph     Borrows it. Must be non-NULL. @param[out] out_keys  Borrows it (caller-allocated). Length @p cap; may be NULL to query count. @param[in]  cap       Capacity of @p out_keys in elements. @param[out] out_count Borrows it. Must be non-NULL. Receives total count. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_BUFFER_TOO_SMALL  @p out_keys is non-NULL and @p cap is too small. @threadsafe Yes (read-only on graph metadata). @sa occtl_mesh_model_metadata_get, occtl_graph_metadata_keys /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [return] Array[Ref[OcctlMetadataKeyView]] result.
+		</description>
+		</method>
+		<method name="model_metadata_unset">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="key" type="String" />
+			<description>
+				Removes one mesh-model metadata key. Idempotent: removing a missing key is a successful no-op. @param[in,out] graph  Borrows it. Must be non-NULL. @param[in]     key    Metadata key bytes. Borrowed; must be non-NULL and non-empty. @param[in]     keyLen Length of @p key in bytes. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p key is NULL/empty. @threadsafe No (mutates graph metadata). @sa occtl_mesh_model_metadata_set, occtl_mesh_model_metadata_get /
+				    [param graph] Input parameter.
+				    [param key] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="from_buffers_options_init">
+			<argument index="0" name="options" type="Ref<OcctlMeshFromBuffersOptions>" />
+			<description>
+				Runtime initialiser for #occtl_mesh_from_buffers_options_t. Sets all fields to #OCCTL_MESH_FROM_BUFFERS_OPTIONS_INIT. @param[out] options Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_mesh_from_buffers /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="from_buffers">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="options" type="Ref<OcctlMeshFromBuffersOptions>" />
+			<argument index="1" name="out_root" type="int64_t" />
+			<description>
+				Creates a graph containing one triangulated Face from caller buffers. This is the inverse of the triangle-soup extraction helper for workflows that receive mesh data from engines, WASM, or 3D-print pipelines.  The implementation copies caller buffers into OCCT #Poly_Triangulation and attaches that triangulation to a Face using OCCT topology builders before ingesting the result through BRepGraph.  No wrapper-local mesh store is kept. @param[in]  options   Borrows it. Must be non-NULL and fully initialised. @param[out] out_graph Owns it. Receives a new graph handle. Must be released with #occtl_graph_free. @param[out] out_root  Borrows it. Receives the triangulated Face root. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p options, @p out_graph, or @p out_root is NULL; @c p_next is non-NULL; buffers are inconsistent; coordinates are not finite; an index is out of range; or @c deflection is negative / non-finite. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version is unsupported. @retval OCCTL_GEOMETRY_INVALID  OCCT could not construct a triangulated face from the buffers. @retval OCCTL_TOPOLOGY_INVALID  The triangulated face could not be ingested into BRepGraph. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (allocates a new graph; does not touch shared state). @sa occtl_mesh_triangle_buffers, occtl_mesh_face_triangulation /
+				    [param options] An optional [OcctlMeshFromBuffersOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="generate">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="nodes" type="int64_t" />
+			<argument index="2" name="n_nodes" type="int" />
+			<argument index="3" name="options" type="Ref<OcctlMeshOptions>" />
+			<description>
+				Tessellates the graph (or a node subset). Three modes folded into a single entry point through @p nodes / @p n_nodes: - @p nodes == NULL && @p n_nodes == 0 — mesh every active face and free edge in @p graph (whole-graph dispatch). - @p nodes != NULL && @p n_nodes == 1 — mesh the subtree rooted at that node (single-root dispatch). - @p nodes != NULL && @p n_nodes  > 1 — mesh the deduplicated set of faces reachable from any of the given nodes (multi-node dispatch). If @c options->use_bbox is non-zero the algorithm derives parameters from @c options->bbox / @c options->deviation_coefficient / @c options->deviation_angle; otherwise the explicit @c deflection / @c angle / ... fields are used directly. On success, any cached mesh views over @p graph are invalidated; re-fetch via the accessor functions below before reading. @param[in,out] graph    Borrows it. Must be non-NULL. Mutated: receives generated mesh data on its faces / edges / coedges. @param[in]     nodes    Borrows it. May be NULL when @p n_nodes is 0. When non-NULL must point to at least @p n_nodes valid #occtl_node_id_t entries that already live in @p graph. @param[in]     n_nodes  Number of node IDs. 0 selects the whole-graph dispatch. Must be 0 when @p nodes is NULL. @param[in]     options  Borrows it. Must be non-NULL with a recognised @c struct_version. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p options is NULL, or @p nodes / @p n_nodes is inconsistent. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version is unrecognised. @retval OCCTL_NOT_FOUND         A NodeId in @p nodes is invalid or has been removed from @p graph. @retval OCCTL_NOT_DONE          The tessellation algorithm reported failure. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @retval OCCTL_INTERNAL          A C++ exception was caught at the ABI boundary. @threadsafe No — mutates @p graph. @sa occtl_mesh_face_triangulation, occtl_mesh_edge_polygon3d /
+				    [param graph] Input parameter.
+				    [param nodes] A node.
+				    [param n_nodes] Input parameter.
+				    [param options] An optional [OcctlMeshOptions]. Pass null to use defaults.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="face_triangulation">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="out_view" type="Ref<OcctlTriangulationView>" />
+			<description>
+				Returns the active cached triangulation of @p face. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  face     NodeId of a face in @p graph. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. On success populated with a borrowed view; on failure left untouched. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_view is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid / removed, or it has no cached triangulation (run #occtl_mesh_generate first). @retval OCCTL_WRONG_KIND        @p face is not #OCCTL_KIND_FACE. @retval OCCTL_INTERNAL          Internal failure. @threadsafe Yes (read-only on @p graph). @sa occtl_topo_face_has_triangulation, occtl_mesh_face_triangulation_count, occtl_mesh_face_triangulation_indexed /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param face] A node.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="face_triangulation_count">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="out_count" type="PackedInt32Array" />
+			<description>
+				Returns the number of cached triangulations on @p face. Faces may carry several LOD-style triangulations; this accessor reports how many. Most workflows use the active triangulation (#occtl_mesh_face_triangulation) and ignore the multi-mesh case. @param[in]  graph     Borrows it. Must be non-NULL. @param[in]  face      NodeId of a face in @p graph. @param[out] out_count Borrows it. Must be non-NULL. @retval OCCTL_OK                Success; @p out_count receives the count (0 when there is no cached mesh). @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid or removed. @retval OCCTL_WRONG_KIND        @p face is not #OCCTL_KIND_FACE. @threadsafe Yes. @sa occtl_mesh_face_triangulation, occtl_mesh_face_triangulation_indexed /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param face] A node.
+				    [param out_count] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="face_triangulation_indexed">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="index" type="int" />
+			<argument index="3" name="out_view" type="Ref<OcctlTriangulationView>" />
+			<description>
+				Returns the @p index-th cached triangulation of @p face. @p index ranges over @c [0, occtl_mesh_face_triangulation_count(graph, face)). @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  face     NodeId of a face in @p graph. @param[in]  index    0-based triangulation index. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_view is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid or has no cached mesh. @retval OCCTL_OUT_OF_RANGE      @p index is past the number of cached triangulations. @retval OCCTL_WRONG_KIND        @p face is not #OCCTL_KIND_FACE. @threadsafe Yes. @sa occtl_mesh_face_triangulation /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param face] A node.
+				    [param index] Input parameter.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="edge_polygon3d">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="out_view" type="Ref<OcctlPolygon3dView>" />
+			<description>
+				Returns the cached 3D polygon on @p edge. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  edge     NodeId of an edge in @p graph. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_view is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid / removed, or it has no cached 3D polygon. @retval OCCTL_WRONG_KIND        @p edge is not #OCCTL_KIND_EDGE. @threadsafe Yes. /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param edge] A node.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="coedge_polygon_on_tri">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="coedge" type="int64_t" />
+			<argument index="2" name="out_view" type="Ref<OcctlPolygonOnTriView>" />
+			<description>
+				Returns the cached polygon-on-triangulation for @p coedge. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  coedge   NodeId of a coedge in @p graph. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_view is NULL. @retval OCCTL_NOT_FOUND         @p coedge is invalid / removed, or it has no cached polygon-on-triangulation. @retval OCCTL_WRONG_KIND        @p coedge is not #OCCTL_KIND_COEDGE. @threadsafe Yes. /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param coedge] A node.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_buffers">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="out_view" type="Ref<OcctlMeshTriangleBuffersView>" />
+			<description>
+				Aggregates cached face triangulations into engine-friendly buffers. @p root may be #OCCTL_NODE_ID_INVALID to include every active face in @p graph.  Otherwise @p root must name an active graph node; all faces reachable below that root are included.  Run #occtl_mesh_generate first. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  root     Root node to extract, or #OCCTL_NODE_ID_INVALID for whole-graph extraction. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. Receives borrowed buffers owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_view is NULL. @retval OCCTL_NOT_FOUND         @p root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_generate, occtl_mesh_face_triangulation /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_analysis">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="out_view" type="Ref<OcctlMeshTriangleAnalysisView>" />
+			<description>
+				Computes cached per-triangle normals and adjacency for mesh buffers. @p root may be #OCCTL_NODE_ID_INVALID to include every active face in @p graph.  Otherwise @p root must name an active graph node; all faces reachable below that root are included.  Run #occtl_mesh_generate first. Triangle normals are computed with OCCT vector operations from the cached triangulation coordinates; adjacency is built from shared triangle edges. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  root     Root node to analyse, or #OCCTL_NODE_ID_INVALID for whole-graph analysis. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. Receives borrowed buffers owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_view is NULL. @retval OCCTL_NOT_FOUND         @p root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_buffers, occtl_mesh_generate /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_components_options_init">
+			<argument index="0" name="options" type="Ref<OcctlMeshTriangleComponentsOptions>" />
+			<description>
+				Initialises @p options to default triangle-component settings. NULL-tolerant. @param[out] options Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_mesh_triangle_components /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="triangle_components">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleComponentsOptions>" />
+			<argument index="2" name="out_view" type="Ref<OcctlMeshTriangleComponentsView>" />
+			<description>
+				Groups adjacent triangles into normal-connected components. This is a graph-owned cache view intended as a deterministic substrate for mesh reverse-engineering and primitive patch detection.  It first builds the same aggregate triangle soup as #occtl_mesh_triangle_buffers, computes normals/adjacency as #occtl_mesh_triangle_analysis does, then runs a BFS over adjacent triangles whose normals satisfy @p options. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  options  Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. Receives borrowed buffers owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_analysis, occtl_mesh_triangle_buffers /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleComponentsOptions]. Pass null to use defaults.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_component_triangles">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleComponentsOptions>" />
+			<argument index="2" name="component_id" type="int" />
+			<argument index="3" name="out_view" type="Ref<OcctlMeshTriangleComponentTrianglesView>" />
+			<description>
+				Returns aggregate triangle indices belonging to one component. Uses the same traversal and normal-connected component labelling as #occtl_mesh_triangle_components for @p options, then filters the dense triangle labels for @p component_id. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[in]  component_id Component ID to select. @param[out] out_view     Borrows it (caller-allocated). Must be non-NULL. Receives a borrowed triangle-index buffer owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_RANGE      @p component_id is not present. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_components, occtl_mesh_triangle_buffers /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleComponentsOptions]. Pass null to use defaults.
+				    [param component_id] Input parameter.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_component_boundary">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleComponentsOptions>" />
+			<argument index="2" name="component_id" type="int" />
+			<argument index="3" name="out_view" type="Ref<OcctlMeshTriangleComponentBoundaryView>" />
+			<description>
+				Returns boundary edges for one normal-connected triangle component. Uses the same traversal and component labelling as #occtl_mesh_triangle_components for @p options.  An edge is reported when it has no adjacent triangle, or when the adjacent triangle belongs to a different component.  Returned node indices refer to the aggregate triangle buffers for the same root/options. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[in]  component_id Component ID to select. @param[out] out_view     Borrows it (caller-allocated). Must be non-NULL. Receives a borrowed boundary-edge buffer owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_RANGE      @p component_id is not present. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_components, occtl_mesh_triangle_analysis /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleComponentsOptions]. Pass null to use defaults.
+				    [param component_id] Input parameter.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_component_boundary_chains">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleComponentsOptions>" />
+			<argument index="2" name="component_id" type="int" />
+			<argument index="3" name="out_view" type="Ref<OcctlMeshTriangleComponentBoundaryChainsView>" />
+			<description>
+				Returns ordered boundary chains for one normal-connected triangle component. This first computes #occtl_mesh_triangle_component_boundary, then orders the component perimeter edges into contiguous head-to-tail chains.  Closed mesh patches normally return one or more closed chains; open or non-manifold patches may return open chains. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[in]  component_id Component ID to select. @param[out] out_view     Borrows it (caller-allocated). Must be non-NULL. Receives borrowed ordered chain buffers owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_RANGE      @p component_id is not present. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_component_boundary, occtl_mesh_triangle_components /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleComponentsOptions]. Pass null to use defaults.
+				    [param component_id] Input parameter.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="component_boundary_polylines">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleComponentsOptions>" />
+			<argument index="2" name="component_id" type="int" />
+			<argument index="3" name="out_view" type="Ref<OcctlMeshComponentBoundaryPolylinesView>" />
+			<description>
+				Returns ordered 3D boundary polylines for one triangle component. This computes ordered boundary chains and materialises their aggregate node indices as 3D points.  Closed chains repeat their first point at the end of the polyline. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[in]  component_id Component ID to select. @param[out] out_view     Borrows it (caller-allocated). Must be non-NULL. Receives borrowed ordered polyline buffers owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_RANGE      @p component_id is not present. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_component_boundary_chains, occtl_mesh_triangle_buffers /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleComponentsOptions]. Pass null to use defaults.
+				    [param component_id] Input parameter.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_component_summaries">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleComponentsOptions>" />
+			<argument index="2" name="out_view" type="Ref<OcctlMeshTriangleComponentSummariesView>" />
+			<description>
+				Computes summaries for normal-connected triangle components. This uses the same traversal, normal-angle grouping, and graph-owned buffers as #occtl_mesh_triangle_components, then computes one summary per component.  Geometry accumulation uses OCCT point/vector primitives over the cached triangulation buffers. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  options  Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. Receives a borrowed summary array owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_components, occtl_mesh_triangle_analysis /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleComponentsOptions]. Pass null to use defaults.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_plane_components_options_init">
+			<argument index="0" name="options" type="Ref<OcctlMeshTrianglePlaneComponentsOptions>" />
+			<description>
+				Initialises @p options to default plane-component detector settings. NULL-tolerant. @param[out] options Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_mesh_triangle_plane_components /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="triangle_plane_components">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTrianglePlaneComponentsOptions>" />
+			<argument index="2" name="out_view" type="Ref<OcctlMeshTrianglePlaneComponentsView>" />
+			<description>
+				Detects plane-like normal-connected triangle components. This is a first reverse-engineering primitive detector over graph-owned mesh buffers.  It groups triangles by normal connectivity, computes component summaries, and validates each component against an OCCT #gp_Pln plane using @c max_distance. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  options  Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. Receives a borrowed component array owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_component_summaries, occtl_mesh_triangle_components /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTrianglePlaneComponentsOptions]. Pass null to use defaults.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_sphere_components_options_init">
+			<argument index="0" name="options" type="Ref<OcctlMeshTriangleSphereComponentsOptions>" />
+			<description>
+				Initialises @p options to default sphere-component detector settings. NULL-tolerant. @param[out] options Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_mesh_triangle_sphere_components /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="triangle_sphere_components">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleSphereComponentsOptions>" />
+			<argument index="2" name="out_view" type="Ref<OcctlMeshTriangleSphereComponentsView>" />
+			<description>
+				Detects sphere-like normal-connected triangle components. This reverse-engineering primitive detector groups triangles by normal connectivity, computes component summaries, fits each component to a sphere with OCCT @c math_SVD, and validates radial residuals with OCCT point-distance calculations. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  options  Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. Receives a borrowed component array owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_component_summaries, occtl_mesh_triangle_plane_components /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleSphereComponentsOptions]. Pass null to use defaults.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="triangle_cylinder_components_options_init">
+			<argument index="0" name="options" type="Ref<OcctlMeshTriangleCylinderComponentsOptions>" />
+			<description>
+				Initialises @p options to default cylinder-component detector settings. NULL-tolerant. @param[out] options Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_mesh_triangle_cylinder_components /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="triangle_cylinder_components">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleCylinderComponentsOptions>" />
+			<argument index="2" name="out_view" type="Ref<OcctlMeshTriangleCylinderComponentsView>" />
+			<description>
+				Detects cylinder-like normal-connected triangle components. This reverse-engineering primitive detector groups triangles by normal connectivity, computes component summaries, fits each component to a cylinder with OCCT @c math_Jacobi and @c math_SVD, and validates radial residuals with OCCT point-to-line distance calculations. @param[in]  graph    Borrows it. Must be non-NULL. @param[in]  options  Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_view Borrows it (caller-allocated). Must be non-NULL. Receives a borrowed component array owned by @p graph. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_view is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe Yes (read-only on @p graph; serialises cache materialisation). @sa occtl_mesh_triangle_component_summaries, occtl_mesh_triangle_sphere_components /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlMeshTriangleCylinderComponentsOptions]. Pass null to use defaults.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="make_sphere_component_solid">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleSphereComponentsOptions>" />
+			<argument index="2" name="component_id" type="int" />
+			<argument index="3" name="out_solid" type="int64_t" />
+			<description>
+				Rebuilds one sphere-like triangle component as an analytic sphere Solid. This detects sphere-like components using @p options, builds an OCCT analytic sphere Solid from the selected fitted component, then inserts it into @p graph as a new topology root.  The source mesh component is not removed or modified. @param[in,out] graph        Borrows it. Must be non-NULL. Receives the new Solid root on success. @param[in]     options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[in]     component_id Sphere-like component ID to rebuild. @param[out]    out_solid    Borrows it (caller-allocated). Must be non-NULL. Receives the new Solid node ID. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_solid is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, no cached face triangulation was found, or @p component_id is not sphere-like. @retval OCCTL_OUT_OF_RANGE      @p component_id is not present. @retval OCCTL_GEOMETRY_INVALID  OCCT could not build the analytic sphere. @retval OCCTL_TOPOLOGY_INVALID  BRepGraph could not ingest the rebuilt Solid. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No. Mutates @p graph by inserting a new Solid. @sa occtl_mesh_triangle_sphere_components /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlMeshTriangleSphereComponentsOptions]. Pass null to use defaults.
+				    [param component_id] Input parameter.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="make_cylinder_component_solid">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleCylinderComponentsOptions>" />
+			<argument index="2" name="component_id" type="int" />
+			<argument index="3" name="out_solid" type="int64_t" />
+			<description>
+				Rebuilds one cylinder-like triangle component as an analytic cylinder Solid. This detects cylinder-like components using @p options, builds an OCCT analytic cylinder Solid from the selected fitted component, then inserts it into @p graph as a new topology root.  The source mesh component is not removed or modified. @param[in,out] graph        Borrows it. Must be non-NULL. Receives the new Solid root on success. @param[in]     options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[in]     component_id Cylinder-like component ID to rebuild. @param[out]    out_solid    Borrows it (caller-allocated). Must be non-NULL. Receives the new Solid node ID. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_solid is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, no cached face triangulation was found, or @p component_id is not cylinder-like. @retval OCCTL_OUT_OF_RANGE      @p component_id is not present. @retval OCCTL_GEOMETRY_INVALID  OCCT could not build the analytic cylinder. @retval OCCTL_TOPOLOGY_INVALID  BRepGraph could not ingest the rebuilt Solid. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No. Mutates @p graph by inserting a new Solid. @sa occtl_mesh_triangle_cylinder_components /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlMeshTriangleCylinderComponentsOptions]. Pass null to use defaults.
+				    [param component_id] Input parameter.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="make_sphere_component_solids">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleSphereComponentsOptions>" />
+			<description>
+				Rebuilds all detected sphere-like triangle components as analytic Solids. This is the bulk form of #occtl_mesh_make_sphere_component_solid.  It first detects sphere-like components using @p options, then builds OCCT analytic sphere Solids and inserts them into @p graph.  The source mesh components are not removed or modified. Uses the two-call buffer pattern: pass @p out_buf as NULL with @p cap 0 to query @p out_count without mutating @p graph, then call again with an array of at least that many entries to receive the new Solid node IDs. @param[in,out] graph     Borrows it. Must be non-NULL. Receives new Solid roots on the fill call. @param[in]     options   Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out]    out_buf   Owns it (caller-allocated). May be NULL to query the required count. Receives @p out_count Solid node IDs on success. @param[in]     cap       Capacity of @p out_buf in elements. @param[out]    out_count Borrows it (caller-allocated). Must be non-NULL. Receives the number of sphere-like components. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_count is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @retval OCCTL_GEOMETRY_INVALID  OCCT could not build an analytic sphere. @retval OCCTL_TOPOLOGY_INVALID  BRepGraph could not ingest a rebuilt Solid. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No. The fill call mutates @p graph by inserting new Solids. The sizing call is read-only except for cache materialisation. @sa occtl_mesh_make_sphere_component_solid, occtl_mesh_triangle_sphere_components /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlMeshTriangleSphereComponentsOptions]. Pass null to use defaults.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="make_cylinder_component_solids">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTriangleCylinderComponentsOptions>" />
+			<description>
+				Rebuilds all detected cylinder-like triangle components as analytic Solids. This is the bulk form of #occtl_mesh_make_cylinder_component_solid.  It first detects cylinder-like components using @p options, then builds OCCT analytic cylinder Solids and inserts them into @p graph.  The source mesh components are not removed or modified. Uses the two-call buffer pattern: pass @p out_buf as NULL with @p cap 0 to query @p out_count without mutating @p graph, then call again with an array of at least that many entries to receive the new Solid node IDs. @param[in,out] graph     Borrows it. Must be non-NULL. Receives new Solid roots on the fill call. @param[in]     options   Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out]    out_buf   Owns it (caller-allocated). May be NULL to query the required count. Receives @p out_count Solid node IDs on success. @param[in]     cap       Capacity of @p out_buf in elements. @param[out]    out_count Borrows it (caller-allocated). Must be non-NULL. Receives the number of cylinder-like components. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_count is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @retval OCCTL_GEOMETRY_INVALID  OCCT could not build an analytic cylinder. @retval OCCTL_TOPOLOGY_INVALID  BRepGraph could not ingest a rebuilt Solid. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No. The fill call mutates @p graph by inserting new Solids. The sizing call is read-only except for cache materialisation. @sa occtl_mesh_make_cylinder_component_solid, occtl_mesh_triangle_cylinder_components /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlMeshTriangleCylinderComponentsOptions]. Pass null to use defaults.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="make_plane_component_face">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTrianglePlaneComponentsOptions>" />
+			<argument index="2" name="component_id" type="int" />
+			<argument index="3" name="out_face" type="int64_t" />
+			<description>
+				Rebuilds one plane-like triangle component as a planar BRepGraph Face. This is a first mesh-to-BRep recovery bridge.  It detects plane-like components using @p options, materialises ordered boundary polylines for @p component_id, builds OCCT wires and a planar Face, then inserts that Face into @p graph as a new topology root.  The source mesh component is not removed or modified. @param[in,out] graph        Borrows it. Must be non-NULL. Receives the new Face root on success. @param[in]     options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[in]     component_id Plane-like component ID to rebuild. @param[out]    out_face     Borrows it (caller-allocated). Must be non-NULL. Receives the new Face node ID. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_face is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, no cached face triangulation was found, or @p component_id is not plane-like. @retval OCCTL_OUT_OF_RANGE      @p component_id is not present. @retval OCCTL_GEOMETRY_INVALID  OCCT could not build wires / Face from the component boundary. @retval OCCTL_TOPOLOGY_INVALID  BRepGraph could not ingest the rebuilt Face. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No. Mutates @p graph by inserting a new Face. @sa occtl_mesh_triangle_plane_components, occtl_mesh_component_boundary_polylines /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlMeshTrianglePlaneComponentsOptions]. Pass null to use defaults.
+				    [param component_id] Input parameter.
+				    [param out_face] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="make_plane_component_faces">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlMeshTrianglePlaneComponentsOptions>" />
+			<description>
+				Rebuilds all detected plane-like triangle components as planar Face roots. This is the bulk form of #occtl_mesh_make_plane_component_face.  It first detects plane-like components using @p options, then builds OCCT planar Faces from each component boundary and inserts them into @p graph.  The source mesh components are not removed or modified. Uses the two-call buffer pattern: pass @p out_buf as NULL with @p cap 0 to query @p out_count without mutating @p graph, then call again with an array of at least that many entries to receive the new Face node IDs. @param[in,out] graph     Borrows it. Must be non-NULL. Receives new Face roots on the fill call. @param[in]     options   Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out]    out_buf   Owns it (caller-allocated). May be NULL to query the required count. Receives @p out_count Face node IDs on success. @param[in]     cap       Capacity of @p out_buf in elements. @param[out]    out_count Borrows it (caller-allocated). Must be non-NULL. Receives the number of plane-like components. @retval OCCTL_OK                Success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_count is NULL; @c p_next is non-NULL; or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid / removed, or no cached face triangulation was found. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @retval OCCTL_GEOMETRY_INVALID  OCCT could not build wires / Faces from a component boundary. @retval OCCTL_TOPOLOGY_INVALID  BRepGraph could not ingest a rebuilt Face. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No. The fill call mutates @p graph by inserting new Faces. The sizing call is read-only except for cache materialisation. @sa occtl_mesh_make_plane_component_face, occtl_mesh_triangle_plane_components /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlMeshTrianglePlaneComponentsOptions]. Pass null to use defaults.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="OCCTL_MESH_OPTIONS_VERSION_1" value="1u">
+			Current options struct version. Bumped only on a binary-incompatible change. New fields are appended via @c p_next-chained extension structs. /.
+		</constant>
+		<constant name="OCCTL_MESH_FROM_BUFFERS_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_MESH_FROM_BUFFERS_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_MESH_TRIANGLE_COMPONENTS_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_MESH_TRIANGLE_COMPONENTS_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_MESH_TRIANGLE_PLANE_COMPONENTS_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_MESH_TRIANGLE_PLANE_COMPONENTS_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_MESH_TRIANGLE_SPHERE_COMPONENTS_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_MESH_TRIANGLE_SPHERE_COMPONENTS_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_MESH_TRIANGLE_CYLINDER_COMPONENTS_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_MESH_TRIANGLE_CYLINDER_COMPONENTS_OPTIONS_VERSION_1.
+		</constant>
+	</constants>
+</class>

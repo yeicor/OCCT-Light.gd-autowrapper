@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoAlgo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_topo_algo.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_topo_algo.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_TOPO_ALGO_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_topo_algo.h @brief OCCT-Light: graph-native algorithms — sewing, same-parameter recompute, validation. These wrap the @c BRepGraphAlgo and @c BRepGraphCheck families in OCCT. They are part of the @c topo module; this header is gated by @c OCCTL_HAS_TOPO in the umbrella include. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_SEW_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Default-value initialiser for #occtl_topo_sew_options_t..
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_SEW_RESULT_INIT">
+			<return type="int64_t" />
+			<description>
+				Default-value initialiser for #occtl_topo_sew_result_t..
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_SAME_PARAMETER_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_SAME_PARAMETER_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_FILLET_OPTIONS_INIT">
+			<return type="double" />
+			<description>
+				Default-value initialiser for #occtl_topo_fillet_options_t..
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_EDGE_BLEND_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_EDGE_BLEND_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAX_FILLET_RADIUS_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAX_FILLET_RADIUS_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_PROJECT_ON_FACE_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_PROJECT_ON_FACE_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_WRAP_ON_FACE_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_WRAP_ON_FACE_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_PROJECT_FACE_DIRECTION_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_PROJECT_FACE_DIRECTION_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_FACE_TO_ARCS_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_FACE_TO_ARCS_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_HLR_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_HLR_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_HLR_RESULT_INIT">
+			<return type="int64_t" />
+			<description>
+				Default-value initialiser for #occtl_topo_hlr_result_t..
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_DRAFT_FACES_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_DRAFT_FACES_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_DEFEATURE_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_DEFEATURE_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_OFFSET_FEATURES_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_OFFSET_FEATURES_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_FILLING_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_FILLING_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_FILLING_PATCH_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_FILLING_PATCH_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_SPLIT_BY_PLANE_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_SPLIT_BY_PLANE_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_SECTION_BY_PLANES_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_SECTION_BY_PLANES_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_EXTRUDE_FACES_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_EXTRUDE_FACES_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_LINEAR_PATTERN_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Default-value initialiser for #occtl_topo_linear_pattern_options_t..
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_CIRCULAR_PATTERN_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Default-value initialiser for #occtl_topo_circular_pattern_options_t..
+			</description>
+		</method>
+		<method name="sew_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoSewOptions>" />
+			<description>
+				Initialises @p options to default values matching #OCCTL_TOPO_SEW_OPTIONS_INIT. NULL-tolerant. @param[out] options  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_sew /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="sew_result_init">
+			<argument index="0" name="result" type="Ref<OcctlTopoSewResult>" />
+			<description>
+				Initialises @p result to default zeros, ready for filling by #occtl_topo_sew. NULL-tolerant. @param[out] result  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_sew /
+				    [param result] Output parameter.
+		</description>
+		</method>
+		<method name="sew">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoSewOptions>" />
+			<argument index="2" name="out_result" type="Ref<OcctlTopoSewResult>" />
+			<description>
+				Sews free edges of @p graph in place. Wraps @c BRepGraphAlgo_Sewing::Perform.  Caller-allocated @p options and @p out_result; both versioned.  Pass NULL for @p options to use the defaults; @p out_result is optional and may be NULL when the caller does not need diagnostics. @param[in,out] graph        Borrows it.  Must be non-NULL. @param[in]     options      Borrows it.  May be NULL. @param[out]    out_result   Borrows it.  May be NULL.  When non-NULL must carry a supported struct_version. @retval OCCTL_OK                On success (sewing may still report is_done == 0). @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_VERSION_MISMATCH  @p options or @p out_result has an unsupported struct_version. @threadsafe No — mutates the graph. @sa occtl_topo_sew_options_init /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoSewOptions]. Pass null to use defaults.
+				    [param out_result] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="same_parameter_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoSameParameterOptions>" />
+			<description>
+				@copydoc occtl_topo_sew_options_init
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="recompute_same_parameter">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoSameParameterOptions>" />
+			<argument index="2" name="out_c0_fallback_count" type="PackedInt32Array" />
+			<argument index="3" name="out_approx_fallback_count" type="PackedInt32Array" />
+			<description>
+				Recomputes SameParameter on every active edge of @p graph. Wraps @c BRepGraphAlgo_SameParameter::Perform on the full edge set. Tolerance is updated edge-by-edge. @param[in,out] graph                  Borrows it.  Must be non-NULL. @param[in]     options                Borrows it.  May be NULL for defaults. @param[out]    out_c0_fallback_count    Borrows it.  May be NULL.  Receives the number of edges where a C0 BSpline PCurve could not be promoted to C1. @param[out]    out_approx_fallback_count Borrows it.  May be NULL.  Receives the number of edges where Approx SameParameter failed. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @threadsafe No — mutates the graph. @sa occtl_topo_sew /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoSameParameterOptions]. Pass null to use defaults.
+				    [param out_c0_fallback_count] Output parameter.
+				    [param out_approx_fallback_count] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="check">
+			<return type="Array[Ref[OcctlTopoCheckIssue]]" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<description>
+				Runs the full validation suite on @p graph and reports diagnostic issues. Two-call buffer (§10.1 of @c ABI_PATTERNS.md): pass @p out_issues as NULL with @p cap=0 to size; reissue with a buffer of length at least the returned @p out_count. @param[in]     graph       Must be non-NULL. @param[out]    out_issues  Borrows it.  Length @p cap.  May be NULL on the sizing call. @param[in]     cap         Capacity of @p out_issues. @param[out]    out_count   Borrows it.  Receives the total issue count. @retval OCCTL_OK                Success — either sizing or full fill. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_BUFFER_TOO_SMALL  @p cap < total issue count and @p out_issues is non-NULL. @threadsafe Yes (read-only on graph). @sa occtl_topo_sew /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [return] Array[Ref[OcctlTopoCheckIssue]] result.
+		</description>
+		</method>
+		<method name="fillet_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoFilletOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_FILLET_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_fillet /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="fillet">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="opts" type="Ref<OcctlTopoFilletOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Applies a 3D fillet or chamfer to all solids and standalone shells in @p graph. Every edge of every top-level solid and standalone shell is processed; the result shape is placed into a newly-allocated output graph. @param[in]     graph      Borrows it.  Must be non-NULL.  Provides the input topology (not modified). @param[in]     opts       Borrows it.  Must be non-NULL and carry a supported struct_version. @param[out]    out_graph  Owns it.  Must be non-NULL.  Receives a newly-allocated graph handle. @param[out]    out_root   Borrows it.  Must be non-NULL.  Receives the root NodeId of the filleted result in @p *out_graph. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p opts, @p out_graph, or @p out_root is NULL. @retval OCCTL_VERSION_MISMATCH  @p opts has an unsupported struct_version. @retval OCCTL_GEOMETRY_INVALID  The algorithm failed to produce a valid result (e.g. radius too large for the geometry). @threadsafe No — allocates a new graph. @sa occtl_topo_fillet_options_init /
+				    [param graph] Input parameter.
+				    [param opts] An optional [OcctlTopoFilletOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="edge_blend_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoEdgeBlendOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_EDGE_BLEND_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_blend_edges /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="blend_edges">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoEdgeBlendOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Applies a selected-edge 3D fillet or chamfer to @p options->root. Output is a new graph; the input graph is not modified. Unlike #occtl_topo_fillet, this operation is scoped to the selected edge set in @p options. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the modified root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c edge_count is zero, or a distance/radius is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root or a selected edge is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected NodeId is not an Edge. @retval OCCTL_GEOMETRY_INVALID  The algorithm failed to produce a valid result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No — allocates a new graph. @sa occtl_topo_transformed /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoEdgeBlendOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="max_fillet_radius_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoMaxFilletRadiusOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_MAX_FILLET_RADIUS_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_max_fillet_radius /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="max_fillet_radius">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoMaxFilletRadiusOptions>" />
+			<argument index="2" name="out_radius" type="PackedFloat64Array" />
+			<description>
+				Estimates the largest constant-radius fillet accepted for selected edges. The input graph is not modified. The estimate is conservative: each trial radius is validated by OCCT @c BRepFilletAPI_MakeFillet::Build(), and the largest successful trial within @p options->tolerance is returned. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_radius Borrows it. Must be non-NULL. Receives the estimated maximum radius. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c edge_count is zero, or a search option is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root or a selected edge is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected NodeId is not an Edge. @retval OCCTL_GEOMETRY_INVALID  OCCT could not find a successful radius. @threadsafe No. Runs trial OCCT fillet builds. @sa occtl_topo_blend_edges, occtl_topo_edge_blend_options_init /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoMaxFilletRadiusOptions]. Pass null to use defaults.
+				    [param out_radius] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="transformed">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="transform" type="Ref<OcctlTransform>" />
+			<argument index="3" name="out_root" type="int64_t" />
+			<description>
+				Creates a transformed copy of the shape rooted at @p root. Output is a new graph; the input graph is not modified. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  root       NodeId of the shape to transform. @param[in]  transform  Affine transform to apply. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the transformed root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p out_graph, or @p out_root is NULL. @retval OCCTL_NOT_FOUND         @p root is invalid, removed, or cannot be resolved. @retval OCCTL_GEOMETRY_INVALID  The transformed shape is null. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No — allocates a new graph. @sa occtl_topo_blend_edges /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param transform] A [OcctlTransform].
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="project_on_face_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoProjectOnFaceOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_PROJECT_ON_FACE_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_project_on_face /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="project_on_face">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoProjectOnFaceOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Projects an edge or wire onto a target face along face normals. Output is a new graph; the input graph is not modified. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the projected root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, or an option value is outside the supported range. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c source or @c face is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        @c source is not an Edge or Wire, or @c face is not a Face. @retval OCCTL_GEOMETRY_INVALID  Projection failed to produce a result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No — allocates a new graph. @sa occtl_topo_make_filling /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoProjectOnFaceOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="wrap_on_face_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoWrapOnFaceOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_WRAP_ON_FACE_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_wrap_on_face /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="wrap_on_face">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoWrapOnFaceOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Wraps a planar Edge, Wire, or Face onto a target Face. Output is a new graph; the input graph is not modified. The result conforms planar input to the target Face. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the wrapped result root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL or an option is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c source or @c target_face is invalid or removed. @retval OCCTL_WRONG_KIND        @c source is not an Edge, Wire, or Face, or @c target_face is not a Face. @retval OCCTL_GEOMETRY_INVALID  OCCT could not construct a wrapped result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into the output graph. @threadsafe No. Allocates a new graph and runs OCCT modeling algorithms. @sa occtl_topo_project_on_face, occtl_topo_make_filling_patch /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoWrapOnFaceOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="project_face_direction_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoProjectFaceDirectionOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_PROJECT_FACE_DIRECTION_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_project_face_along_direction /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="project_face_along_direction">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoProjectFaceDirectionOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Projects a face onto target boundary faces along a fixed direction. Output is a new graph; the input graph is not modified. Internally OCCT-Light builds a prism from @c source_face, intersects it with the target boundary faces using OCCT Boolean common, and stores the resulting faces or shells in a fresh BRepGraph. For Solid, CompSolid, and Compound targets, only boundary faces are used, so the operation returns projected surface fragments rather than a volumetric intersection. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the projected result root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c direction is zero/non-finite, or @c max_distance is non-finite. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c source_face or @c target is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        @c source_face is not a Face, or @c target has no boundary faces. @retval OCCTL_GEOMETRY_INVALID  Projection failed to produce a result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No — allocates a new graph. @sa occtl_topo_project_on_face /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoProjectFaceDirectionOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="face_to_arcs_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoFaceToArcsOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_FACE_TO_ARCS_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_face_to_arcs /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="face_to_arcs">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoFaceToArcsOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Converts planar face or wire boundaries to line and circular-arc edges. Output is a new graph; the input graph is not modified. Face input returns a Face root. Wire input must be closed and planar enough to define a support face; the returned root is the converted outer Wire. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the converted Face or Wire root. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, or @c angular_tolerance is non-positive or non-finite. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c source is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        @c source is neither Face nor Wire. @retval OCCTL_GEOMETRY_INVALID  OCCT could not build or convert the face. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into the output graph. @threadsafe No — allocates a new graph. @sa occtl_topo_project_face_along_direction /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoFaceToArcsOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="hlr_result_init">
+			<argument index="0" name="result" type="Ref<OcctlTopoHlrResult>" />
+			<description>
+				Initialises @p result to defaults matching #OCCTL_TOPO_HLR_RESULT_INIT. NULL-tolerant. @param[out] result  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_hlr_projection /
+				    [param result] Output parameter.
+		</description>
+		</method>
+		<method name="hlr_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoHlrOptions>" />
+			<description>
+				Initialises @p options to default values matching #OCCTL_TOPO_HLR_OPTIONS_INIT. NULL-tolerant. @param[out] options Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_hlr_projection /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="make_hlr_projection">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoHlrOptions>" />
+			<argument index="2" name="out_result" type="Ref<OcctlTopoHlrResult>" />
+			<description>
+				Projects a graph root with OCCT hidden-line removal. The output graph contains one root per non-empty requested category. Each category is an OCCT-generated edge compound ingested into BRepGraph, so downstream drawing exporters can traverse ordinary graph topology instead of owning HLR-specific objects. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_result Borrows it. Receives an owned output graph and category roots. Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  A required pointer is NULL, @c p_next is non-NULL, or an option value is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid, removed, or cannot be resolved. @retval OCCTL_GEOMETRY_INVALID  OCCT HLR produced no requested edge category. @retval OCCTL_TOPOLOGY_INVALID  A projected category could not be ingested into the output graph. @threadsafe No. Allocates a new graph and runs OCCT HLR algorithms. @sa occtl_curve_to_bezier_segments, occtl_topo_face_to_arcs /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoHlrOptions]. Pass null to use defaults.
+				    [param out_result] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="draft_faces_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoDraftFacesOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_DRAFT_FACES_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_draft_faces /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="draft_faces">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoDraftFacesOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Applies a draft angle to selected faces of a shape. Output is a new graph; the input graph is not modified. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the drafted root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c face_count is zero, or @c angle is zero. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root or a selected face is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected NodeId is not a Face. @retval OCCTL_GEOMETRY_INVALID  Draft failed to produce a valid result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No — allocates a new graph. @sa occtl_topo_blend_edges /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoDraftFacesOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="defeature_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoDefeatureOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_DEFEATURE_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_defeature /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="defeature">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoDefeatureOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Removes selected features from @p options->root. Output is a new graph; the input graph is not modified. Each selected node may be a Face, Shell, Solid, CompSolid, or Compound. Non-face selections are expanded to their contained faces before calling OCCT's defeaturing kernel. This covers feature selections at several topology levels while preserving OCCT's face-based removal semantics internally. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph    Owns it. Receives a new graph on success. @param[out] out_root     Borrows it. Receives the defeatured root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, or @c selection_count is zero. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root or a selected node is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected NodeId cannot be expanded to faces. @retval OCCTL_GEOMETRY_INVALID  Defeaturing failed to produce a valid result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No. Allocates a new graph. @sa occtl_topo_draft_faces /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoDefeatureOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="offset_features_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoOffsetFeaturesOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_OFFSET_FEATURES_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_offset_features /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_offset_features">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoOffsetFeaturesOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Offsets selected features of @p options->root. Output is a new graph; the input graph is not modified. Each selected node may be a Face, Shell, Solid, CompSolid, or Compound. Non-face selections are expanded to their contained faces, and those faces receive @c selection_offset while unselected faces use @c base_offset. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph    Owns it. Receives a new graph on success. @param[out] out_root     Borrows it. Receives the offset result root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c selection_count is zero, @c tolerance is non-positive, or both offsets are zero. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root or a selected node is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected NodeId cannot be expanded to faces. @retval OCCTL_GEOMETRY_INVALID  Offset failed to produce a valid result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No. Allocates a new graph. @sa occtl_topo_defeature /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoOffsetFeaturesOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="filling_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoFillingOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_FILLING_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_filling /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_filling">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoFillingOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Builds an N-side filling face from ordered boundary edges. Output is a new graph; the input graph is not modified. @param[in]  graph        Borrows it. Must be non-NULL. @param[in]  options      Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph    Owns it. Receives a new graph on success. @param[out] out_root     Borrows it. Receives the filling face root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c edge_count is less than 2, or a solver option is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         A selected edge is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected NodeId is not an Edge. @retval OCCTL_GEOMETRY_INVALID  Filling failed to produce a valid result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No — allocates a new graph. @sa occtl_topo_project_on_face /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoFillingOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="filling_patch_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoFillingPatchOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_FILLING_PATCH_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_filling_patch /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_filling_patch">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoFillingPatchOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Builds an N-side filling patch from edge, support-face, and point constraints. Output is a new graph; the input graph is not modified. This is the richer graph-facing variant of #occtl_topo_make_filling: each edge may optionally name a support Face for G1/G2 continuity, and additional 3D points can be added as surface constraints. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the filling patch face root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c p_next is non-NULL, @c edge_count is less than 2, @c points is NULL while @c point_count is non-zero, or a solver option is invalid. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         A selected edge or support face is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected edge is not an Edge, or a support node is not a Face. @retval OCCTL_GEOMETRY_INVALID  Filling failed to produce a valid result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No — allocates a new graph. @sa occtl_topo_make_filling /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoFillingPatchOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="split_by_plane_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoSplitByPlaneOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_SPLIT_BY_PLANE_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_split_by_plane /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_split_by_plane">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoSplitByPlaneOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Splits a shape by a plane and returns selected side(s). Output is a new graph; the input graph is not modified. Keeping all pieces uses OCCT's splitter with a finite plane face sized from the input bounds. Keeping one side intersects the shape with an OCCT half-space. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the split result root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL or @c keep is not a supported value. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid, removed, or cannot be resolved. @retval OCCTL_GEOMETRY_INVALID  The split failed or produced a null result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No. Allocates a new graph. @sa occtl_topo_mirrored /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoSplitByPlaneOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="section_by_planes_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoSectionByPlanesOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_SECTION_BY_PLANES_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_sections_by_planes /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_sections_by_planes">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoSectionByPlanesOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Sections a shape by one or more planes. Output is a new graph containing the generated section edges, usually as a Compound root. The input graph is not modified. Multiple planes are sectioned independently and collected into one compound. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the section result root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL or @c plane_count is zero. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @c root is invalid, removed, or cannot be resolved. @retval OCCTL_GEOMETRY_INVALID  Sectioning failed or produced a null result. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No. Allocates a new graph. @sa occtl_topo_make_split_by_plane /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoSectionByPlanesOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="extrude_faces_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoExtrudeFacesOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_EXTRUDE_FACES_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_face_extrusion /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_face_extrusion">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoExtrudeFacesOptions>" />
+			<argument index="2" name="out_root" type="int64_t" />
+			<description>
+				Extrudes one or more Face nodes into prism solids. Output is a new graph; the input graph is not modified. Each Face is swept with OCCT @c BRepPrimAPI_MakePrism. Without @c use_normal, the sweep direction is the oriented face normal evaluated at the middle of the face parameter bounds. Multiple faces are collected into a Compound result. This is a sweep operation, distinct from the hollow/shell operation #occtl_prim_make_thick_solid. @param[in]  graph      Borrows it. Must be non-NULL. @param[in]  options    Borrows it. Must be non-NULL and carry a supported @c struct_version. @param[out] out_graph  Owns it. Receives a new graph on success. @param[out] out_root   Borrows it. Receives the extrude result root NodeId. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  Any required pointer is NULL, @c face_count is zero, @c thickness is non-positive, or @c normal is invalid when requested. @retval OCCTL_VERSION_MISMATCH  @p options has an unsupported struct_version. @retval OCCTL_NOT_FOUND         A selected face is invalid, removed, or cannot be resolved. @retval OCCTL_WRONG_KIND        A selected NodeId is not a Face. @retval OCCTL_GEOMETRY_INVALID  Extrusion failed or a face normal could not be evaluated. @retval OCCTL_TOPOLOGY_INVALID  The result could not be ingested into BRepGraph. @threadsafe No. Allocates a new graph. @sa occtl_prim_make_thick_solid, occtl_topo_section_by_planes /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param options] An optional [OcctlTopoExtrudeFacesOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="mirrored">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="point" type="Ref<OcctlPoint3>" />
+			<argument index="3" name="normal" type="Ref<OcctlDirection3>" />
+			<argument index="4" name="out_root" type="int64_t" />
+			<description>
+				Creates a mirrored copy of the shape rooted at @p root across a plane defined by @p point and @p normal. Output is a new graph; the input graph is not modified. @param[in]     graph      Borrows it.  Must be non-NULL. @param[in]     root       NodeId of the shape to mirror.  Must be a valid solid, shell, or compound node. @param[in]     point      A point on the mirror plane. @param[in]     normal     Normal direction of the mirror plane (must be unit-length). @param[out]    out_graph  Owns it.  Must be non-NULL.  Receives a newly-allocated graph handle. @param[out]    out_root   Borrows it.  Must be non-NULL.  Receives the root NodeId of the mirrored result in @p *out_graph. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p out_graph, or @p out_root is NULL. @retval OCCTL_NOT_FOUND         @p root is invalid, removed, or cannot be resolved to an OCCT shape. @retval OCCTL_GEOMETRY_INVALID  The result shape is null. @threadsafe No — allocates a new graph. /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param point] A [OcctlPoint3].
+				    [param normal] A [OcctlDirection3].
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="linear_pattern_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoLinearPatternOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_LINEAR_PATTERN_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_linear_pattern /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_linear_pattern">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="opts" type="Ref<OcctlTopoLinearPatternOptions>" />
+			<argument index="3" name="out_root" type="int64_t" />
+			<description>
+				Creates @c count instances of the shape rooted at @p root, translated along @c direction by multiples of @c step. The original shape is included as the first instance.  Results are placed into a newly-allocated compound in a new graph. @param[in]     graph      Borrows it.  Must be non-NULL. @param[in]     root       NodeId of the shape to pattern.  Must be a valid solid, shell, or compound node. @param[in]     opts       Borrows it.  Must be non-NULL and carry a supported struct_version. @param[out]    out_graph  Borrows it.  Must be non-NULL.  Receives a newly-allocated graph handle (owns it). @param[out]    out_root   Borrows it.  Must be non-NULL.  Receives the root NodeId of the resulting compound in @p *out_graph. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p opts, @p out_graph, or @p out_root is NULL. @retval OCCTL_VERSION_MISMATCH  @p opts has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @p root is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  The result compound is null. @threadsafe No — allocates a new graph. @sa occtl_topo_linear_pattern_options_init /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param opts] An optional [OcctlTopoLinearPatternOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="circular_pattern_options_init">
+			<argument index="0" name="opts" type="Ref<OcctlTopoCircularPatternOptions>" />
+			<description>
+				Initialises @p opts to default values matching #OCCTL_TOPO_CIRCULAR_PATTERN_OPTIONS_INIT. NULL-tolerant. @param[out] opts  Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_circular_pattern /
+				    [param opts] Output parameter.
+		</description>
+		</method>
+		<method name="make_circular_pattern">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="root" type="int64_t" />
+			<argument index="2" name="opts" type="Ref<OcctlTopoCircularPatternOptions>" />
+			<argument index="3" name="out_root" type="int64_t" />
+			<description>
+				Creates @c count instances of the shape rooted at @p root, rotated around @c axis by multiples of @c angle. The original shape is included as the first instance.  Results are placed into a newly-allocated compound in a new graph. @param[in]     graph      Borrows it.  Must be non-NULL. @param[in]     root       NodeId of the shape to pattern.  Must be a valid solid, shell, or compound node. @param[in]     opts       Borrows it.  Must be non-NULL and carry a supported struct_version. @param[out]    out_graph  Borrows it.  Must be non-NULL.  Receives a newly-allocated graph handle (owns it). @param[out]    out_root   Borrows it.  Must be non-NULL.  Receives the root NodeId of the resulting compound in @p *out_graph. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p opts, @p out_graph, or @p out_root is NULL. @retval OCCTL_VERSION_MISMATCH  @p opts has an unsupported struct_version. @retval OCCTL_NOT_FOUND         @p root is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  The result compound is null. @threadsafe No — allocates a new graph. @sa occtl_topo_circular_pattern_options_init /
+				    [param graph] A [OcctlGraphHandle] handle.
+				    [param root] A node.
+				    [param opts] An optional [OcctlTopoCircularPatternOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="OCCTL_TOPO_SEW_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_SEW_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_SEW_RESULT_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_SEW_RESULT_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_SAME_PARAMETER_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_SAME_PARAMETER_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_FILLET_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_FILLET_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_EDGE_BLEND_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_EDGE_BLEND_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAX_FILLET_RADIUS_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAX_FILLET_RADIUS_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_PROJECT_ON_FACE_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_PROJECT_ON_FACE_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_WRAP_ON_FACE_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_WRAP_ON_FACE_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_PROJECT_FACE_DIRECTION_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_PROJECT_FACE_DIRECTION_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_FACE_TO_ARCS_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_FACE_TO_ARCS_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_HLR_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_HLR_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_HLR_RESULT_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_HLR_RESULT_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_DRAFT_FACES_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_DRAFT_FACES_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_DEFEATURE_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_DEFEATURE_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_OFFSET_FEATURES_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_OFFSET_FEATURES_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_FILLING_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_FILLING_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_FILLING_PATCH_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_FILLING_PATCH_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_SPLIT_BY_PLANE_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_SPLIT_BY_PLANE_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_SECTION_BY_PLANES_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_SECTION_BY_PLANES_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_EXTRUDE_FACES_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_EXTRUDE_FACES_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_LINEAR_PATTERN_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_LINEAR_PATTERN_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_CIRCULAR_PATTERN_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_CIRCULAR_PATTERN_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_CHECK_WARNING" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoAlgo.occtl_topo_check_severity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_CHECK_ERROR" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoAlgo.occtl_topo_check_severity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_CHECK_FATAL" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoAlgo.occtl_topo_check_severity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_CHECK_SEVERITY_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoAlgo.occtl_topo_check_severity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_HLR_BREP" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoAlgo.occtl_topo_hlr_mode_t].
+		</constant>
+		<constant name="OCCTL_TOPO_HLR_POLY" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoAlgo.occtl_topo_hlr_mode_t].
+		</constant>
+		<constant name="OCCTL_TOPO_HLR_MODE_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoAlgo.occtl_topo_hlr_mode_t].
+		</constant>
+		<constant name="OCCTL_TOPO_FILLING_C0" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoAlgo.occtl_topo_filling_continuity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_FILLING_G1" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoAlgo.occtl_topo_filling_continuity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_FILLING_G2" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoAlgo.occtl_topo_filling_continuity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_FILLING_CONTINUITY_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoAlgo.occtl_topo_filling_continuity_t].
+		</constant>
+		<constant name="OCCTL_TOPO_SPLIT_KEEP_ALL" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoAlgo.occtl_topo_split_keep_t].
+		</constant>
+		<constant name="OCCTL_TOPO_SPLIT_KEEP_POSITIVE" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoAlgo.occtl_topo_split_keep_t].
+		</constant>
+		<constant name="OCCTL_TOPO_SPLIT_KEEP_NEGATIVE" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoAlgo.occtl_topo_split_keep_t].
+		</constant>
+		<constant name="OCCTL_TOPO_SPLIT_KEEP_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoAlgo.occtl_topo_split_keep_t].
+		</constant>
+	</constants>
+</class>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlDeFormatInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_de_format_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_de_format_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_id">
+			<return type="String" />
+			<description>
+				Returns the [member id] value.
+			</description>
+		</method>
+		<method name="set_id">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member id] value.
+			</description>
+		</method>
+		<method name="get_label">
+			<return type="String" />
+			<description>
+				Returns the [member label] value.
+			</description>
+		</method>
+		<method name="set_label">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member label] value.
+			</description>
+		</method>
+		<method name="get_extension_count">
+			<return type="int" />
+			<description>
+				Returns the [member extension_count] value.
+			</description>
+		</method>
+		<method name="set_extension_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member extension_count] value.
+			</description>
+		</method>
+		<method name="get_can_read_file">
+			<return type="int" />
+			<description>
+				Returns the [member can_read_file] value.
+			</description>
+		</method>
+		<method name="set_can_read_file">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member can_read_file] value.
+			</description>
+		</method>
+		<method name="get_can_write_file">
+			<return type="int" />
+			<description>
+				Returns the [member can_write_file] value.
+			</description>
+		</method>
+		<method name="set_can_write_file">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member can_write_file] value.
+			</description>
+		</method>
+		<method name="get_can_read_memory">
+			<return type="int" />
+			<description>
+				Returns the [member can_read_memory] value.
+			</description>
+		</method>
+		<method name="set_can_read_memory">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member can_read_memory] value.
+			</description>
+		</method>
+		<method name="get_can_write_memory">
+			<return type="int" />
+			<description>
+				Returns the [member can_write_memory] value.
+			</description>
+		</method>
+		<method name="set_can_write_memory">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member can_write_memory] value.
+			</description>
+		</method>
+	</methods>
+</class>

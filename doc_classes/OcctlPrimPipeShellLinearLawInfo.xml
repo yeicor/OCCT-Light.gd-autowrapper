@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlPrimPipeShellLinearLawInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_prim_pipe_shell_linear_law_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_prim_pipe_shell_linear_law_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_spine_wire">
+			<return type="int64_t" />
+			<description>
+				Returns the [member spine_wire] value.
+			</description>
+		</method>
+		<method name="set_spine_wire">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member spine_wire] value.
+			</description>
+		</method>
+		<method name="get_profile">
+			<return type="int64_t" />
+			<description>
+				Returns the [member profile] value.
+			</description>
+		</method>
+		<method name="set_profile">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member profile] value.
+			</description>
+		</method>
+		<method name="get_scale_first">
+			<return type="double" />
+			<description>
+				Returns the [member scale_first] value.
+			</description>
+		</method>
+		<method name="set_scale_first">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member scale_first] value.
+			</description>
+		</method>
+		<method name="get_scale_last">
+			<return type="double" />
+			<description>
+				Returns the [member scale_last] value.
+			</description>
+		</method>
+		<method name="set_scale_last">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member scale_last] value.
+			</description>
+		</method>
+		<method name="get_mode">
+			<return type="int" />
+			<description>
+				Returns the [member mode] value.
+			</description>
+		</method>
+		<method name="set_mode">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member mode] value.
+			</description>
+		</method>
+		<method name="get_mode_axis">
+			<return type="Ref<OcctlAxis2Placement>" />
+			<description>
+				Returns the [member mode_axis] value.
+			</description>
+		</method>
+		<method name="set_mode_axis">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis2Placement>" />
+			<description>
+				Sets the [member mode_axis] value.
+			</description>
+		</method>
+		<method name="get_mode_binormal">
+			<return type="Ref<OcctlDirection3>" />
+			<description>
+				Returns the [member mode_binormal] value.
+			</description>
+		</method>
+		<method name="set_mode_binormal">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlDirection3>" />
+			<description>
+				Sets the [member mode_binormal] value.
+			</description>
+		</method>
+		<method name="get_transition">
+			<return type="int" />
+			<description>
+				Returns the [member transition] value.
+			</description>
+		</method>
+		<method name="set_transition">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member transition] value.
+			</description>
+		</method>
+		<method name="get_with_contact">
+			<return type="int" />
+			<description>
+				Returns the [member with_contact] value.
+			</description>
+		</method>
+		<method name="set_with_contact">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member with_contact] value.
+			</description>
+		</method>
+		<method name="get_with_correction">
+			<return type="int" />
+			<description>
+				Returns the [member with_correction] value.
+			</description>
+		</method>
+		<method name="set_with_correction">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member with_correction] value.
+			</description>
+		</method>
+		<method name="get_make_solid">
+			<return type="int" />
+			<description>
+				Returns the [member make_solid] value.
+			</description>
+		</method>
+		<method name="set_make_solid">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member make_solid] value.
+			</description>
+		</method>
+	</methods>
+</class>

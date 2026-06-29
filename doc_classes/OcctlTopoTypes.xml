@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoTypes" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_topo_types.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_topo_types.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_TOPO_TYPES_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_topo_types.h @brief OCCT-Light: Core topology identity types. Defines the fundamental topology identity types used throughout the topo module and its sub-headers: occtl_node_id_t, occtl_ref_id_t, occtl_ref_uid_t, occtl_rep_uid_t, occtl_joint_id_t, occtl_graph_t, and their associated sentinel macros and wire-format constants. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_REF_UID_WIRE_SIZE">
+			<return type="int64_t" />
+			<description>
+				Number of bytes in the wire-format encoding of an #occtl_ref_uid_t. The encoding has the same size and reserved-byte policy as #OCCTL_UID_WIRE_SIZE: the top 8 bytes carry the current packed RefUID in big-endian order, and the bottom 8 bytes are reserved zero bytes. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_REP_UID_WIRE_SIZE">
+			<return type="int64_t" />
+			<description>
+				Number of bytes in the wire-format encoding of an #occtl_rep_uid_t. The encoding has the same size and reserved-byte policy as #OCCTL_UID_WIRE_SIZE: the top 8 bytes carry the current packed RepUID in big-endian order, and the bottom 8 bytes are reserved zero bytes. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_NODE_ID_INVALID">
+			<return type="double" />
+			<description>
+				Invalid sentinels for the four ID types. Defined as C99 compound literals in C and as C++ braced initialisers in C++; this keeps the macros usable on MSVC and pedantic C++ modes without changing their value. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_REF_ID_INVALID">
+			<return type="double" />
+			<description>
+				Invalid sentinels for the four ID types. Defined as C99 compound literals in C and as C++ braced initialisers in C++; this keeps the macros usable on MSVC and pedantic C++ modes without changing their value. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_REF_UID_INVALID">
+			<return type="double" />
+			<description>
+				Invalid sentinels for the four ID types. Defined as C99 compound literals in C and as C++ braced initialisers in C++; this keeps the macros usable on MSVC and pedantic C++ modes without changing their value. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_REP_UID_INVALID">
+			<return type="double" />
+			<description>
+				Invalid sentinels for the four ID types. Defined as C99 compound literals in C and as C++ braced initialisers in C++; this keeps the macros usable on MSVC and pedantic C++ modes without changing their value. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_JOINT_ID_INVALID">
+			<return type="int64_t" />
+			<description>
+				Invalid sentinels for the four ID types. Defined as C99 compound literals in C and as C++ braced initialisers in C++; this keeps the macros usable on MSVC and pedantic C++ modes without changing their value. /.
+			</description>
+		</method>
+	</methods>
+</class>

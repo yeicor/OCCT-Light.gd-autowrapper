@@ -1,0 +1,1706 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoBuild" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_topo_build.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_topo_build.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_TOPO_BUILD_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_topo_build.h @brief OCCT-Light: Topology builders, mutations, and property setters. Covers low-level element construction (make_vertex, make_edge, make_wire, make_face, make_shell, make_solid, make_compound, make_compsolid), wire/edge operations (edges_to_wires, wire_offset_2d, curves_to_wire, wire_fix_degenerate, face_chamfer_2d, wire_chamfer_2d), in-place mutations (remove, replace, add/remove from parent, edge_split), and property setters. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_VERTEX_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_VERTEX_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_EDGE_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_EDGE_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_WIRE_INFO_INIT">
+			<return type="double" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_WIRE_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_EDGES_TO_WIRES_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_EDGES_TO_WIRES_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_WIRE_OFFSET_2D_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_WIRE_OFFSET_2D_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_WIRE_FIX_DEGENERATE_EDGES_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_WIRE_FIX_DEGENERATE_EDGES_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_FACE_CHAMFER_2D_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_FACE_CHAMFER_2D_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_WIRE_CHAMFER_2D_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_WIRE_CHAMFER_2D_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_FACE_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_FACE_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_FACE_FROM_WIRES_AUTO_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_FACE_FROM_WIRES_AUTO_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_SHELL_INFO_INIT">
+			<return type="double" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_SHELL_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_SOLID_INFO_INIT">
+			<return type="double" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_SOLID_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_COMPOUND_INFO_INIT">
+			<return type="double" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_COMPOUND_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_TOPO_MAKE_COMPSOLID_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_TOPO_MAKE_COMPSOLID_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_MATERIAL_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_MATERIAL_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_JOINT_INFO_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_JOINT_INFO_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_SELECT_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_SELECT_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_SELECT_METADATA_FILTER_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_SELECT_METADATA_FILTER_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_SELECT_DISTANCE_TO_NODE_SORT_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_SELECT_DISTANCE_TO_NODE_SORT_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_SELECT_GROUP_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_SELECT_GROUP_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_SELECT_GROUP_VIEW_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_SELECT_GROUP_VIEW_INIT.
+			</description>
+		</method>
+		<method name="topo_make_vertex_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeVertexInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_VERTEX_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_vertex /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_edge_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeEdgeInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_EDGE_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_edge /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_wire_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeWireInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_WIRE_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_wire /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_edges_to_wires_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoEdgesToWiresOptions>" />
+			<description>
+				Initialises @p options to default values via #OCCTL_TOPO_EDGES_TO_WIRES_OPTIONS_INIT. NULL-tolerant. @param[out] options Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_edges_to_wires /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="topo_wire_offset_2d_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoWireOffset2dOptions>" />
+			<description>
+				Initialises @p options to default values via #OCCTL_TOPO_WIRE_OFFSET_2D_OPTIONS_INIT. NULL-tolerant. @param[out] options Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_wire_offset_2d /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="topo_wire_fix_degenerate_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoWireFixDegenerateEdgesOptions>" />
+			<description>
+				Initialises @p options to default values via #OCCTL_TOPO_WIRE_FIX_DEGENERATE_EDGES_OPTIONS_INIT. NULL-tolerant. @param[out] options Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_wire_fix_degenerate /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="topo_face_chamfer_2d_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoFaceChamfer2dOptions>" />
+			<description>
+				Initialises @p options to default values via #OCCTL_TOPO_FACE_CHAMFER_2D_OPTIONS_INIT. NULL-tolerant. @param[out] options Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_face_chamfer_2d /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="topo_wire_chamfer_2d_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoWireChamfer2dOptions>" />
+			<description>
+				Initialises @p options to default values via #OCCTL_TOPO_WIRE_CHAMFER_2D_OPTIONS_INIT. NULL-tolerant. @param[out] options Borrows it. May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_wire_chamfer_2d /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_face_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeFaceInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_FACE_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_face /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_face_from_wires_auto_options_init">
+			<argument index="0" name="options" type="Ref<OcctlTopoMakeFaceFromWiresAutoOptions>" />
+			<description>
+				Initialises @p options to default values via #OCCTL_TOPO_MAKE_FACE_FROM_WIRES_AUTO_OPTIONS_INIT. NULL-tolerant. @param[out] options Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_face_from_wires_auto /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_shell_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeShellInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_SHELL_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_shell /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_solid_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeSolidInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_SOLID_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_solid /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_compound_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeCompoundInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_COMPOUND_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_compound /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_vertex">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeVertexInfo>" />
+			<argument index="2" name="out_vertex" type="int64_t" />
+			<description>
+				Creates a vertex in the graph. @param[in,out] graph      Borrows it.  Must be non-NULL. @param[in]     info       Borrows it.  Must be non-NULL. @param[out]    out_vertex Borrows it.  Must be non-NULL.  Receives the new vertex NodeId on success. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, or @p out_vertex is NULL. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version is unsupported. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeVertexInfo]. Pass null to use defaults.
+				    [param out_vertex] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_edge">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeEdgeInfo>" />
+			<argument index="2" name="out_edge" type="int64_t" />
+			<description>
+				Creates an edge in the graph. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     info     Borrows it.  Must be non-NULL. @c start_vertex and @c end_vertex must be valid, active vertex NodeIds.  @c curve may be NULL for a degenerate edge. @param[out]    out_edge Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, or @p out_edge is NULL. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version unsupported. @retval OCCTL_NOT_FOUND         A vertex NodeId is invalid or removed. @retval OCCTL_WRONG_KIND        A vertex NodeId is not a vertex. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeEdgeInfo]. Pass null to use defaults.
+				    [param out_edge] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_wire">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeWireInfo>" />
+			<argument index="2" name="out_wire" type="int64_t" />
+			<description>
+				Creates a wire in the graph from an ordered span of (edge, orientation) pairs. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     info     Borrows it.  Must be non-NULL.  The edges span is borrowed; it need not remain valid after the call returns. @param[out]    out_wire Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, or @p out_wire is NULL; or @c edges is NULL when @c edge_count > 0; or @c edges is non-NULL when @c edge_count == 0. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version unsupported. @retval OCCTL_NOT_FOUND         A child NodeId is invalid or removed. @retval OCCTL_WRONG_KIND        A child NodeId does not have the expected kind. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeWireInfo]. Pass null to use defaults.
+				    [param out_wire] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edges_to_wires">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoEdgesToWiresOptions>" />
+			<description>
+				Connects unordered Edge nodes into one or more Wire nodes. On a sizing call, pass @p out_wires as NULL with @p cap = 0; the function writes the number of wires that would be created into @p out_count without mutating @p graph.  Reissue with a buffer of at least that many #occtl_node_id_t entries to create the wires and receive their IDs. Endpoint matching prefers shared BRepGraph vertex IDs and falls back to endpoint point distance when @c options->tolerance > 0.  Created wires reference the original Edge nodes; no Edge or Vertex nodes are duplicated. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     options   Borrows it.  Must be non-NULL. @param[out]    out_wires Borrows it.  May be NULL on the sizing call. @param[in]     cap       Capacity of @p out_wires in entries. @param[out]    out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_count is NULL; an options field is malformed; or open wires are produced while @c options->allow_open is 0. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_NOT_FOUND         An Edge node ID is invalid or removed. @retval OCCTL_WRONG_KIND        An input node is not an Edge. @retval OCCTL_BUFFER_TOO_SMALL  @p out_wires is non-NULL and @p cap is too small. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph when @p out_wires is non-NULL and large enough). @sa occtl_topo_make_wire, occtl_topo_wire_order_edges /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoEdgesToWiresOptions]. Pass null to use defaults.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="topo_wire_offset_2d">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoWireOffset2dOptions>" />
+			<argument index="2" name="out_wire" type="int64_t" />
+			<description>
+				Creates a planar 2D offset of a Wire node and inserts it into the graph. The source wire must be planar.  The resulting offset Wire is inserted into @p graph as a new Wire node.  The source wire is not modified. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     options  Borrows it.  Must be non-NULL. @param[out]    out_wire Borrows it.  Must be non-NULL.  Receives the new Wire node ID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_wire is NULL; an options field is malformed; or @c distance is zero / non-finite. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_NOT_FOUND         @c options->wire is invalid or removed. @retval OCCTL_WRONG_KIND        @c options->wire is not a Wire node. @retval OCCTL_GEOMETRY_INVALID  OCCT could not create a valid offset wire. @retval OCCTL_TOPOLOGY_INVALID  The offset result could not be ingested as a graph Wire. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_edges_to_wires, occtl_topo_make_face_from_wires_auto /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoWireOffset2dOptions]. Pass null to use defaults.
+				    [param out_wire] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_curves_to_wire">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="curve_ids" type="int64_t" />
+			<argument index="2" name="count" type="int" />
+			<argument index="3" name="out_wire" type="int64_t" />
+			<description>
+				Creates a wire from an ordered array of curve rep IDs. For each curve the function evaluates the start and end point, creates vertices (sharing vertices between consecutive curves whose endpoints match within tolerance), creates a single-edge wire per curve, then joins all edges into one wire. A single closed curve (e.g. a circle) produces one vertex used as both start and end of a single edge. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     curve_ids Borrows it.  Array of @p count curve rep IDs. Must be non-NULL when @p count > 0. @param[in]     count     Number of curves.  Must be >= 1. @param[out]    out_wire  Owns it.  Receives the wire node ID. Must be non-NULL. @retval OCCTL_OK                  On success. @retval OCCTL_INVALID_ARGUMENT    Any required pointer is NULL, @p count == 0, or a curve rep ID in the array is invalid. @retval OCCTL_NOT_FOUND           A curve evaluation failed. @retval OCCTL_GEOMETRY_INVALID    Could not create geometry. @threadsafe No (mutates graph). @sa occtl_topo_edges_to_wires, occtl_topo_make_edge, occtl_curve_eval_d0 /
+				    [param graph] Input parameter.
+				    [param curve_ids] A occtl_rep_id_t.
+				    [param count] Input parameter.
+				    [param out_wire] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_wire_fix_degenerate">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoWireFixDegenerateEdgesOptions>" />
+			<argument index="2" name="out_removed" type="int" />
+			<description>
+				Removes degenerate edge usages from a Wire in place. The function scans the Wire's coedge usages, measures each underlying Edge with OCCT linear properties when possible, and detaches every usage whose length is less than or equal to @c options->min_length.  The underlying Edge definitions are not deleted; only their usage in @c options->wire is removed.  This makes the operation safe for shared graph topology. @param[in,out] graph       Borrows it.  Must be non-NULL. @param[in]     options     Borrows it.  Must be non-NULL. @param[out]    out_removed Borrows it.  Must be non-NULL.  Receives the number of detached coedge usages. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_removed is NULL; @c p_next is non-NULL; or @c min_length is negative / non-finite. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_NOT_FOUND         @c options->wire is invalid or removed. @retval OCCTL_WRONG_KIND        @c options->wire is not a Wire node. @threadsafe No (mutates graph). @sa occtl_topo_wire_fix_degenerate_options_init, occtl_topo_wire_order_edges /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoWireFixDegenerateEdgesOptions]. Pass null to use defaults.
+				    [param out_removed] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_face_chamfer_2d">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoFaceChamfer2dOptions>" />
+			<argument index="2" name="out_face" type="int64_t" />
+			<description>
+				Chamfers corners of a planar Face and inserts the result into the graph. The source face must be planar. The chamfered Face is inserted into @p graph as a new Face node. The source face is not modified. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     options  Borrows it.  Must be non-NULL. @param[out]    out_face Borrows it.  Must be non-NULL.  Receives the new Face node ID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_face is NULL; an options field is malformed; or a distance is non-positive / non-finite. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_NOT_FOUND         @c options->face is invalid or removed; or a selected vertex is invalid / removed. @retval OCCTL_WRONG_KIND        @c options->face is not a Face node, or a selected node is not a Vertex. @retval OCCTL_GEOMETRY_INVALID  OCCT could not create a valid chamfered face. @retval OCCTL_TOPOLOGY_INVALID  The chamfer result could not be ingested as a graph Face. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_face_chamfer_2d_options_init, occtl_topo_wire_offset_2d /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoFaceChamfer2dOptions]. Pass null to use defaults.
+				    [param out_face] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_wire_chamfer_2d">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoWireChamfer2dOptions>" />
+			<argument index="2" name="out_wire" type="int64_t" />
+			<description>
+				Chamfers corners of a planar Wire and inserts the result into the graph. The source wire must be planar.  The resulting outer Wire is inserted into @p graph as a new Wire node.  The source wire is not modified. @param[in,out] graph    Borrows it. Must be non-NULL. @param[in]     options  Borrows it. Must be non-NULL. @param[out]    out_wire Borrows it. Must be non-NULL. Receives the new Wire node ID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, or @p out_wire is NULL; an options field is malformed; or a distance is non-positive / non-finite. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_NOT_FOUND         @c options->wire is invalid or removed; or a selected vertex is invalid / removed. @retval OCCTL_WRONG_KIND        @c options->wire is not a Wire node, or a selected node is not a Vertex. @retval OCCTL_GEOMETRY_INVALID  OCCT could not create a valid chamfered wire. @retval OCCTL_TOPOLOGY_INVALID  The chamfer result could not be ingested as a graph Wire. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_wire_chamfer_2d_options_init, occtl_topo_face_chamfer_2d /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoWireChamfer2dOptions]. Pass null to use defaults.
+				    [param out_wire] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_face">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeFaceInfo>" />
+			<argument index="2" name="out_face" type="int64_t" />
+			<description>
+				Creates a face in the graph from a surface, outer wire, and optional inner wires. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     info     Borrows it.  Must be non-NULL.  @c surface must be non-NULL.  The inner-wires span is borrowed; it need not remain valid after the call returns. @param[out]    out_face Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, @p out_face, or @c info->surface is NULL. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version unsupported. @retval OCCTL_NOT_FOUND         A wire NodeId is invalid or removed. @retval OCCTL_WRONG_KIND        A wire NodeId is not a wire. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeFaceInfo]. Pass null to use defaults.
+				    [param out_face] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_face_from_wires_auto">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlTopoMakeFaceFromWiresAutoOptions>" />
+			<argument index="2" name="out_face" type="int64_t" />
+			<description>
+				Creates a face by classifying candidate wires into outer and inner loops. The function classifies the candidate Wires by planar enclosed area and uses the largest unambiguous loop as the outer wire. All other input wires become inner wires in their input order.  The stored graph Face references the original Wire nodes; no boundary topology is duplicated. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     options  Borrows it.  Must be non-NULL. @param[out]    out_face Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p options, @p out_face, @c options->surface, or @c options->wires is NULL; @c wire_count is 0; an option value is malformed; or the outer wire is ambiguous. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_NOT_FOUND         A Wire node ID is invalid or removed. @retval OCCTL_WRONG_KIND        An input node is not a Wire. @retval OCCTL_ERROR             The candidate wires could not be classified. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_make_face, occtl_topo_edges_to_wires /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlTopoMakeFaceFromWiresAutoOptions]. Pass null to use defaults.
+				    [param out_face] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_shell">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeShellInfo>" />
+			<argument index="2" name="out_shell" type="int64_t" />
+			<description>
+				Creates a shell in the graph from a span of (face, orientation) pairs. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     info      Borrows it.  Must be non-NULL.  The faces span is borrowed; it need not remain valid after the call returns. @param[out]    out_shell Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, or @p out_shell is NULL; or @c faces is NULL when @c face_count > 0; or @c faces is non-NULL when @c face_count == 0. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version unsupported. @retval OCCTL_NOT_FOUND         A child NodeId is invalid or removed. @retval OCCTL_WRONG_KIND        A child NodeId does not have the expected kind. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_make_shell_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeShellInfo]. Pass null to use defaults.
+				    [param out_shell] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_solid">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeSolidInfo>" />
+			<argument index="2" name="out_solid" type="int64_t" />
+			<description>
+				Creates a solid in the graph from a span of (shell, orientation) pairs. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     info      Borrows it.  Must be non-NULL.  The shells span is borrowed; it need not remain valid after the call returns. @param[out]    out_solid Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, or @p out_solid is NULL; or @c shells is NULL when @c shell_count > 0; or @c shells is non-NULL when @c shell_count == 0. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version unsupported. @retval OCCTL_NOT_FOUND         A child NodeId is invalid or removed. @retval OCCTL_WRONG_KIND        A child NodeId does not have the expected kind. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_make_solid_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeSolidInfo]. Pass null to use defaults.
+				    [param out_solid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_compound">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeCompoundInfo>" />
+			<argument index="2" name="out_compound" type="int64_t" />
+			<description>
+				Creates a compound in the graph from a span of mixed-kind (child, orientation) pairs. @param[in,out] graph        Borrows it.  Must be non-NULL. @param[in]     info         Borrows it.  Must be non-NULL.  The children span is borrowed; it need not remain valid after the call returns. @param[out]    out_compound Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, or @p out_compound is NULL; or @c children is NULL when @c child_count > 0; or @c children is non-NULL when @c child_count == 0. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version unsupported. @retval OCCTL_NOT_FOUND         A child NodeId is invalid or removed. @retval OCCTL_WRONG_KIND        A child NodeId does not have the expected kind. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_make_compound_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeCompoundInfo]. Pass null to use defaults.
+				    [param out_compound] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_make_compsolid_info_init">
+			<argument index="0" name="info" type="Ref<OcctlTopoMakeCompsolidInfo>" />
+			<description>
+				Initialises @p info to default values via #OCCTL_TOPO_MAKE_COMPSOLID_INFO_INIT. NULL-tolerant. @param[out] info Borrows it.  May be NULL (no-op). @threadsafe Yes. @sa occtl_topo_make_compsolid /
+				    [param info] Output parameter.
+		</description>
+		</method>
+		<method name="topo_make_compsolid">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="info" type="Ref<OcctlTopoMakeCompsolidInfo>" />
+			<argument index="2" name="out_compsolid" type="int64_t" />
+			<description>
+				Creates a compsolid in the graph from a span of (solid, orientation) pairs. @param[in,out] graph         Borrows it.  Must be non-NULL. @param[in]     info          Borrows it.  Must be non-NULL.  The solids span is borrowed; it need not remain valid after the call returns. @param[out]    out_compsolid Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph, @p info, or @p out_compsolid is NULL; or @c solids is NULL when @c solid_count > 0; or @c solids is non-NULL when @c solid_count == 0. @retval OCCTL_VERSION_MISMATCH  @c info->struct_version unsupported. @retval OCCTL_NOT_FOUND         A child NodeId is invalid or removed. @retval OCCTL_WRONG_KIND        A child NodeId does not have the expected kind. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph). @sa occtl_topo_make_compsolid_info_init /
+				    [param graph] Input parameter.
+				    [param info] An optional [OcctlTopoMakeCompsolidInfo]. Pass null to use defaults.
+				    [param out_compsolid] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_remove">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="id" type="int64_t" />
+			<description>
+				Removes a node from the graph. The node's children (direct references) are also removed. Removing a node that is referenced by other active nodes is valid: those references become dangling and will resolve to invalid on subsequent refinement. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     id     NodeId of the entity to remove.  All-zero value returns #OCCTL_NOT_FOUND. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p first/@p last are non-finite, or @p last is less than @p first. @retval OCCTL_NOT_FOUND         @p id is invalid or already removed. @threadsafe No (mutates graph). @sa occtl_topo_remove_subgraph /
+				    [param graph] Input parameter.
+				    [param id] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_remove_subgraph">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="id" type="int64_t" />
+			<description>
+				Recursively removes a node and its entire subgraph. All descendants reachable through reference edges are removed. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     id     NodeId of the root to remove. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p id is invalid or already removed. @threadsafe No (mutates graph). @sa occtl_topo_remove /
+				    [param graph] Input parameter.
+				    [param id] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_begin_batch">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<description>
+				Opens a batched mutation scope on @p graph. Subsequent mutations on @p graph are deferred until #occtl_batch_commit is called on the returned handle. Release with #occtl_batch_commit (apply) or #occtl_batch_abort (discard). @param[in,out] graph      Borrows it.  Must be non-NULL. @param[out]    out_batch  Owns it.  Must be non-NULL.  The caller is responsible for calling commit or abort. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_batch is NULL. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (mutates graph batch state). @sa occtl_batch_commit, occtl_batch_abort /
+				    [param graph] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="batch_commit">
+			<return type="int" />
+			<argument index="0" name="batch" type="int64_t" />
+			<description>
+				Commits all deferred mutations in the batch to the graph. After this call @p batch is freed and must not be reused. NULL-tolerant (no-op). @param[in] batch  Owning pointer.  May be NULL. @retval OCCTL_OK  On success. @threadsafe No (mutates graph). @sa occtl_graph_begin_batch, occtl_batch_abort /
+				    [param batch] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="batch_abort">
+			<return type="int" />
+			<argument index="0" name="batch" type="int64_t" />
+			<description>
+				Aborts the batch, discarding all deferred mutations. After this call @p batch is freed and must not be reused. NULL-tolerant (no-op). @param[in] batch  Owning pointer.  May be NULL. @retval OCCTL_OK  On success. @threadsafe No (mutates graph). @sa occtl_graph_begin_batch, occtl_batch_commit /
+				    [param batch] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_replace_edge_curve">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="curve_id" type="int64_t" />
+			<description>
+				Replaces the 3D curve of an edge. Replaces the underlying Curve3DRep geometry without rebuilding the edge topology.  Callers can later query the new extent through #occtl_topo_edge_range or evaluate via #occtl_topo_edge_eval. Passing @p curve_id == #OCCTL_REP_ID_INVALID clears the curve binding, making the edge degenerate. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     edge     Edge node ID.  Must be a valid, active edge. @param[in]     curve_id Rep ID of the 3D curve node to bind, or #OCCTL_REP_ID_INVALID to clear. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @retval OCCTL_WRONG_KIND        @p edge is not an edge. @threadsafe No (mutates graph). @sa occtl_topo_replace_face_surface, occtl_topo_replace_coedge_pcurve, occtl_topo_make_edge /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param curve_id] A occtl_rep_id_t.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_replace_face_surface">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="surface_id" type="int64_t" />
+			<description>
+				Replaces the surface of a face. Replaces the underlying SurfaceRep geometry without rebuilding the face topology.  Passing @p surface_id == #OCCTL_REP_ID_INVALID clears the surface binding. @param[in,out] graph      Borrows it.  Must be non-NULL. @param[in]     face       Face node ID.  Must be a valid, active face. @param[in]     surface_id Rep ID of the surface node to bind, or #OCCTL_REP_ID_INVALID to clear. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid, removed, or not a face. @retval OCCTL_WRONG_KIND        @p face is not a face. @threadsafe No (mutates graph). @sa occtl_topo_replace_edge_curve, occtl_topo_replace_coedge_pcurve, occtl_topo_make_face /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param surface_id] A occtl_rep_id_t.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_replace_coedge_pcurve">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="coedge" type="int64_t" />
+			<argument index="2" name="pcurve_id" type="int64_t" />
+			<description>
+				Replaces the PCurve of a coedge. Pass @p pcurve_id == #OCCTL_REP_ID_INVALID to clear the PCurve binding. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     coedge    CoEdge node ID.  Must be a valid, active coedge. @param[in]     pcurve_id Rep ID of the 2D curve node to bind, or #OCCTL_REP_ID_INVALID to clear. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p coedge is invalid, removed, or not a coedge. @retval OCCTL_WRONG_KIND        @p coedge is not a coedge. @threadsafe No (mutates graph). @sa occtl_topo_replace_edge_curve, occtl_topo_add_pcurve /
+				    [param graph] Input parameter.
+				    [param coedge] A node.
+				    [param pcurve_id] A occtl_rep_id_t.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_add_pcurve">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="face" type="int64_t" />
+			<argument index="3" name="pcurve_id" type="int64_t" />
+			<argument index="4" name="first" type="double" />
+			<argument index="5" name="last" type="double" />
+			<argument index="6" name="orientation" type="int" />
+			<description>
+				Adds a PCurve binding between an edge and a face. Creates a new CoEdge entity with a Curve2DRep for the given edge-face pair. This is the canonical repair operation when an edge lacks a pcurve on a face it bounds. @param[in,out] graph       Borrows it.  Must be non-NULL. @param[in]     edge        Edge node ID.  Must be a valid, active edge. @param[in]     face        Face node ID.  Must be a valid, active face. @param[in]     pcurve_id   Rep ID of the 2D parametric curve node. Must be valid (not #OCCTL_REP_ID_INVALID). @param[in]     first       First parameter on the PCurve. @param[in]     last        Last parameter on the PCurve. @param[in]     orientation Edge orientation on the face. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL or @p pcurve_id is invalid. @retval OCCTL_NOT_FOUND         @p edge or @p face is invalid or removed. @retval OCCTL_WRONG_KIND        @p edge is not an edge or @p face is not a face. @threadsafe No (mutates graph). @sa occtl_topo_replace_coedge_pcurve /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param face] A node.
+				    [param pcurve_id] A occtl_rep_id_t.
+				    [param first] Input parameter.
+				    [param last] Input parameter.
+				    [param orientation] Enum value.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_shell_add_face">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="shell" type="int64_t" />
+			<argument index="2" name="face" type="int64_t" />
+			<argument index="3" name="orientation" type="int" />
+			<description>
+				Adds a face to an existing shell. @param[in,out] graph       Borrows it.  Must be non-NULL. @param[in]     shell       Shell node ID.  Must be a valid, active shell. @param[in]     face        Face node ID.  Must be a valid, active face. @param[in]     orientation Orientation of the face inside the shell. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p shell or @p face is invalid or removed. @retval OCCTL_WRONG_KIND        @p shell is not a shell or @p face is not a face. @retval OCCTL_ERROR              the operation was rejected. @threadsafe No (mutates graph). @sa occtl_topo_shell_remove_face, occtl_topo_make_shell /
+				    [param graph] Input parameter.
+				    [param shell] A node.
+				    [param face] A node.
+				    [param orientation] Enum value.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_shell_remove_face">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="shell" type="int64_t" />
+			<argument index="2" name="face" type="int64_t" />
+			<description>
+				Removes a face from a shell without deleting the face definition. The face remains in the graph for use by other shells or compounds. @param[in,out] graph Borrows it.  Must be non-NULL. @param[in]     shell Shell node ID.  Must be a valid, active shell. @param[in]     face  Face node ID.  Must be the definition ID of a face referenced by the shell. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p shell or @p face is invalid, removed, has wrong kind, or the face is not in the shell. @retval OCCTL_WRONG_KIND        @p shell is not a shell. @threadsafe No (mutates graph). @sa occtl_topo_shell_add_face /
+				    [param graph] Input parameter.
+				    [param shell] A node.
+				    [param face] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_face_add_holes">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="holes" type="int64_t" />
+			<argument index="3" name="hole_count" type="int" />
+			<description>
+				Adds inner wire references to a face without duplicating wire definitions. Each entry in @p holes must name an active Wire definition.  The function attaches each wire as a non-outer wire reference owned by @p face.  Wires already referenced by @p face are rejected to avoid duplicate hole usages. @param[in,out] graph      Borrows it.  Must be non-NULL. @param[in]     face       Face node ID.  Must be a valid, active face. @param[in]     holes      Borrowed span of Wire node IDs to add as holes. Must be non-NULL. @param[in]     hole_count Number of entries in @p holes.  Must be greater than zero. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p holes is NULL; @p hole_count is zero; a hole ID appears more than once; or a wire is already referenced by @p face. @retval OCCTL_NOT_FOUND         @p face or a requested hole is invalid or removed. @retval OCCTL_WRONG_KIND        @p face is not a face, or a requested hole node is not a wire. @retval OCCTL_ERROR             The graph editor rejected the wire usage. @threadsafe No (mutates graph). @sa occtl_topo_face_remove_holes, occtl_topo_make_face_from_wires_auto /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param holes] A node.
+				    [param hole_count] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_face_remove_holes">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="holes" type="int64_t" />
+			<argument index="3" name="hole_count" type="int" />
+			<description>
+				Removes inner wire references from a face without deleting wire definitions. When @p holes is NULL and @p hole_count is 0, all non-outer wire references are removed from @p face.  Otherwise, @p holes must name inner Wire definition IDs referenced by @p face; each matching wire reference is detached.  The outer wire is never removed by this function. @param[in,out] graph      Borrows it.  Must be non-NULL. @param[in]     face       Face node ID.  Must be a valid, active face. @param[in]     holes      Borrowed span of inner Wire node IDs, or NULL to remove all inner wires. @param[in]     hole_count Number of entries in @p holes. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL; @p holes is NULL while @p hole_count > 0; or @p holes is non-NULL while @p hole_count == 0. @retval OCCTL_NOT_FOUND         @p face or a requested hole is invalid, removed, not referenced by @p face, or is the outer wire. @retval OCCTL_WRONG_KIND        @p face is not a face, or a requested hole node is not a wire. @threadsafe No (mutates graph). @sa occtl_topo_make_face_from_wires_auto, occtl_topo_make_face /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param holes] A node.
+				    [param hole_count] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_solid_add_shell">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="solid" type="int64_t" />
+			<argument index="2" name="shell" type="int64_t" />
+			<argument index="3" name="orientation" type="int" />
+			<description>
+				Adds a shell to an existing solid. @param[in,out] graph       Borrows it.  Must be non-NULL. @param[in]     solid       Solid node ID.  Must be a valid, active solid. @param[in]     shell       Shell node ID.  Must be a valid, active shell. @param[in]     orientation Orientation of the shell inside the solid. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p solid or @p shell is invalid or removed. @retval OCCTL_WRONG_KIND        @p solid is not a solid or @p shell is not a shell. @retval OCCTL_ERROR              the operation was rejected. @threadsafe No (mutates graph). @sa occtl_topo_solid_remove_shell, occtl_topo_make_solid /
+				    [param graph] Input parameter.
+				    [param solid] A node.
+				    [param shell] A node.
+				    [param orientation] Enum value.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_solid_remove_shell">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="solid" type="int64_t" />
+			<argument index="2" name="shell" type="int64_t" />
+			<description>
+				Removes a shell from a solid without deleting the shell definition. @param[in,out] graph Borrows it.  Must be non-NULL. @param[in]     solid Solid node ID.  Must be a valid, active solid. @param[in]     shell Shell node ID.  Must be the definition ID of a shell referenced by the solid. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p solid or @p shell is invalid, removed, has wrong kind, or the shell is not in the solid. @retval OCCTL_WRONG_KIND        @p solid is not a solid. @threadsafe No (mutates graph). @sa occtl_topo_solid_add_shell /
+				    [param graph] Input parameter.
+				    [param solid] A node.
+				    [param shell] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_compound_add_child">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="compound" type="int64_t" />
+			<argument index="2" name="child" type="int64_t" />
+			<argument index="3" name="orientation" type="int" />
+			<description>
+				Adds a child entity to an existing compound. @param[in,out] graph       Borrows it.  Must be non-NULL. @param[in]     compound    Compound node ID.  Must be a valid, active compound. @param[in]     child       Child node ID of any topology kind. @param[in]     orientation Orientation of the child in the compound. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p compound or @p child is invalid or removed. @retval OCCTL_WRONG_KIND        @p compound is not a compound. @retval OCCTL_ERROR              the operation was rejected. @threadsafe No (mutates graph). @sa occtl_topo_compound_remove_child, occtl_topo_make_compound /
+				    [param graph] Input parameter.
+				    [param compound] A node.
+				    [param child] A node.
+				    [param orientation] Enum value.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_compound_remove_child">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="compound" type="int64_t" />
+			<argument index="2" name="child" type="int64_t" />
+			<description>
+				Removes a child from a compound without deleting the child definition. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     compound Compound node ID.  Must be a valid, active compound. @param[in]     child    Child node ID.  Must be the definition ID of a child referenced by the compound. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p compound or @p child is invalid, removed, has wrong kind, or the child is not in the compound. @retval OCCTL_WRONG_KIND        @p compound is not a compound. @threadsafe No (mutates graph). @sa occtl_topo_compound_add_child /
+				    [param graph] Input parameter.
+				    [param compound] A node.
+				    [param child] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_split">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="parameter" type="double" />
+			<argument index="3" name="out_edge1" type="int64_t" />
+			<argument index="4" name="out_edge2" type="int64_t" />
+			<description>
+				Splits an edge at the given parameter on its 3D curve. Creates a new vertex at the split point and produces two sub-edges. The original edge is soft-removed; all wires containing it are updated to reference the two new edges. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     edge      Edge node ID.  Must be a valid, active edge with a 3D curve. @param[in]     parameter Parameter on the edge's 3D curve at which to split. @param[out]    out_edge1  Borrows it.  Receives the first sub-edge NodeId (start → split). @param[out]    out_edge2  Borrows it.  Receives the second sub-edge NodeId (split → end). @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or an out-param is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, not an edge, or the edge has no 3D curve. @retval OCCTL_WRONG_KIND        @p edge is not an edge. @retval OCCTL_ERROR              the operation was rejected. @threadsafe No (mutates graph). @sa occtl_topo_edge_add_internal_vertex, occtl_topo_make_edge /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param parameter] Input parameter.
+				    [param out_edge1] Output parameter.
+				    [param out_edge2] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_add_internal_vertex">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="vertex" type="int64_t" />
+			<description>
+				Adds an internal vertex to an edge. The vertex is recorded on the edge with INTERNAL orientation.  This does not split the edge; for splitting see #occtl_topo_edge_split. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     edge      Edge node ID.  Must be a valid, active edge. @param[in]     vertex    Vertex node ID.  Must be a valid, active vertex. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p edge or @p vertex is invalid or removed. @retval OCCTL_WRONG_KIND        @p edge is not an edge or @p vertex is not a vertex. @retval OCCTL_ERROR              the operation was rejected. @threadsafe No (mutates graph). @sa occtl_topo_edge_remove_vertex, occtl_topo_edge_split /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param vertex] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_remove_vertex">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="vertex" type="int64_t" />
+			<description>
+				Removes a vertex from an edge. Supports both boundary vertices (start/end) and internal vertices. The vertex definition is not deleted. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID.  Must be a valid, active edge. @param[in]     vertex Vertex node ID.  Must be the definition ID of a vertex referenced by the edge. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p edge or @p vertex is invalid, removed, has wrong kind, or the vertex is not on the edge. @retval OCCTL_WRONG_KIND        @p edge is not an edge. @threadsafe No (mutates graph). @sa occtl_topo_edge_add_internal_vertex /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param vertex] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_continuity">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="faceA" type="int64_t" />
+			<argument index="3" name="faceB" type="int64_t" />
+			<argument index="4" name="out_continuity" type="int" />
+			<description>
+				Returns the geometric continuity between two faces at their shared edge. The continuity describes how smoothly the surfaces of @p faceA and @p faceB meet along @p edge. @param[in]  graph          Must be non-NULL. @param[in]  edge           Edge node ID shared by both faces. @param[in]  faceA          First face node ID. @param[in]  faceB          Second face node ID. @param[out] out_continuity  Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_continuity is NULL. @retval OCCTL_NOT_FOUND         @p edge, @p faceA, or @p faceB is invalid or removed. @retval OCCTL_WRONG_KIND        A NodeId has the wrong kind. @threadsafe Yes (read-only on graph). @sa occtl_topo_edge_has_continuity, occtl_topo_edge_max_continuity /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param faceA] A node.
+				    [param faceB] A node.
+				    [param out_continuity] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_has_continuity">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="faceA" type="int64_t" />
+			<argument index="3" name="faceB" type="int64_t" />
+			<argument index="4" name="out_has_continuity" type="PackedInt32Array" />
+			<description>
+				Returns whether continuity information is recorded between two faces at a shared edge. @param[in]  graph    Must be non-NULL. @param[in]  edge     Edge node ID shared by both faces. @param[in]  faceA    First face node ID. @param[in]  faceB    Second face node ID. @param[out] out_has_continuity  Borrows it.  Set to 1 if continuity is recorded, 0 otherwise.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_has_continuity is NULL. @retval OCCTL_NOT_FOUND         @p edge, @p faceA, or @p faceB is invalid or removed. @retval OCCTL_WRONG_KIND        A NodeId has the wrong kind. @threadsafe Yes (read-only on graph). @sa occtl_topo_edge_continuity, occtl_topo_edge_max_continuity /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param faceA] A node.
+				    [param faceB] A node.
+				    [param out_has_continuity] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_max_continuity">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="out_continuity" type="int" />
+			<description>
+				Returns the maximum continuity across all incident faces at an edge. This is the highest continuity value across every face pair that shares @p edge. @param[in]  graph          Must be non-NULL. @param[in]  edge           Edge node ID. @param[out] out_continuity  Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_continuity is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid or removed. @retval OCCTL_WRONG_KIND        @p edge is not an edge. @threadsafe Yes (read-only on graph). @sa occtl_topo_edge_continuity, occtl_topo_edge_has_continuity /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param out_continuity] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_coedge_orientation">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="coedge" type="int64_t" />
+			<argument index="2" name="out_orientation" type="int" />
+			<description>
+				Returns the full orientation (FORWARD/REVERSED/INTERNAL/EXTERNAL) of a coedge. Unlike #occtl_topo_coedge_is_reversed, which only tests the REVERSED flag, this returns the complete TopAbs_Orientation. @param[in]  graph          Must be non-NULL. @param[in]  coedge         CoEdge node ID. @param[out] out_orientation Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_orientation is NULL. @retval OCCTL_NOT_FOUND         @p coedge is invalid, removed, or not a coedge. @threadsafe Yes (read-only on graph). @sa occtl_topo_coedge_is_reversed /
+				    [param graph] Input parameter.
+				    [param coedge] A node.
+				    [param out_orientation] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_find_coedge_on_face">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="face" type="int64_t" />
+			<argument index="3" name="out_coedge" type="int64_t" />
+			<description>
+				Finds the coedge belonging to the given (edge, face) pair. O(1) lookup through the edge's coedge reverse-index.  Returns #OCCTL_NOT_FOUND when @p edge is not incident to @p face. @param[in]  graph      Must be non-NULL. @param[in]  edge       Edge node ID. @param[in]  face       Face node ID. @param[out] out_coedge  Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_coedge is NULL. @retval OCCTL_NOT_FOUND         @p edge or @p face is invalid/removed, or no coedge binds this edge-face pair. @retval OCCTL_WRONG_KIND        @p edge is not an edge or @p face is not a face. @threadsafe Yes (read-only on graph). @sa occtl_topo_edge_find_coedge_on_face_oriented /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param face] A node.
+				    [param out_coedge] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_find_coedge_on_face_oriented">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="face" type="int64_t" />
+			<argument index="3" name="orientation" type="int" />
+			<argument index="4" name="out_coedge" type="int64_t" />
+			<description>
+				Finds the coedge for an (edge, face, orientation) triple. On seam edges two coedges share the same face with opposite orientations; this overload disambiguates by the requested @p orientation. @param[in]  graph        Must be non-NULL. @param[in]  edge         Edge node ID. @param[in]  face         Face node ID. @param[in]  orientation  Orientation filter (by value). @param[out] out_coedge    Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_coedge is NULL. @retval OCCTL_NOT_FOUND         @p edge or @p face is invalid/removed, or no coedge matches the triple. @retval OCCTL_WRONG_KIND        @p edge is not an edge or @p face is not a face. @threadsafe Yes (read-only on graph). @sa occtl_topo_edge_find_coedge_on_face /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param face] A node.
+				    [param orientation] Enum value.
+				    [param out_coedge] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_vertex_point_in_usage">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="vertex" type="int64_t" />
+			<argument index="2" name="parent" type="int64_t" />
+			<argument index="3" name="out_point" type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the 3D point of a vertex with the parent's Location applied. The parent can be any node that references the vertex (edge, face, compound, occurrence, etc.).  The returned point incorporates the Location from the parent's reference chain. @param[in]  graph    Must be non-NULL. @param[in]  vertex   Vertex node ID. @param[in]  parent   Parent node ID whose Location is applied. @param[out] out_point Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_point is NULL. @retval OCCTL_NOT_FOUND         @p vertex or @p parent is invalid or removed, or @p parent does not reference @p vertex. @retval OCCTL_WRONG_KIND        @p vertex is not a vertex. @threadsafe Yes (read-only on graph). @sa occtl_topo_vertex_point /
+				    [param graph] Input parameter.
+				    [param vertex] A node.
+				    [param parent] A node.
+				    [param out_point] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_vertex_pcurve_parameter">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="vertex" type="int64_t" />
+			<argument index="2" name="coedge" type="int64_t" />
+			<argument index="3" name="out_u" type="PackedFloat64Array" />
+			<description>
+				Returns the 2D parameter of a vertex on a coedge's pcurve. @param[in]  graph  Must be non-NULL. @param[in]  vertex Vertex node ID. @param[in]  coedge CoEdge node ID. @param[out] out_u   Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_u is NULL. @retval OCCTL_NOT_FOUND         @p vertex or @p coedge is invalid or removed. @retval OCCTL_WRONG_KIND        @p vertex is not a vertex or @p coedge is not a coedge. @threadsafe Yes (read-only on graph). @sa occtl_topo_vertex_parameter, occtl_topo_coedge_pcurve_parameter /
+				    [param graph] Input parameter.
+				    [param vertex] A node.
+				    [param coedge] A node.
+				    [param out_u] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_edge_has_polygon3d">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="out_has_polygon3d" type="PackedInt32Array" />
+			<description>
+				Returns whether an edge has a 3D polygon discretization. @param[in]  graph   Must be non-NULL. @param[in]  edge    Edge node ID. @param[out] out_has_polygon3d Borrows it.  Set to 1 if polygon present, 0 otherwise. Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_has_polygon3d is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @threadsafe Yes (read-only on graph). @sa occtl_topo_coedge_has_polygon_on_surface /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param out_has_polygon3d] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_coedge_has_polygon_on_surface">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="coedge" type="int64_t" />
+			<argument index="2" name="out_has_polygon_on_surface" type="PackedInt32Array" />
+			<description>
+				Returns whether a coedge has a polygon-on-surface discretization. @param[in]  graph   Must be non-NULL. @param[in]  coedge  CoEdge node ID. @param[out] out_has_polygon_on_surface Borrows it.  Set to 1 if polygon present, 0 otherwise. Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_has_polygon_on_surface is NULL. @retval OCCTL_NOT_FOUND         @p coedge is invalid, removed, or not a coedge. @threadsafe Yes (read-only on graph). @sa occtl_topo_edge_has_polygon3d /
+				    [param graph] Input parameter.
+				    [param coedge] A node.
+				    [param out_has_polygon_on_surface] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_face_uv_bounds_restricted">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="umin" type="double" />
+			<argument index="3" name="umax" type="double" />
+			<argument index="4" name="vmin" type="double" />
+			<argument index="5" name="vmax" type="double" />
+			<argument index="6" name="u" type="double" />
+			<argument index="7" name="v" type="double" />
+			<argument index="8" name="out_point" type="Ref<OcctlPoint3>" />
+			<argument index="9" name="out_d1u" type="Ref<OcctlVector3>" />
+			<argument index="10" name="out_d1v" type="Ref<OcctlVector3>" />
+			<description>
+				Evaluates a face surface and its first partial derivatives inside a restricted UV box. The surface is evaluated at (@p u, @p v).  The adaptor is clamped to [@p umin, @p umax] x [@p vmin, @p vmax], which binds the evaluation range separately from the surface's natural bounds. @param[in]  graph    Must be non-NULL. @param[in]  face     Face node ID. @param[in]  umin     Lower U bound. @param[in]  umax     Upper U bound. @param[in]  vmin     Lower V bound. @param[in]  vmax     Upper V bound. @param[in]  u        U evaluation parameter. @param[in]  v        V evaluation parameter. @param[out] out_point Borrows it.  Must be non-NULL. @param[out] out_d1u   Borrows it.  Must be non-NULL. @param[out] out_d1v   Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or an out-param is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid, removed, or not a face. @threadsafe Yes (read-only on graph). @sa occtl_topo_face_eval_d1, occtl_topo_face_uv_bounds /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param umin] Input parameter.
+				    [param umax] Input parameter.
+				    [param vmin] Input parameter.
+				    [param vmax] Input parameter.
+				    [param u] Input parameter.
+				    [param v] Input parameter.
+				    [param out_point] Output parameter.
+				    [param out_d1u] Output parameter.
+				    [param out_d1v] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_vertex_point">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="vertex" type="int64_t" />
+			<argument index="2" name="point" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the 3D point of a vertex. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     vertex Vertex node ID. @param[in]     point  New point coordinates (by value). @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p tol is negative or non-finite. @retval OCCTL_NOT_FOUND         @p vertex is invalid, removed, or not a vertex. @threadsafe No (mutates graph). @sa occtl_topo_set_vertex_tolerance /
+				    [param graph] Input parameter.
+				    [param vertex] A node.
+				    [param point] A [OcctlPoint3].
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_vertex_tolerance">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="vertex" type="int64_t" />
+			<argument index="2" name="tol" type="double" />
+			<description>
+				Sets the tolerance of a vertex. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     vertex Vertex node ID. @param[in]     tol    New tolerance value. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p tol is negative or non-finite. @retval OCCTL_NOT_FOUND         @p vertex is invalid, removed, or not a vertex. @threadsafe No (mutates graph). @sa occtl_topo_set_vertex_point /
+				    [param graph] Input parameter.
+				    [param vertex] A node.
+				    [param tol] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_tolerance">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="tol" type="double" />
+			<description>
+				Sets the tolerance of an edge. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID. @param[in]     tol    New tolerance value. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p tol is negative or non-finite. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @threadsafe No (mutates graph). @sa occtl_topo_set_face_tolerance /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param tol] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_face_tolerance">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="tol" type="double" />
+			<description>
+				Sets the tolerance of a face. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     face   Face node ID. @param[in]     tol    New tolerance value. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p tol is negative or non-finite. @retval OCCTL_NOT_FOUND         @p face is invalid, removed, or not a face. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_tolerance /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param tol] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_param_range">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="first" type="double" />
+			<argument index="3" name="last" type="double" />
+			<description>
+				Sets the parametric range of an edge's 3D curve. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID. @param[in]     first  First parameter (lower bound). @param[in]     last   Last parameter (upper bound). @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p first/@p last are non-finite, or @p last is less than @p first. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_same_parameter, occtl_topo_set_coedge_param_range /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param first] Input parameter.
+				    [param last] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_same_parameter">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the same-parameter flag on an edge. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID. @param[in]     flag   1 to set, 0 to clear. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p first/@p last are non-finite, or @p last is less than @p first. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_same_range /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_same_range">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the same-range flag on an edge. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID. @param[in]     flag   1 to set, 0 to clear. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_same_parameter /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_is_degenerate">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the is-degenerate flag on an edge. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID. @param[in]     flag   1 to mark degenerate, 0 otherwise. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_is_closed, occtl_topo_edge_is_degenerated /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_is_closed">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the is-closed flag on an edge (start vertex == end vertex). @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID. @param[in]     flag   1 to mark closed, 0 otherwise. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid, removed, or not an edge. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_is_degenerate, occtl_topo_set_wire_is_closed /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_wire_is_closed">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="wire" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the is-closed flag on a wire. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     wire   Wire node ID. @param[in]     flag   1 to mark closed, 0 otherwise. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p wire is invalid, removed, or not a wire. @threadsafe No (mutates graph). @sa occtl_topo_set_shell_is_closed /
+				    [param graph] Input parameter.
+				    [param wire] A node.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_shell_is_closed">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="shell" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the is-closed flag on a shell (watertightness). @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     shell  Shell node ID. @param[in]     flag   1 to mark closed, 0 otherwise. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p shell is invalid, removed, or not a shell. @threadsafe No (mutates graph). @sa occtl_topo_set_wire_is_closed /
+				    [param graph] Input parameter.
+				    [param shell] A node.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_face_natural_restriction">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the natural-restriction flag on a face. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     face   Face node ID. @param[in]     flag   1 to set natural restriction, 0 to clear. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid, removed, or not a face. @threadsafe No (mutates graph). @sa occtl_topo_set_coedge_param_range /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_coedge_param_range">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="coedge" type="int64_t" />
+			<argument index="2" name="first" type="double" />
+			<argument index="3" name="last" type="double" />
+			<description>
+				Sets the parametric range of a coedge. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     coedge CoEdge node ID. @param[in]     first  First parameter (lower bound). @param[in]     last   Last parameter (upper bound). @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or @p first/@p last are non-finite, or @p last is less than @p first. @retval OCCTL_NOT_FOUND         @p coedge is invalid, removed, or not a coedge. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_param_range, occtl_topo_set_coedge_uv_box /
+				    [param graph] Input parameter.
+				    [param coedge] A node.
+				    [param first] Input parameter.
+				    [param last] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_coedge_uv_box">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="coedge" type="int64_t" />
+			<argument index="2" name="uv_lo" type="Ref<OcctlPoint2>" />
+			<argument index="3" name="uv_hi" type="Ref<OcctlPoint2>" />
+			<description>
+				Sets the UV box (start UV, end UV) of a coedge. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     coedge CoEdge node ID. @param[in]     uv_lo   UV point at parameter first (by value). @param[in]     uv_hi   UV point at parameter last (by value). @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p coedge is invalid, removed, or not a coedge. @threadsafe No (mutates graph). @sa occtl_topo_set_coedge_param_range /
+				    [param graph] Input parameter.
+				    [param coedge] A node.
+				    [param uv_lo] A [OcctlPoint2].
+				    [param uv_hi] A [OcctlPoint2].
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_clear_cached">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="ref" type="int64_t" />
+			<description>
+				Clears graph-owned computed data related to one node or one reference. Exactly one of @p node or @p ref must be valid.  The implementation removes graph-owned computed data attached to the selected target; callers must treat cached calculation results as an optimization only. @param[in,out] graph Borrows it.  Must be non-NULL. @param[in]     node  Node ID to clear, or #OCCTL_NODE_ID_INVALID. @param[in]     ref   Ref ID to clear, or #OCCTL_REF_ID_INVALID. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL, or both/neither IDs are valid. @retval OCCTL_NOT_FOUND         The selected node or reference is invalid or removed. @threadsafe No (mutates internal computed-data state). @sa occtl_graph_bbox_get, occtl_graph_pair_distance_get /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [param ref] A reference ID.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="select_options_init">
+			<argument index="0" name="options" type="Ref<OcctlSelectOptions>" />
+			<description>
+				Initialises @p options to #OCCTL_SELECT_OPTIONS_INIT. @param[out] options Borrows it.  May be NULL. @threadsafe Yes. @sa occtl_select_iter_create /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="select_group_options_init">
+			<argument index="0" name="options" type="Ref<OcctlSelectGroupOptions>" />
+			<description>
+				Initialises @p options to #OCCTL_SELECT_GROUP_OPTIONS_INIT. @param[out] options Borrows it.  May be NULL. @threadsafe Yes. @sa occtl_select_group_iter_create /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="select_group_view_init">
+			<argument index="0" name="view" type="Ref<OcctlSelectGroupView>" />
+			<description>
+				Initialises @p view to #OCCTL_SELECT_GROUP_VIEW_INIT. @param[out] view Borrows it. May be NULL. @threadsafe Yes. @sa occtl_select_group_iter_next /
+				    [param view] Output parameter.
+		</description>
+		</method>
+		<method name="graph_bbox_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="out_bbox" type="Ref<OcctlSelectBbox>" />
+			<description>
+				Returns a computed axis-aligned bounding box for a node. The value is computed from current graph state. OCCT may use internal transient caches, but OCCT-Light exposes only the computed POD result. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     node     Node ID to query.  Must be valid and active. @param[out]    out_bbox Borrows it.  Must be non-NULL.  Receives the box. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_bbox is NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute a finite box. @threadsafe No (may update OCCT internal caches). @sa occtl_graph_obb_get, occtl_graph_measure_get /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [param out_bbox] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_obb_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="out_obb" type="Ref<OcctlGraphObb>" />
+			<description>
+				Returns a computed oriented bounding box for a node. The value is computed through OCCT from current graph state. Callers receive a POD copy. @param[in,out] graph   Borrows it.  Must be non-NULL. @param[in]     node    Node ID to query.  Must be valid and active. @param[out]    out_obb Borrows it.  Must be non-NULL.  Receives the box. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_obb is NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute an oriented box. @threadsafe No (may update OCCT internal caches). @sa occtl_graph_bbox_get /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [param out_obb] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_face_uv_bounds_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="out_uv_bounds" type="Ref<OcctlGraphUvBounds>" />
+			<description>
+				Returns computed UV parameter bounds for a Face node. The value is computed through BRepGraph UV-bounds algorithms from current graph state. OCCT may use internal transient caches; callers receive a POD copy. @param[in,out] graph         Borrows it.  Must be non-NULL. @param[in]     face          Face node ID to query.  Must be valid and active. @param[out]    out_uv_bounds Borrows it.  Must be non-NULL.  Receives bounds. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_uv_bounds is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid or removed. @retval OCCTL_WRONG_KIND        @p face is not a Face node. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute valid UV bounds. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_face_uv_bounds /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param out_uv_bounds] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_measure_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="kind" type="int" />
+			<argument index="3" name="out_value" type="PackedFloat64Array" />
+			<description>
+				Returns a computed OCCT mass-property scalar for a node. The value is computed through OCCT mass-property algorithms from current graph state. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     node      Node ID to query.  Must be valid and active. @param[in]     kind      Measure scalar to compute. @param[out]    out_value Borrows it.  Must be non-NULL.  Receives the value. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_value is NULL, or @p kind is unsupported. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_WRONG_KIND        @p kind is not applicable to @p node. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute the requested value. @threadsafe No (may update OCCT internal caches). @sa occtl_graph_bbox_get /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [param kind] Enum value.
+				    [param out_value] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_mass_properties_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="out_properties" type="Ref<OcctlGraphMassProperties>" />
+			<description>
+				Returns computed combined OCCT mass properties for a node. The value is computed through OCCT mass-property algorithms from current graph state. Callers receive a POD copy. @param[in,out] graph          Borrows it.  Must be non-NULL. @param[in]     node           Node ID to query.  Must be valid and active. @param[out]    out_properties Borrows it.  Must be non-NULL.  Receives the mass-property summary. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_properties is NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute finite properties. @threadsafe No (may update OCCT internal caches). @sa occtl_graph_measure_get /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [param out_properties] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_edge_curve_kind_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="out_kind" type="int" />
+			<description>
+				Returns a computed curve-kind classification for an Edge node. The classification delegates to OCCT edge adaptors. Callers receive a POD enum copy. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     edge     Edge node ID to classify.  Must be valid and active. @param[out]    out_kind Borrows it.  Must be non-NULL.  Receives the curve kind. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_kind is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid or removed. @retval OCCTL_WRONG_KIND        @p edge is not an Edge node. @retval OCCTL_GEOMETRY_INVALID  OCCT could not classify the edge geometry. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_edge_curve_kind /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param out_kind] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_face_surface_kind_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<argument index="2" name="out_kind" type="int" />
+			<description>
+				Returns a computed surface-kind classification for a Face node. The classification delegates to OCCT surface adaptors. Callers receive a POD enum copy. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     face     Face node ID to classify.  Must be valid and active. @param[out]    out_kind Borrows it.  Must be non-NULL.  Receives the surface kind. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_kind is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid or removed. @retval OCCTL_WRONG_KIND        @p face is not a Face node. @retval OCCTL_GEOMETRY_INVALID  OCCT could not classify the face geometry. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_face_surface_kind /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [param out_kind] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="graph_descendant_vertices_get">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<description>
+				Returns computed descendant Vertex nodes for a graph root. The list is computed through BRepGraph child traversal from current graph state.  Duplicate Vertex definitions are collapsed.  If @p node is itself a Vertex, the returned list contains that Vertex. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     node      Root node ID to query.  Must be valid and active. @param[out]    out_buf   Borrows it.  May be NULL on the sizing call. @param[in]     cap       Capacity of @p out_buf in entries. @param[out]    out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_common_vertices /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="graph_descendant_edges_get">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<description>
+				Returns computed descendant Edge nodes for a graph root. The list is computed through BRepGraph child traversal from current graph state.  Duplicate Edge definitions are collapsed.  If @p node is itself an Edge, the returned list contains that Edge. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     node      Root node ID to query.  Must be valid and active. @param[out]    out_buf   Borrows it.  May be NULL on the sizing call. @param[in]     cap       Capacity of @p out_buf in entries. @param[out]    out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_connected_edges /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="graph_descendant_faces_get">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<description>
+				Returns computed descendant Face nodes for a graph root. The list is computed through BRepGraph child traversal from current graph state.  Duplicate Face definitions are collapsed.  If @p node is itself a Face, the returned list contains that Face. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     node      Root node ID to query.  Must be valid and active. @param[out]    out_buf   Borrows it.  May be NULL on the sizing call. @param[in]     cap       Capacity of @p out_buf in entries. @param[out]    out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_connected_faces /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="graph_descendants_get">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="descendant_kind" type="int" />
+			<description>
+				Returns computed descendant nodes of one requested kind for a graph root. The list is computed through BRepGraph child traversal from current graph state and keyed by @p descendant_kind.  Duplicate definitions are collapsed.  If @p node itself has @p descendant_kind, the returned list includes @p node. This is the broad descendant query surface for root-scoped scans. Use the narrower Vertex / Edge / Face functions only when a binding wants a more explicitly named convenience wrapper. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. @param[in,out] graph           Borrows it.  Must be non-NULL. @param[in]     node            Root node ID to query.  Must be valid and active. @param[in]     descendant_kind Requested node kind.  Must not be #OCCTL_KIND_INVALID. @param[out]    out_buf         Borrows it.  May be NULL on the sizing call. @param[in]     cap             Capacity of @p out_buf in entries. @param[out]    out_count       Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL, or @p descendant_kind is invalid. @retval OCCTL_NOT_FOUND         @p node is invalid or removed. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @threadsafe No (may update OCCT internal caches). @sa occtl_graph_descendant_vertices_get /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [param descendant_kind] Enum value.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="graph_adjacent_faces_get">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="face" type="int64_t" />
+			<description>
+				Returns computed adjacent Face nodes for one Face node. The list is computed through BRepGraph face-adjacency relations from current graph state. Duplicate Face definitions are collapsed.  This is a reusable graph-owned adjacency primitive for connected-face walks, selector-style relation predicates, and future reverse-engineering patch traversal. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     face      Face node ID to query.  Must be valid and active. @param[out]    out_buf   Borrows it.  May be NULL on the sizing call. @param[in]     cap       Capacity of @p out_buf in entries. @param[out]    out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND         @p face is invalid or removed. @retval OCCTL_WRONG_KIND        @p face is not a Face node. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_connected_faces /
+				    [param graph] Input parameter.
+				    [param face] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="graph_adjacent_edges_get">
+			<return type="PackedInt64Array" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<description>
+				Returns computed adjacent Edge nodes for one Edge node. The list is computed through BRepGraph shared-Vertex incidence from current graph state. Duplicate Edge definitions are collapsed and @p edge itself is not returned.  This is a reusable graph-owned adjacency primitive for connected-edge walks, wire grouping, selector-style relation predicates, and future sketch cleanup helpers. Two-call buffer (§10.1): pass @p out_buf as NULL with @p cap = 0 to learn the required count in @p out_count, then reissue with a buffer of at least that many #occtl_node_id_t entries. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     edge      Edge node ID to query.  Must be valid and active. @param[out]    out_buf   Borrows it.  May be NULL on the sizing call. @param[in]     cap       Capacity of @p out_buf in entries. @param[out]    out_count Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_count is NULL. @retval OCCTL_NOT_FOUND         @p edge is invalid or removed. @retval OCCTL_WRONG_KIND        @p edge is not an Edge node. @retval OCCTL_BUFFER_TOO_SMALL  @p out_buf is non-NULL and @p cap is too small. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_connected_edges /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [return] Array of node/UID values.
+		</description>
+		</method>
+		<method name="graph_pair_distance_get">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="first" type="int64_t" />
+			<argument index="2" name="second" type="int64_t" />
+			<argument index="3" name="out_distance" type="PackedFloat64Array" />
+			<description>
+				Returns a computed OCCT minimum distance between two graph nodes. The value is computed through OCCT from current graph state. Callers receive a POD scalar copy. @param[in,out] graph        Borrows it.  Must be non-NULL. @param[in]     first        First node ID.  Must be valid and active. @param[in]     second       Second node ID.  Must be valid and active. @param[out]    out_distance Borrows it.  Must be non-NULL.  Receives the minimum distance. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_distance is NULL. @retval OCCTL_NOT_FOUND         @p first or @p second is invalid or removed. @retval OCCTL_GEOMETRY_INVALID  OCCT could not compute a finite distance. @threadsafe No (may update OCCT internal caches). @sa occtl_topo_distance_pair /
+				    [param graph] Input parameter.
+				    [param first] A node.
+				    [param second] A node.
+				    [param out_distance] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="select_iter_create">
+			<return type="Ref<OcctlSelectIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlSelectOptions>" />
+			<description>
+				Creates an iterator over nodes matching @p options. The selector computes derived data such as node bounding boxes; pass a mutable graph handle because OCCT algorithms may update internal graph state. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     options  Borrows it.  May be NULL for defaults. @param[out]    out_iter Owns it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL, or an optional pointer field is inconsistent. @retval OCCTL_NOT_FOUND         @c options->root is invalid or removed. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (may update OCCT internal caches). @sa occtl_select_iter_next, occtl_select_iter_free /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlSelectOptions]. Pass null to use defaults.
+				    [return] A new [OcctlSelectIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="select_tagged_iter_create">
+			<return type="Ref<OcctlSelectIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="options" type="Ref<OcctlSelectOptions>" />
+			<argument index="2" name="tag" type="String" />
+			<description>
+				Creates an iterator over tagged nodes matching @p options. This is equivalent to #occtl_select_iter_create followed by an exact graph tag predicate, but filtering is performed during selector traversal. The selector may populate BRepGraph transient caches for expensive derived data such as node bounding boxes; pass a mutable graph handle. @param[in,out] graph    Borrows it.  Must be non-NULL. @param[in]     options  Borrows it.  May be NULL for defaults. @param[in]     tag      Tag bytes.  Borrowed; must be non-NULL and non-empty. @param[in]     tagLen   Length of @p tag in bytes. @param[out]    out_iter Owns it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL, @p tag is NULL/empty, or an optional pointer field is inconsistent. @retval OCCTL_NOT_FOUND         @c options->root is invalid or removed. @retval OCCTL_VERSION_MISMATCH  @c options->struct_version unsupported. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (may update OCCT internal caches). @sa occtl_graph_tag_add, occtl_select_iter_next, occtl_select_iter_free /
+				    [param graph] Input parameter.
+				    [param options] An optional [OcctlSelectOptions]. Pass null to use defaults.
+				    [param tag] Input parameter.
+				    [return] A new [OcctlSelectIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="select_iter_next">
+			<return type="int" />
+			<argument index="0" name="iter" type="Ref<OcctlSelectIterHandle>" />
+			<argument index="1" name="out_node" type="int64_t" />
+			<description>
+				Advances a selection iterator. @param[in,out] iter     Borrows it.  Must be non-NULL. @param[out]    out_node Borrows it.  Must be non-NULL. @retval OCCTL_OK                Next selected node written. @retval OCCTL_NOT_FOUND         Iterator exhausted; @p out_node is invalid. @retval OCCTL_INVALID_ARGUMENT  @p iter or @p out_node is NULL. @threadsafe No (mutates iterator). @sa occtl_select_iter_create, occtl_select_iter_free /
+				    [param iter] Input parameter.
+				    [param out_node] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="select_iter_free">
+			<argument index="0" name="iter" type="Ref<OcctlSelectIterHandle>" />
+			<description>
+				Releases a selection iterator. @param[in] iter Owns it.  May be NULL. @threadsafe Yes. @sa occtl_select_iter_next /
+				    [param iter] Input parameter.
+		</description>
+		</method>
+		<method name="select_group_iter_create">
+			<return type="Ref<OcctlSelectGroupIterHandle>" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="select_options" type="Ref<OcctlSelectOptions>" />
+			<argument index="2" name="group_options" type="Ref<OcctlSelectGroupOptions>" />
+			<description>
+				Creates an iterator over grouped selector results. @param[in,out] graph         Borrows it.  Must be non-NULL. @param[in]     select_options Borrows it.  May be NULL for defaults. @param[in]     group_options Borrows it.  May be NULL for defaults. @param[out]    out_iter      Owns it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph or @p out_iter is NULL, or an option value is invalid. @retval OCCTL_NOT_FOUND         @c select_options->root is invalid or removed. @retval OCCTL_VERSION_MISMATCH  An options struct version is unsupported. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (may update OCCT internal caches). @sa occtl_select_group_iter_next, occtl_select_group_iter_free /
+				    [param graph] Input parameter.
+				    [param select_options] An optional [OcctlSelectOptions]. Pass null to use defaults.
+				    [param group_options] An optional [OcctlSelectGroupOptions]. Pass null to use defaults.
+				    [return] A new [OcctlSelectGroupIterHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="select_group_iter_next">
+			<return type="int" />
+			<argument index="0" name="iter" type="Ref<OcctlSelectGroupIterHandle>" />
+			<argument index="1" name="out_view" type="Ref<OcctlSelectGroupView>" />
+			<description>
+				Advances a grouped-selection iterator. @param[in,out] iter     Borrows it.  Must be non-NULL. @param[out]    out_view Borrows it.  Must be non-NULL. @retval OCCTL_OK                Next group view written. @retval OCCTL_NOT_FOUND         Iterator exhausted. @retval OCCTL_INVALID_ARGUMENT  @p iter or @p out_view is NULL. @threadsafe No (mutates iterator). @sa occtl_select_group_iter_create, occtl_select_group_iter_free /
+				    [param iter] Input parameter.
+				    [param out_view] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="select_group_iter_free">
+			<argument index="0" name="iter" type="Ref<OcctlSelectGroupIterHandle>" />
+			<description>
+				Releases a grouped-selection iterator. @param[in] iter Owns it.  May be NULL. @threadsafe Yes. @sa occtl_select_group_iter_create /
+				    [param iter] Input parameter.
+		</description>
+		</method>
+		<method name="graph_clone">
+			<return type="Ref<OcctlGraphHandle>" />
+			<argument index="0" name="source" type="Ref<OcctlGraphHandle>" />
+			<description>
+				Deep-clones a topology graph. Copies all active nodes, references, representations, and registered layers.  Geometry handles are deep-copied so the new graph is fully independent.  The caller owns the returned graph and must release it with #occtl_graph_free. @param[in]  source     Borrows it.  Must be non-NULL. @param[out] out_graph   Owns it.  Must be non-NULL.  On success receives a valid handle; on failure set to NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p source or @p out_graph is NULL. @retval OCCTL_OUT_OF_MEMORY     Allocation failed. @threadsafe No (reads source, but source must not be concurrently mutated). @sa occtl_graph_create, occtl_graph_free /
+				    [param source] A [OcctlGraphHandle] handle.
+				    [return] A new [OcctlGraphHandle] handle, or null on failure.
+		</description>
+		</method>
+		<method name="graph_compact">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<description>
+				Compacts the graph by reclaiming slots from removed nodes. After compaction all #occtl_node_id_t and #occtl_ref_id_t values are invalidated (they are session-local indices that may be renumbered). Persistent #occtl_uid_t values survive compaction and can be resolved back to new NodeIds via #occtl_graph_node_id_from_uid. @param[in,out] graph  Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @note After this call, all previously obtained NodeId and RefId values are invalid.  Resolve UIDs to obtain fresh NodeId values. @threadsafe No (mutates graph). @sa occtl_graph_node_id_from_uid /
+				    [param graph] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_remove_with_replacement">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node" type="int64_t" />
+			<argument index="2" name="replacement" type="int64_t" />
+			<description>
+				Removes a node and reparents its children to a replacement node. For edge nodes: all CoEdges referencing the removed edge are reparented to the replacement edge.  Metadata observers are notified with both old and replacement NodeIds for data migration. @param[in,out] graph       Borrows it.  Must be non-NULL. @param[in]     node        NodeId of the entity to remove. @param[in]     replacement NodeId of the replacement entity. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p node or @p replacement is invalid or removed. @threadsafe No (mutates graph). @sa occtl_topo_remove /
+				    [param graph] Input parameter.
+				    [param node] A node.
+				    [param replacement] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_remove_ref">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="ref_id" type="int64_t" />
+			<description>
+				Removes a reference entry by its RefId. This is the builder-level API for detaching a child usage from its parent without removing the referenced definition itself. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     ref_id  Reference entry to remove. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p ref_id is invalid or already removed. @threadsafe No (mutates graph). @sa occtl_topo_remove_rep /
+				    [param graph] Input parameter.
+				    [param ref_id] A reference ID.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_remove_rep">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="rep_id" type="int64_t" />
+			<description>
+				Removes a representation entry by its RepId. Owning topology entities are marked modified so generation-based caches observe the representation as absent. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     rep_id  Representation entry to remove. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p rep_id is invalid or already removed. @threadsafe No (mutates graph). @sa occtl_topo_remove_ref /
+				    [param graph] Input parameter.
+				    [param rep_id] A occtl_rep_id_t.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_cleanup_removed_refs">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<description>
+				Cleans up stale references after removal operations. Forces the graph to finalise deferred invalidation and validate internal consistency.  Idempotent — calling multiple times is safe and has no additional side effects. @param[in,out] graph  Borrows it.  Must be non-NULL. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @threadsafe No (mutates graph). /
+				    [param graph] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_start_vertex">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="vertex" type="int64_t" />
+			<description>
+				Rebinds an edge's start vertex to a different vertex definition. Rewires the existing start-vertex reference to point to @p vertex. The previous vertex definition is no longer referenced by this edge. @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     edge   Edge node ID.  Must be a valid, active edge. @param[in]     vertex Vertex node ID.  Must be a valid, active vertex. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p edge or @p vertex is invalid or removed. @retval OCCTL_WRONG_KIND        @p edge is not an edge or @p vertex is not a vertex. @threadsafe No (mutates graph). @sa occtl_topo_set_edge_end_vertex /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param vertex] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_edge_end_vertex">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="edge" type="int64_t" />
+			<argument index="2" name="vertex" type="int64_t" />
+			<description>
+				Rebinds an edge's end vertex to a different vertex definition. @copydetails occtl_topo_set_edge_start_vertex @sa occtl_topo_set_edge_start_vertex /
+				    [param graph] Input parameter.
+				    [param edge] A node.
+				    [param vertex] A node.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_ref_orientation">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="ref_id" type="int64_t" />
+			<argument index="2" name="orientation" type="int" />
+			<description>
+				Sets the orientation of a reference entry. Dispatches internally by RefId kind.  Supported ref kinds: Shell, Face, Wire, CoEdge, Vertex, Solid, Child. @param[in,out] graph       Borrows it.  Must be non-NULL. @param[in]     ref_id       Reference entry to modify. @param[in]     orientation New orientation value. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p ref_id is invalid or removed. @threadsafe No (mutates graph). @sa occtl_topo_set_ref_location /
+				    [param graph] Input parameter.
+				    [param ref_id] A reference ID.
+				    [param orientation] Enum value.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_ref_location">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="ref_id" type="int64_t" />
+			<argument index="2" name="transform" type="Ref<OcctlTransform>" />
+			<description>
+				Sets the local location of a reference entry. Dispatches internally by RefId kind.  Supported ref kinds: Shell, Face, Wire, CoEdge, Vertex, Solid, Child, Occurrence. @param[in,out] graph     Borrows it.  Must be non-NULL. @param[in]     ref_id     Reference entry to modify. @param[in]     transform New local location as an affine transform. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p ref_id is invalid or removed. @threadsafe No (mutates graph). @sa occtl_topo_set_ref_orientation /
+				    [param graph] Input parameter.
+				    [param ref_id] A reference ID.
+				    [param transform] A [OcctlTransform].
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="topo_set_wire_ref_is_outer">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="ref_id" type="int64_t" />
+			<argument index="2" name="flag" type="int" />
+			<description>
+				Sets the IsOuter flag on a wire reference (marks it as the outer wire on a face). @param[in,out] graph  Borrows it.  Must be non-NULL. @param[in]     ref_id  Wire reference entry to modify. @param[in]     flag   1 to mark as outer wire, 0 to clear. @retval OCCTL_OK                On success. @retval OCCTL_INVALID_ARGUMENT  @p graph is NULL. @retval OCCTL_NOT_FOUND         @p ref_id is invalid, removed, or not a wire ref. @threadsafe No (mutates graph). @sa occtl_topo_set_ref_orientation /
+				    [param graph] Input parameter.
+				    [param ref_id] A reference ID.
+				    [param flag] Input parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="OCCTL_TOPO_MAKE_VERTEX_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_VERTEX_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_EDGE_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_EDGE_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_WIRE_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_WIRE_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_EDGES_TO_WIRES_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_EDGES_TO_WIRES_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_WIRE_OFFSET_2D_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_WIRE_OFFSET_2D_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_WIRE_FIX_DEGENERATE_EDGES_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_WIRE_FIX_DEGENERATE_EDGES_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_FACE_CHAMFER_2D_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_FACE_CHAMFER_2D_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_WIRE_CHAMFER_2D_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_WIRE_CHAMFER_2D_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_FACE_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_FACE_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_FACE_FROM_WIRES_AUTO_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_FACE_FROM_WIRES_AUTO_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_SHELL_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_SHELL_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_SOLID_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_SOLID_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_COMPOUND_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_COMPOUND_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_MAKE_COMPSOLID_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_TOPO_MAKE_COMPSOLID_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_MATERIAL_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_MATERIAL_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_JOINT_INFO_VERSION_1" value="1u">
+			Constant for #define OCCTL_JOINT_INFO_VERSION_1.
+		</constant>
+		<constant name="OCCTL_SELECT_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_SELECT_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_SELECT_METADATA_FILTER_VERSION_1" value="1u">
+			Constant for #define OCCTL_SELECT_METADATA_FILTER_VERSION_1.
+		</constant>
+		<constant name="OCCTL_SELECT_DISTANCE_TO_NODE_SORT_VERSION_1" value="1u">
+			Constant for #define OCCTL_SELECT_DISTANCE_TO_NODE_SORT_VERSION_1.
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_SELECT_GROUP_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_VIEW_VERSION_1" value="1u">
+			Constant for #define OCCTL_SELECT_GROUP_VIEW_VERSION_1.
+		</constant>
+		<constant name="OCCTL_TOPO_WIRE_OFFSET_2D_JOIN_ARC" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_topo_wire_offset_2d_join_t].
+		</constant>
+		<constant name="OCCTL_TOPO_WIRE_OFFSET_2D_JOIN_TANGENT" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_topo_wire_offset_2d_join_t].
+		</constant>
+		<constant name="OCCTL_TOPO_WIRE_OFFSET_2D_JOIN_INTERSECTION" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_topo_wire_offset_2d_join_t].
+		</constant>
+		<constant name="OCCTL_TOPO_WIRE_OFFSET_2D_JOIN_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_topo_wire_offset_2d_join_t].
+		</constant>
+		<constant name="OCCTL_OFFSET_JOIN_ARC" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_offset_join_type_t].
+		</constant>
+		<constant name="OCCTL_OFFSET_JOIN_TANGENT" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_offset_join_type_t].
+		</constant>
+		<constant name="OCCTL_OFFSET_JOIN_INTERSECTION" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_offset_join_type_t].
+		</constant>
+		<constant name="OCCTL_OFFSET_JOIN_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_offset_join_type_t].
+		</constant>
+		<constant name="OCCTL_JOINT_RIGID" value="0">
+			Enum value = 0 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_joint_kind_t].
+		</constant>
+		<constant name="OCCTL_JOINT_REVOLUTE" value="1">
+			Enum value = 1 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_joint_kind_t].
+		</constant>
+		<constant name="OCCTL_JOINT_LINEAR" value="2">
+			Enum value = 2 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_joint_kind_t].
+		</constant>
+		<constant name="OCCTL_JOINT_CYLINDRICAL" value="3">
+			Enum value = 3 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_joint_kind_t].
+		</constant>
+		<constant name="OCCTL_JOINT_BALL" value="4">
+			Enum value = 4 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_joint_kind_t].
+		</constant>
+		<constant name="OCCTL_JOINT_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_joint_kind_t].
+		</constant>
+		<constant name="OCCTL_SELECT_BBOX_INTERSECTS" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_select_bbox_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_BBOX_INSIDE" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_select_bbox_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_BBOX_CONTAINS_CENTER" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_select_bbox_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_BBOX_MODE_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_select_bbox_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_X" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_select_axis_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_Y" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_select_axis_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_Z" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_select_axis_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_select_axis_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_POSITION_MIN" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_select_axis_position_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_POSITION_MAX" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_select_axis_position_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_POSITION_CENTER" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_select_axis_position_t].
+		</constant>
+		<constant name="OCCTL_SELECT_AXIS_POSITION_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_select_axis_position_t].
+		</constant>
+		<constant name="OCCTL_SELECT_NORMAL_PARALLEL" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_select_normal_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_NORMAL_ANTIPARALLEL" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_select_normal_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_NORMAL_EITHER" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_select_normal_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_NORMAL_MODE_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_select_normal_mode_t].
+		</constant>
+		<constant name="OCCTL_SELECT_MEASURE_EDGE_LENGTH" value="0">
+			Enum value = 0 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_select_measure_kind_t].
+		</constant>
+		<constant name="OCCTL_SELECT_MEASURE_WIRE_LENGTH" value="1">
+			Enum value = 1 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_select_measure_kind_t].
+		</constant>
+		<constant name="OCCTL_SELECT_MEASURE_FACE_AREA" value="2">
+			Enum value = 2 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_select_measure_kind_t].
+		</constant>
+		<constant name="OCCTL_SELECT_MEASURE_SURFACE_AREA" value="3">
+			Enum value = 3 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_select_measure_kind_t].
+		</constant>
+		<constant name="OCCTL_SELECT_MEASURE_VOLUME" value="4">
+			Enum value = 4 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_select_measure_kind_t].
+		</constant>
+		<constant name="OCCTL_SELECT_MEASURE_KIND_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Kind identifier. Defined in [enum OcctlTopoBuild.occtl_select_measure_kind_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_NONE" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_AXIS_COORDINATE" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_MEASURE" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_DISTANCE_TO_POINT" value="3">
+			Enum value = 3 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_NAME" value="4">
+			Enum value = 4 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_UID" value="5">
+			Enum value = 5 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_DISTANCE_TO_NODE" value="6">
+			Enum value = 6 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_KEY_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_select_sort_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_ASCENDING" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_select_sort_direction_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_DESCENDING" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_select_sort_direction_t].
+		</constant>
+		<constant name="OCCTL_SELECT_SORT_DIRECTION_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_select_sort_direction_t].
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_KIND" value="0">
+			Enum value = 0 Defined in [enum OcctlTopoBuild.occtl_select_group_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_AXIS_COORDINATE" value="1">
+			Enum value = 1 Defined in [enum OcctlTopoBuild.occtl_select_group_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_CURVE_KIND" value="2">
+			Enum value = 2 Defined in [enum OcctlTopoBuild.occtl_select_group_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_SURFACE_KIND" value="3">
+			Enum value = 3 Defined in [enum OcctlTopoBuild.occtl_select_group_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_NAME" value="4">
+			Enum value = 4 Defined in [enum OcctlTopoBuild.occtl_select_group_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_COLOR" value="5">
+			Enum value = 5 Defined in [enum OcctlTopoBuild.occtl_select_group_key_t].
+		</constant>
+		<constant name="OCCTL_SELECT_GROUP_KEY_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlTopoBuild.occtl_select_group_key_t].
+		</constant>
+	</constants>
+</class>

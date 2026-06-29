@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlHeal" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Wrapper for occtl_heal.h.
+	</brief_description>
+	<description>
+		Auto-generated wrapper for the OCCT-Light C header occtl_heal.h.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="const_OCCTL_HEAL_H">
+			<return type="int64_t" />
+			<description>
+				@file occtl_heal.h @brief OCCT-Light: shape healing module. Exposes OCCT's ShapeFix, ShapeAnalysis, ShapeProcess, and ShapeUpgrade toolkits for repairing and validating CAD geometry. /.
+			</description>
+		</method>
+		<method name="const_OCCTL_HEAL_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_HEAL_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="const_OCCTL_HEAL_UNIFY_SAME_DOMAIN_OPTIONS_INIT">
+			<return type="int64_t" />
+			<description>
+				Constant wrapper for #define OCCTL_HEAL_UNIFY_SAME_DOMAIN_OPTIONS_INIT.
+			</description>
+		</method>
+		<method name="options_init">
+			<argument index="0" name="options" type="Ref<OcctlHealOptions>" />
+			<description>
+				Runtime initialiser for #occtl_heal_options_t. @param[out] options  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_heal_shape /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="unify_same_domain_options_init">
+			<argument index="0" name="options" type="Ref<OcctlHealUnifySameDomainOptions>" />
+			<description>
+				Runtime initialiser for #occtl_heal_unify_same_domain_options_t. @param[out] options  Borrows it. NULL-tolerant; no-op when NULL. @threadsafe Yes. @sa occtl_heal_unify_same_domain /
+				    [param options] Output parameter.
+		</description>
+		</method>
+		<method name="shape">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node_id" type="int64_t" />
+			<argument index="2" name="options" type="Ref<OcctlHealOptions>" />
+			<description>
+				Performs shape healing on a shape referenced by @p node_id. Wraps @c ShapeFix_Shape from OCCT's TKShHealing toolkit.  The healed shape is ingested back into @p graph as a new topology root (the old node is unaffected).  Caller must ensure exclusive access to the graph during the call. @param[inout] graph    Borrows it.  Must be non-NULL. @param[in]    node_id  Node whose OCCT shape will be healed. The node must resolve to a valid, non-null shape. @param[in]    options  Borrows it.  May be NULL for defaults (#OCCTL_HEAL_OPTIONS_INIT). @retval OCCTL_OK               Healing completed (may produce warnings). @retval OCCTL_INVALID_ARGUMENT @p graph is NULL; or @p options has invalid fields (non-NULL @c p_next, non-finite/negative tolerance, non-0/1 fix flags). @retval OCCTL_NOT_FOUND        @p node_id does not resolve to a valid shape. @retval OCCTL_VERSION_MISMATCH Unsupported @c struct_version in @p options. @retval OCCTL_OUT_OF_RANGE     @p options->mode is outside supported enum values. @retval OCCTL_TOPOLOGY_INVALID The healed result could not be added to the graph. @threadsafe No — mutates the graph. @sa occtl_heal_options_init /
+				    [param graph] Input parameter.
+				    [param node_id] A node.
+				    [param options] An optional [OcctlHealOptions]. Pass null to use defaults.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+		<method name="unify_same_domain">
+			<return type="int" />
+			<argument index="0" name="graph" type="Ref<OcctlGraphHandle>" />
+			<argument index="1" name="node_id" type="int64_t" />
+			<argument index="2" name="options" type="Ref<OcctlHealUnifySameDomainOptions>" />
+			<argument index="3" name="out_root" type="int64_t" />
+			<description>
+				Unifies same-domain edges and faces of a shape. Wraps OCCT's @c ShapeUpgrade_UnifySameDomain.  The unified shape is ingested back into @p graph as a new topology root; the original node is unaffected. @param[inout] graph    Borrows it.  Must be non-NULL. @param[in]    node_id  Node whose OCCT shape will be unified. @param[in]    options  Borrows it.  May be NULL for defaults (#OCCTL_HEAL_UNIFY_SAME_DOMAIN_OPTIONS_INIT). @param[out]   out_root Borrows it.  Receives the new topology root.  Must be non-NULL. @retval OCCTL_OK               Shape was unified and ingested. @retval OCCTL_INVALID_ARGUMENT @p graph or @p out_root is NULL; or @p options has invalid fields (non-NULL @c p_next, non-0/1 flags, non-finite/negative tolerances). @retval OCCTL_NOT_FOUND        @p node_id does not resolve to a valid shape. @retval OCCTL_VERSION_MISMATCH Unsupported @c struct_version in @p options. @retval OCCTL_TOPOLOGY_INVALID The unified result could not be added to the graph. @threadsafe No — mutates the graph. @sa occtl_heal_unify_same_domain_options_init /
+				    [param graph] Input parameter.
+				    [param node_id] A node.
+				    [param options] An optional [OcctlHealUnifySameDomainOptions]. Pass null to use defaults.
+				    [param out_root] Output parameter.
+				    [return] Status code ([constant OcctlCore.OCCTL_OK] on success).
+		</description>
+		</method>
+	</methods>
+	<constants>
+		<constant name="OCCTL_HEAL_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_HEAL_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_HEAL_UNIFY_SAME_DOMAIN_OPTIONS_VERSION_1" value="1u">
+			Constant for #define OCCTL_HEAL_UNIFY_SAME_DOMAIN_OPTIONS_VERSION_1.
+		</constant>
+		<constant name="OCCTL_HEAL_MODE_BASIC" value="0">
+			Enum value = 0 Defined in [enum OcctlHeal.occtl_heal_mode_t].
+		</constant>
+		<constant name="OCCTL_HEAL_MODE_STANDARD" value="1">
+			Enum value = 1 Defined in [enum OcctlHeal.occtl_heal_mode_t].
+		</constant>
+		<constant name="OCCTL_HEAL_MODE_FULL" value="2">
+			Enum value = 2 Defined in [enum OcctlHeal.occtl_heal_mode_t].
+		</constant>
+		<constant name="OCCTL_HEAL_MODE_RESERVED_FUTURE" value="2147483647">
+			Enum value = 2147483647 Defined in [enum OcctlHeal.occtl_heal_mode_t].
+		</constant>
+	</constants>
+</class>

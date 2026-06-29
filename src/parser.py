@@ -474,7 +474,26 @@ class HeaderParser:
             )
             return result
 
-        return result
+        # Check for callback typedef: typedef ret (CALL* name)(params);
+        # e.g. typedef occtl_status_t(OCCTL_CALL* occtl_node_visitor_t)(occtl_node_id_t node, void* user_data);
+        if re.search(r"\([^)]*\*\s*\w+\s*\)\s*\(", text_stripped):
+            # Function pointer typedef (callback) - already handled downstream
+            # via CALLBACK_TYPES set. Nothing to generate.
+            return result
+
+        # Check for simple typedef alias: typedef existing_type new_name;
+        # e.g. typedef occtl_axis1_placement_t occtl_geom_line_t;
+        if len(all_ids) >= 2:
+            match = re.match(r"typedef\s+(.+)\s+(\w+)\s*;", text_stripped)
+            if match:
+                # Simple alias - already handled downstream via
+                # TYPEDEF_CANONICAL_MAP and similar mechanisms.
+                # No CStruct needed since it's the same C type.
+                return result
+
+        raise RuntimeError(
+            f"Unrecognized typedef pattern at line {node.start_point.row + 1}: {text[:120]}..."
+        )
 
     def _extract_struct_fields(self, text: str) -> list[CField]:
         """Extract fields from a struct definition text."""

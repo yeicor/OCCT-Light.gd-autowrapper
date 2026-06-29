@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoTouchHit" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_touch_hit_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_touch_hit_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_node_a">
+			<return type="int64_t" />
+			<description>
+				Returns the [member node_a] value.
+			</description>
+		</method>
+		<method name="set_node_a">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member node_a] value.
+			</description>
+		</method>
+		<method name="get_node_b">
+			<return type="int64_t" />
+			<description>
+				Returns the [member node_b] value.
+			</description>
+		</method>
+		<method name="set_node_b">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member node_b] value.
+			</description>
+		</method>
+		<method name="get_support_a">
+			<return type="int64_t" />
+			<description>
+				Returns the [member support_a] value.
+			</description>
+		</method>
+		<method name="set_support_a">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member support_a] value.
+			</description>
+		</method>
+		<method name="get_support_b">
+			<return type="int64_t" />
+			<description>
+				Returns the [member support_b] value.
+			</description>
+		</method>
+		<method name="set_support_b">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member support_b] value.
+			</description>
+		</method>
+		<method name="get_point_a">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member point_a] value.
+			</description>
+		</method>
+		<method name="set_point_a">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member point_a] value.
+			</description>
+		</method>
+		<method name="get_point_b">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member point_b] value.
+			</description>
+		</method>
+		<method name="set_point_b">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member point_b] value.
+			</description>
+		</method>
+		<method name="get_distance">
+			<return type="double" />
+			<description>
+				Returns the [member distance] value.
+			</description>
+		</method>
+		<method name="set_distance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member distance] value.
+			</description>
+		</method>
+		<method name="get_inner_solution">
+			<return type="int" />
+			<description>
+				Returns the [member inner_solution] value.
+			</description>
+		</method>
+		<method name="set_inner_solution">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member inner_solution] value.
+			</description>
+		</method>
+	</methods>
+</class>

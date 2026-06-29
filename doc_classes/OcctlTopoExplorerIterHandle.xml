@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoExplorerIterHandle" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Handle wrapper for occtl_topo_explorer_iter_t.	</brief_description>
+	<description>Auto-generated handle for the opaque C type occtl_topo_explorer_iter_t. Wraps a C pointer and auto-frees it on destruction.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="set_handle">
+			<return type="void" />
+			<argument index="0" name="handle" type="int" />
+			<description>Set the wrapped C pointer from an int64_t handle.</description>
+		</method>
+		<method name="get_handle">
+			<return type="int" />
+			<description>Get the wrapped C pointer as an int64_t handle.</description>
+		</method>
+		<method name="is_valid">
+			<return type="bool" />
+			<description>Check if the handle wraps a non-null pointer.</description>
+		</method>
+		<method name="release">
+			<return type="int" />
+			<description>Release ownership of the C pointer and return the handle. The destructor will not free it.</description>
+		</method>
+		<method name="free">
+			<return type="void" />
+			<description>Manually free the wrapped C pointer.</description>
+		</method>
+	</methods>
+</class>

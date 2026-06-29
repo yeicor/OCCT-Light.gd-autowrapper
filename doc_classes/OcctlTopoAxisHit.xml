@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoAxisHit" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_axis_hit_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_axis_hit_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_face">
+			<return type="int64_t" />
+			<description>
+				Returns the [member face] value.
+			</description>
+		</method>
+		<method name="set_face">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member face] value.
+			</description>
+		</method>
+		<method name="get_point">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member point] value.
+			</description>
+		</method>
+		<method name="set_point">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member point] value.
+			</description>
+		</method>
+		<method name="get_uv">
+			<return type="Ref<OcctlPoint2>" />
+			<description>
+				Returns the [member uv] value.
+			</description>
+		</method>
+		<method name="set_uv">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint2>" />
+			<description>
+				Sets the [member uv] value.
+			</description>
+		</method>
+		<method name="get_parameter">
+			<return type="double" />
+			<description>
+				Returns the [member parameter] value.
+			</description>
+		</method>
+		<method name="set_parameter">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member parameter] value.
+			</description>
+		</method>
+		<method name="get_normal">
+			<return type="Ref<OcctlDirection3>" />
+			<description>
+				Returns the [member normal] value.
+			</description>
+		</method>
+		<method name="set_normal">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlDirection3>" />
+			<description>
+				Sets the [member normal] value.
+			</description>
+		</method>
+		<method name="get_has_normal">
+			<return type="int" />
+			<description>
+				Returns the [member has_normal] value.
+			</description>
+		</method>
+		<method name="set_has_normal">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member has_normal] value.
+			</description>
+		</method>
+		<method name="get_location">
+			<return type="int" />
+			<description>
+				Returns the [member location] value.
+			</description>
+		</method>
+		<method name="set_location">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member location] value.
+			</description>
+		</method>
+	</methods>
+</class>

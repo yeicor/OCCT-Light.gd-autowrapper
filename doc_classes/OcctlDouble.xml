@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlDouble" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Out-parameter wrapper for float.</brief_description>
+	<description>
+		Reusable typed wrapper for float out-parameters.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_value">
+			<return type="double" />
+			<description>Getter for value.</description>
+		</method>
+		<method name="set_value">
+			<return type="void" />
+			<argument index="0" name="v" type="double" />
+			<description>Setter for value.</description>
+		</method>
+	</methods>
+	<members>
+		<member name="value" type="double" setter="set_value" getter="get_value">The wrapped float value.</member>
+	</members>
+</class>

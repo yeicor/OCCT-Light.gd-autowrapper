@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlMeshTriangleSphereComponentsOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_mesh_triangle_sphere_components_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_mesh_triangle_sphere_components_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_root">
+			<return type="int64_t" />
+			<description>
+				Returns the [member root] value.
+			</description>
+		</method>
+		<method name="set_root">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member root] value.
+			</description>
+		</method>
+		<method name="get_max_normal_angle">
+			<return type="double" />
+			<description>
+				Returns the [member max_normal_angle] value.
+			</description>
+		</method>
+		<method name="set_max_normal_angle">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member max_normal_angle] value.
+			</description>
+		</method>
+		<method name="get_include_opposite_normals">
+			<return type="int" />
+			<description>
+				Returns the [member include_opposite_normals] value.
+			</description>
+		</method>
+		<method name="set_include_opposite_normals">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member include_opposite_normals] value.
+			</description>
+		</method>
+		<method name="get_max_distance">
+			<return type="double" />
+			<description>
+				Returns the [member max_distance] value.
+			</description>
+		</method>
+		<method name="set_max_distance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member max_distance] value.
+			</description>
+		</method>
+		<method name="get_min_area">
+			<return type="double" />
+			<description>
+				Returns the [member min_area] value.
+			</description>
+		</method>
+		<method name="set_min_area">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member min_area] value.
+			</description>
+		</method>
+		<method name="get_min_triangle_count">
+			<return type="int" />
+			<description>
+				Returns the [member min_triangle_count] value.
+			</description>
+		</method>
+		<method name="set_min_triangle_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member min_triangle_count] value.
+			</description>
+		</method>
+		<method name="get_min_radius">
+			<return type="double" />
+			<description>
+				Returns the [member min_radius] value.
+			</description>
+		</method>
+		<method name="set_min_radius">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member min_radius] value.
+			</description>
+		</method>
+	</methods>
+</class>

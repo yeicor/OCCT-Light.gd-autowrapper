@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlPrimExtrudeTwistInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_prim_extrude_twist_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_prim_extrude_twist_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_profile_wire">
+			<return type="int64_t" />
+			<description>
+				Returns the [member profile_wire] value.
+			</description>
+		</method>
+		<method name="set_profile_wire">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member profile_wire] value.
+			</description>
+		</method>
+		<method name="get_axis">
+			<return type="Ref<OcctlAxis1Placement>" />
+			<description>
+				Returns the [member axis] value.
+			</description>
+		</method>
+		<method name="set_axis">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis1Placement>" />
+			<description>
+				Sets the [member axis] value.
+			</description>
+		</method>
+		<method name="get_height">
+			<return type="double" />
+			<description>
+				Returns the [member height] value.
+			</description>
+		</method>
+		<method name="set_height">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member height] value.
+			</description>
+		</method>
+		<method name="get_angle">
+			<return type="double" />
+			<description>
+				Returns the [member angle] value.
+			</description>
+		</method>
+		<method name="set_angle">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member angle] value.
+			</description>
+		</method>
+		<method name="get_section_count">
+			<return type="int" />
+			<description>
+				Returns the [member section_count] value.
+			</description>
+		</method>
+		<method name="set_section_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member section_count] value.
+			</description>
+		</method>
+		<method name="get_make_solid">
+			<return type="int" />
+			<description>
+				Returns the [member make_solid] value.
+			</description>
+		</method>
+		<method name="set_make_solid">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member make_solid] value.
+			</description>
+		</method>
+		<method name="get_ruled">
+			<return type="int" />
+			<description>
+				Returns the [member ruled] value.
+			</description>
+		</method>
+		<method name="set_ruled">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member ruled] value.
+			</description>
+		</method>
+		<method name="get_pres3d">
+			<return type="double" />
+			<description>
+				Returns the [member pres3d] value.
+			</description>
+		</method>
+		<method name="set_pres3d">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member pres3d] value.
+			</description>
+		</method>
+	</methods>
+</class>

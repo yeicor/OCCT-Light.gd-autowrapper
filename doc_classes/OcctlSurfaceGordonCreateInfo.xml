@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlSurfaceGordonCreateInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_surface_gordon_create_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_surface_gordon_create_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_profiles">
+			<return type="PackedInt64Array" />
+			<description>
+				Returns the [member profiles] value.
+			</description>
+		</method>
+		<method name="set_profiles">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedInt64Array" />
+			<description>
+				Sets the [member profiles] value.
+			</description>
+		</method>
+		<method name="get_profile_count">
+			<return type="int" />
+			<description>
+				Returns the [member profile_count] value.
+			</description>
+		</method>
+		<method name="set_profile_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member profile_count] value.
+			</description>
+		</method>
+		<method name="get_guides">
+			<return type="PackedInt64Array" />
+			<description>
+				Returns the [member guides] value.
+			</description>
+		</method>
+		<method name="set_guides">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedInt64Array" />
+			<description>
+				Sets the [member guides] value.
+			</description>
+		</method>
+		<method name="get_guide_count">
+			<return type="int" />
+			<description>
+				Returns the [member guide_count] value.
+			</description>
+		</method>
+		<method name="set_guide_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member guide_count] value.
+			</description>
+		</method>
+		<method name="get_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member tolerance] value.
+			</description>
+		</method>
+		<method name="set_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member tolerance] value.
+			</description>
+		</method>
+		<method name="get_parallel">
+			<return type="int" />
+			<description>
+				Returns the [member parallel] value.
+			</description>
+		</method>
+		<method name="set_parallel">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member parallel] value.
+			</description>
+		</method>
+	</methods>
+</class>

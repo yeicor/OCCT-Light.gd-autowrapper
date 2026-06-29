@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlMeshTriangleAnalysisView" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_mesh_triangle_analysis_view_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_mesh_triangle_analysis_view_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_triangle_normals">
+			<return type="PackedFloat64Array" />
+			<description>
+				Returns the [member triangle_normals] value.
+			</description>
+		</method>
+		<method name="set_triangle_normals">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedFloat64Array" />
+			<description>
+				Sets the [member triangle_normals] value.
+			</description>
+		</method>
+		<method name="get_triangle_adjacency">
+			<return type="PackedInt32Array" />
+			<description>
+				Returns the [member triangle_adjacency] value.
+			</description>
+		</method>
+		<method name="set_triangle_adjacency">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedInt32Array" />
+			<description>
+				Sets the [member triangle_adjacency] value.
+			</description>
+		</method>
+		<method name="get_triangle_count">
+			<return type="int" />
+			<description>
+				Returns the [member triangle_count] value.
+			</description>
+		</method>
+		<method name="set_triangle_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member triangle_count] value.
+			</description>
+		</method>
+		<method name="get_face_count">
+			<return type="int" />
+			<description>
+				Returns the [member face_count] value.
+			</description>
+		</method>
+		<method name="set_face_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member face_count] value.
+			</description>
+		</method>
+		<method name="get_root">
+			<return type="int64_t" />
+			<description>
+				Returns the [member root] value.
+			</description>
+		</method>
+		<method name="set_root">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member root] value.
+			</description>
+		</method>
+	</methods>
+</class>

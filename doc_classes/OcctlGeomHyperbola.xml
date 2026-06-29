@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlGeomHyperbola" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_geom_hyperbola_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_geom_hyperbola_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_position">
+			<return type="Ref<OcctlAxis2Placement>" />
+			<description>
+				Returns the [member position] value.
+			</description>
+		</method>
+		<method name="set_position">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis2Placement>" />
+			<description>
+				Sets the [member position] value.
+			</description>
+		</method>
+		<method name="get_major_radius">
+			<return type="double" />
+			<description>
+				Returns the [member major_radius] value.
+			</description>
+		</method>
+		<method name="set_major_radius">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member major_radius] value.
+			</description>
+		</method>
+		<method name="get_minor_radius">
+			<return type="double" />
+			<description>
+				Returns the [member minor_radius] value.
+			</description>
+		</method>
+		<method name="set_minor_radius">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member minor_radius] value.
+			</description>
+		</method>
+	</methods>
+</class>

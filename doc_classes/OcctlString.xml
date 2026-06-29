@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlString" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Out-parameter wrapper for const char*.</brief_description>
+	<description>
+		Reusable typed wrapper for const char* out-parameters.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_value">
+			<return type="String" />
+			<description>Getter for value.</description>
+		</method>
+		<method name="set_value">
+			<return type="void" />
+			<argument index="0" name="v" type="String" />
+			<description>Setter for value.</description>
+		</method>
+	</methods>
+	<members>
+		<member name="value" type="String" setter="set_value" getter="get_value">The wrapped string value.</member>
+	</members>
+</class>

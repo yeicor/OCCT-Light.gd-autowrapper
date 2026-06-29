@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlEdgeView" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_edge_view_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_edge_view_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_t_min">
+			<return type="double" />
+			<description>
+				Returns the [member t_min] value.
+			</description>
+		</method>
+		<method name="set_t_min">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member t_min] value.
+			</description>
+		</method>
+		<method name="get_t_max">
+			<return type="double" />
+			<description>
+				Returns the [member t_max] value.
+			</description>
+		</method>
+		<method name="set_t_max">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member t_max] value.
+			</description>
+		</method>
+		<method name="get_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member tolerance] value.
+			</description>
+		</method>
+		<method name="set_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member tolerance] value.
+			</description>
+		</method>
+		<method name="get_start_vertex">
+			<return type="int64_t" />
+			<description>
+				Returns the [member start_vertex] value.
+			</description>
+		</method>
+		<method name="set_start_vertex">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member start_vertex] value.
+			</description>
+		</method>
+		<method name="get_end_vertex">
+			<return type="int64_t" />
+			<description>
+				Returns the [member end_vertex] value.
+			</description>
+		</method>
+		<method name="set_end_vertex">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member end_vertex] value.
+			</description>
+		</method>
+		<method name="get_internal_vertex_count">
+			<return type="int" />
+			<description>
+				Returns the [member internal_vertex_count] value.
+			</description>
+		</method>
+		<method name="set_internal_vertex_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member internal_vertex_count] value.
+			</description>
+		</method>
+		<method name="get_face_count">
+			<return type="int" />
+			<description>
+				Returns the [member face_count] value.
+			</description>
+		</method>
+		<method name="set_face_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member face_count] value.
+			</description>
+		</method>
+		<method name="get_has_curve">
+			<return type="int" />
+			<description>
+				Returns the [member has_curve] value.
+			</description>
+		</method>
+		<method name="set_has_curve">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member has_curve] value.
+			</description>
+		</method>
+		<method name="get_is_degenerated">
+			<return type="int" />
+			<description>
+				Returns the [member is_degenerated] value.
+			</description>
+		</method>
+		<method name="set_is_degenerated">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_degenerated] value.
+			</description>
+		</method>
+		<method name="get_is_closed">
+			<return type="int" />
+			<description>
+				Returns the [member is_closed] value.
+			</description>
+		</method>
+		<method name="set_is_closed">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_closed] value.
+			</description>
+		</method>
+		<method name="get_same_parameter">
+			<return type="int" />
+			<description>
+				Returns the [member same_parameter] value.
+			</description>
+		</method>
+		<method name="set_same_parameter">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member same_parameter] value.
+			</description>
+		</method>
+		<method name="get_same_range">
+			<return type="int" />
+			<description>
+				Returns the [member same_range] value.
+			</description>
+		</method>
+		<method name="set_same_range">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member same_range] value.
+			</description>
+		</method>
+		<method name="get_is_manifold">
+			<return type="int" />
+			<description>
+				Returns the [member is_manifold] value.
+			</description>
+		</method>
+		<method name="set_is_manifold">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_manifold] value.
+			</description>
+		</method>
+		<method name="get_is_boundary">
+			<return type="int" />
+			<description>
+				Returns the [member is_boundary] value.
+			</description>
+		</method>
+		<method name="set_is_boundary">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_boundary] value.
+			</description>
+		</method>
+	</methods>
+</class>

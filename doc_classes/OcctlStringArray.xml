@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlStringArray" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Out-parameter wrapper for const char** (string arrays).</brief_description>
+	<description>
+		Reusable typed wrapper for const char** string-array out-parameters.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_strings">
+			<return type="PackedStringArray" />
+			<description>Getter for the string array.</description>
+		</method>
+		<method name="set_strings">
+			<return type="void" />
+			<argument index="0" name="v" type="PackedStringArray" />
+			<description>Setter for the string array.</description>
+		</method>
+		<method name="get_count">
+			<return type="int" />
+			<description>Number of strings in the array.</description>
+		</method>
+	</methods>
+	<members>
+		<member name="strings" type="PackedStringArray" setter="set_strings" getter="get_strings">The wrapped string array.</member>
+	</members>
+</class>

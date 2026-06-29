@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlIoGltfWriteOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_io_gltf_write_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_io_gltf_write_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_transform_format">
+			<return type="int" />
+			<description>
+				Returns the [member transform_format] value.
+			</description>
+		</method>
+		<method name="set_transform_format">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member transform_format] value.
+			</description>
+		</method>
+		<method name="get_force_uv_export">
+			<return type="int" />
+			<description>
+				Returns the [member force_uv_export] value.
+			</description>
+		</method>
+		<method name="set_force_uv_export">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member force_uv_export] value.
+			</description>
+		</method>
+		<method name="get_embed_textures_in_glb">
+			<return type="int" />
+			<description>
+				Returns the [member embed_textures_in_glb] value.
+			</description>
+		</method>
+		<method name="set_embed_textures_in_glb">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member embed_textures_in_glb] value.
+			</description>
+		</method>
+		<method name="get_merge_faces">
+			<return type="int" />
+			<description>
+				Returns the [member merge_faces] value.
+			</description>
+		</method>
+		<method name="set_merge_faces">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member merge_faces] value.
+			</description>
+		</method>
+		<method name="get_split_indices_16">
+			<return type="int" />
+			<description>
+				Returns the [member split_indices_16] value.
+			</description>
+		</method>
+		<method name="set_split_indices_16">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member split_indices_16] value.
+			</description>
+		</method>
+		<method name="get_parallel">
+			<return type="int" />
+			<description>
+				Returns the [member parallel] value.
+			</description>
+		</method>
+		<method name="set_parallel">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member parallel] value.
+			</description>
+		</method>
+	</methods>
+</class>

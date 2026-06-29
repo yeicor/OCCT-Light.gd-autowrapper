@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlGeom2dParabola" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_geom2d_parabola_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_geom2d_parabola_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_position">
+			<return type="Ref<OcctlAxis2Placement2d>" />
+			<description>
+				Returns the [member position] value.
+			</description>
+		</method>
+		<method name="set_position">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis2Placement2d>" />
+			<description>
+				Sets the [member position] value.
+			</description>
+		</method>
+		<method name="get_focal_length">
+			<return type="double" />
+			<description>
+				Returns the [member focal_length] value.
+			</description>
+		</method>
+		<method name="set_focal_length">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member focal_length] value.
+			</description>
+		</method>
+	</methods>
+</class>

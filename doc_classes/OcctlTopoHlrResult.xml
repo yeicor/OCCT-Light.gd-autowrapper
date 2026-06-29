@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoHlrResult" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_hlr_result_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_hlr_result_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_graph">
+			<return type="int64_t" />
+			<description>
+				Returns the [member graph] value.
+			</description>
+		</method>
+		<method name="set_graph">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member graph] value.
+			</description>
+		</method>
+		<method name="get_visible_sharp">
+			<return type="int64_t" />
+			<description>
+				Returns the [member visible_sharp] value.
+			</description>
+		</method>
+		<method name="set_visible_sharp">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member visible_sharp] value.
+			</description>
+		</method>
+		<method name="get_visible_smooth">
+			<return type="int64_t" />
+			<description>
+				Returns the [member visible_smooth] value.
+			</description>
+		</method>
+		<method name="set_visible_smooth">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member visible_smooth] value.
+			</description>
+		</method>
+		<method name="get_visible_seam">
+			<return type="int64_t" />
+			<description>
+				Returns the [member visible_seam] value.
+			</description>
+		</method>
+		<method name="set_visible_seam">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member visible_seam] value.
+			</description>
+		</method>
+		<method name="get_visible_outline">
+			<return type="int64_t" />
+			<description>
+				Returns the [member visible_outline] value.
+			</description>
+		</method>
+		<method name="set_visible_outline">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member visible_outline] value.
+			</description>
+		</method>
+		<method name="get_hidden_sharp">
+			<return type="int64_t" />
+			<description>
+				Returns the [member hidden_sharp] value.
+			</description>
+		</method>
+		<method name="set_hidden_sharp">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member hidden_sharp] value.
+			</description>
+		</method>
+		<method name="get_hidden_smooth">
+			<return type="int64_t" />
+			<description>
+				Returns the [member hidden_smooth] value.
+			</description>
+		</method>
+		<method name="set_hidden_smooth">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member hidden_smooth] value.
+			</description>
+		</method>
+		<method name="get_hidden_seam">
+			<return type="int64_t" />
+			<description>
+				Returns the [member hidden_seam] value.
+			</description>
+		</method>
+		<method name="set_hidden_seam">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member hidden_seam] value.
+			</description>
+		</method>
+		<method name="get_hidden_outline">
+			<return type="int64_t" />
+			<description>
+				Returns the [member hidden_outline] value.
+			</description>
+		</method>
+		<method name="set_hidden_outline">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member hidden_outline] value.
+			</description>
+		</method>
+	</methods>
+</class>

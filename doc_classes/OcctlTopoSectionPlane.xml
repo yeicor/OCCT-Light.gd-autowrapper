@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoSectionPlane" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_section_plane_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_section_plane_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_point">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member point] value.
+			</description>
+		</method>
+		<method name="set_point">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member point] value.
+			</description>
+		</method>
+		<method name="get_normal">
+			<return type="Ref<OcctlDirection3>" />
+			<description>
+				Returns the [member normal] value.
+			</description>
+		</method>
+		<method name="set_normal">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlDirection3>" />
+			<description>
+				Sets the [member normal] value.
+			</description>
+		</method>
+	</methods>
+</class>

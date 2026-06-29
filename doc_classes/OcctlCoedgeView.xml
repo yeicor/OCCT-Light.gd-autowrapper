@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlCoedgeView" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_coedge_view_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_coedge_view_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_edge_of">
+			<return type="int64_t" />
+			<description>
+				Returns the [member edge_of] value.
+			</description>
+		</method>
+		<method name="set_edge_of">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member edge_of] value.
+			</description>
+		</method>
+		<method name="get_face_of">
+			<return type="int64_t" />
+			<description>
+				Returns the [member face_of] value.
+			</description>
+		</method>
+		<method name="set_face_of">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member face_of] value.
+			</description>
+		</method>
+		<method name="get_orientation">
+			<return type="int" />
+			<description>
+				Returns the [member orientation] value.
+			</description>
+		</method>
+		<method name="set_orientation">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member orientation] value.
+			</description>
+		</method>
+		<method name="get_t_min">
+			<return type="double" />
+			<description>
+				Returns the [member t_min] value.
+			</description>
+		</method>
+		<method name="set_t_min">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member t_min] value.
+			</description>
+		</method>
+		<method name="get_t_max">
+			<return type="double" />
+			<description>
+				Returns the [member t_max] value.
+			</description>
+		</method>
+		<method name="set_t_max">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member t_max] value.
+			</description>
+		</method>
+		<method name="get_uv_start">
+			<return type="Ref<OcctlPoint2>" />
+			<description>
+				Returns the [member uv_start] value.
+			</description>
+		</method>
+		<method name="set_uv_start">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint2>" />
+			<description>
+				Sets the [member uv_start] value.
+			</description>
+		</method>
+		<method name="get_uv_end">
+			<return type="Ref<OcctlPoint2>" />
+			<description>
+				Returns the [member uv_end] value.
+			</description>
+		</method>
+		<method name="set_uv_end">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint2>" />
+			<description>
+				Sets the [member uv_end] value.
+			</description>
+		</method>
+		<method name="get_is_seam">
+			<return type="int" />
+			<description>
+				Returns the [member is_seam] value.
+			</description>
+		</method>
+		<method name="set_is_seam">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_seam] value.
+			</description>
+		</method>
+		<method name="get_is_reversed">
+			<return type="int" />
+			<description>
+				Returns the [member is_reversed] value.
+			</description>
+		</method>
+		<method name="set_is_reversed">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_reversed] value.
+			</description>
+		</method>
+		<method name="get_has_pcurve">
+			<return type="int" />
+			<description>
+				Returns the [member has_pcurve] value.
+			</description>
+		</method>
+		<method name="set_has_pcurve">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member has_pcurve] value.
+			</description>
+		</method>
+	</methods>
+</class>

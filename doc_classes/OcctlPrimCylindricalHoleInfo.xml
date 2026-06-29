@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlPrimCylindricalHoleInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_prim_cylindrical_hole_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_prim_cylindrical_hole_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_base_shape">
+			<return type="int64_t" />
+			<description>
+				Returns the [member base_shape] value.
+			</description>
+		</method>
+		<method name="set_base_shape">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member base_shape] value.
+			</description>
+		</method>
+		<method name="get_axis">
+			<return type="Ref<OcctlAxis1Placement>" />
+			<description>
+				Returns the [member axis] value.
+			</description>
+		</method>
+		<method name="set_axis">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis1Placement>" />
+			<description>
+				Sets the [member axis] value.
+			</description>
+		</method>
+		<method name="get_radius">
+			<return type="double" />
+			<description>
+				Returns the [member radius] value.
+			</description>
+		</method>
+		<method name="set_radius">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member radius] value.
+			</description>
+		</method>
+		<method name="get_kind">
+			<return type="int" />
+			<description>
+				Returns the [member kind] value.
+			</description>
+		</method>
+		<method name="set_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member kind] value.
+			</description>
+		</method>
+		<method name="get_p_from">
+			<return type="double" />
+			<description>
+				Returns the [member p_from] value.
+			</description>
+		</method>
+		<method name="set_p_from">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member p_from] value.
+			</description>
+		</method>
+		<method name="get_p_to">
+			<return type="double" />
+			<description>
+				Returns the [member p_to] value.
+			</description>
+		</method>
+		<method name="set_p_to">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member p_to] value.
+			</description>
+		</method>
+		<method name="get_length">
+			<return type="double" />
+			<description>
+				Returns the [member length] value.
+			</description>
+		</method>
+		<method name="set_length">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member length] value.
+			</description>
+		</method>
+		<method name="get_with_control">
+			<return type="int" />
+			<description>
+				Returns the [member with_control] value.
+			</description>
+		</method>
+		<method name="set_with_control">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member with_control] value.
+			</description>
+		</method>
+	</methods>
+</class>

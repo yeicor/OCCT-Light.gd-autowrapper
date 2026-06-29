@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTextMetrics" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_text_metrics_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_text_metrics_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_width">
+			<return type="double" />
+			<description>
+				Returns the [member width] value.
+			</description>
+		</method>
+		<method name="set_width">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member width] value.
+			</description>
+		</method>
+		<method name="get_height">
+			<return type="double" />
+			<description>
+				Returns the [member height] value.
+			</description>
+		</method>
+		<method name="set_height">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member height] value.
+			</description>
+		</method>
+		<method name="get_left">
+			<return type="double" />
+			<description>
+				Returns the [member left] value.
+			</description>
+		</method>
+		<method name="set_left">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member left] value.
+			</description>
+		</method>
+		<method name="get_right">
+			<return type="double" />
+			<description>
+				Returns the [member right] value.
+			</description>
+		</method>
+		<method name="set_right">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member right] value.
+			</description>
+		</method>
+		<method name="get_bottom">
+			<return type="double" />
+			<description>
+				Returns the [member bottom] value.
+			</description>
+		</method>
+		<method name="set_bottom">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member bottom] value.
+			</description>
+		</method>
+		<method name="get_top">
+			<return type="double" />
+			<description>
+				Returns the [member top] value.
+			</description>
+		</method>
+		<method name="set_top">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member top] value.
+			</description>
+		</method>
+		<method name="get_ascender">
+			<return type="double" />
+			<description>
+				Returns the [member ascender] value.
+			</description>
+		</method>
+		<method name="set_ascender">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member ascender] value.
+			</description>
+		</method>
+		<method name="get_descender">
+			<return type="double" />
+			<description>
+				Returns the [member descender] value.
+			</description>
+		</method>
+		<method name="set_descender">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member descender] value.
+			</description>
+		</method>
+		<method name="get_line_spacing">
+			<return type="double" />
+			<description>
+				Returns the [member line_spacing] value.
+			</description>
+		</method>
+		<method name="set_line_spacing">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member line_spacing] value.
+			</description>
+		</method>
+		<method name="get_max_symbol_width">
+			<return type="double" />
+			<description>
+				Returns the [member max_symbol_width] value.
+			</description>
+		</method>
+		<method name="set_max_symbol_width">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member max_symbol_width] value.
+			</description>
+		</method>
+	</methods>
+</class>

@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlSelectOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_select_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_select_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_root">
+			<return type="int64_t" />
+			<description>
+				Returns the [member root] value.
+			</description>
+		</method>
+		<method name="set_root">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member root] value.
+			</description>
+		</method>
+		<method name="get_kind_mask">
+			<return type="int64_t" />
+			<description>
+				Returns the [member kind_mask] value.
+			</description>
+		</method>
+		<method name="set_kind_mask">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member kind_mask] value.
+			</description>
+		</method>
+		<method name="get_include_root">
+			<return type="int" />
+			<description>
+				Returns the [member include_root] value.
+			</description>
+		</method>
+		<method name="set_include_root">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member include_root] value.
+			</description>
+		</method>
+		<method name="get_name">
+			<return type="String" />
+			<description>
+				Returns the [member name] value.
+			</description>
+		</method>
+		<method name="set_name">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member name] value.
+			</description>
+		</method>
+		<method name="get_name_len">
+			<return type="int" />
+			<description>
+				Returns the [member name_len] value.
+			</description>
+		</method>
+		<method name="set_name_len">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member name_len] value.
+			</description>
+		</method>
+		<method name="get_use_color">
+			<return type="int" />
+			<description>
+				Returns the [member use_color] value.
+			</description>
+		</method>
+		<method name="set_use_color">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_color] value.
+			</description>
+		</method>
+		<method name="get_color">
+			<return type="Ref<OcctlColorRgba>" />
+			<description>
+				Returns the [member color] value.
+			</description>
+		</method>
+		<method name="set_color">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlColorRgba>" />
+			<description>
+				Sets the [member color] value.
+			</description>
+		</method>
+		<method name="get_color_tolerance">
+			<return type="float" />
+			<description>
+				Returns the [member color_tolerance] value.
+			</description>
+		</method>
+		<method name="set_color_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="float" />
+			<description>
+				Sets the [member color_tolerance] value.
+			</description>
+		</method>
+		<method name="get_use_bbox">
+			<return type="int" />
+			<description>
+				Returns the [member use_bbox] value.
+			</description>
+		</method>
+		<method name="set_use_bbox">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_bbox] value.
+			</description>
+		</method>
+		<method name="get_bbox">
+			<return type="Ref<OcctlSelectBbox>" />
+			<description>
+				Returns the [member bbox] value.
+			</description>
+		</method>
+		<method name="set_bbox">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlSelectBbox>" />
+			<description>
+				Sets the [member bbox] value.
+			</description>
+		</method>
+		<method name="get_bbox_mode">
+			<return type="int" />
+			<description>
+				Returns the [member bbox_mode] value.
+			</description>
+		</method>
+		<method name="set_bbox_mode">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member bbox_mode] value.
+			</description>
+		</method>
+		<method name="get_use_curve_kind">
+			<return type="int" />
+			<description>
+				Returns the [member use_curve_kind] value.
+			</description>
+		</method>
+		<method name="set_use_curve_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_curve_kind] value.
+			</description>
+		</method>
+		<method name="get_curve_kind">
+			<return type="int" />
+			<description>
+				Returns the [member curve_kind] value.
+			</description>
+		</method>
+		<method name="set_curve_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member curve_kind] value.
+			</description>
+		</method>
+		<method name="get_use_surface_kind">
+			<return type="int" />
+			<description>
+				Returns the [member use_surface_kind] value.
+			</description>
+		</method>
+		<method name="set_use_surface_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_surface_kind] value.
+			</description>
+		</method>
+		<method name="get_surface_kind">
+			<return type="int" />
+			<description>
+				Returns the [member surface_kind] value.
+			</description>
+		</method>
+		<method name="set_surface_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member surface_kind] value.
+			</description>
+		</method>
+		<method name="get_use_axis_position">
+			<return type="int" />
+			<description>
+				Returns the [member use_axis_position] value.
+			</description>
+		</method>
+		<method name="set_use_axis_position">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_axis_position] value.
+			</description>
+		</method>
+		<method name="get_axis">
+			<return type="int" />
+			<description>
+				Returns the [member axis] value.
+			</description>
+		</method>
+		<method name="set_axis">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member axis] value.
+			</description>
+		</method>
+		<method name="get_axis_position">
+			<return type="int" />
+			<description>
+				Returns the [member axis_position] value.
+			</description>
+		</method>
+		<method name="set_axis_position">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member axis_position] value.
+			</description>
+		</method>
+		<method name="get_axis_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member axis_tolerance] value.
+			</description>
+		</method>
+		<method name="set_axis_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member axis_tolerance] value.
+			</description>
+		</method>
+		<method name="get_use_normal">
+			<return type="int" />
+			<description>
+				Returns the [member use_normal] value.
+			</description>
+		</method>
+		<method name="set_use_normal">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_normal] value.
+			</description>
+		</method>
+		<method name="get_normal">
+			<return type="Ref<OcctlDirection3>" />
+			<description>
+				Returns the [member normal] value.
+			</description>
+		</method>
+		<method name="set_normal">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlDirection3>" />
+			<description>
+				Sets the [member normal] value.
+			</description>
+		</method>
+		<method name="get_normal_mode">
+			<return type="int" />
+			<description>
+				Returns the [member normal_mode] value.
+			</description>
+		</method>
+		<method name="set_normal_mode">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member normal_mode] value.
+			</description>
+		</method>
+		<method name="get_normal_angle_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member normal_angle_tolerance] value.
+			</description>
+		</method>
+		<method name="set_normal_angle_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member normal_angle_tolerance] value.
+			</description>
+		</method>
+		<method name="get_use_measure">
+			<return type="int" />
+			<description>
+				Returns the [member use_measure] value.
+			</description>
+		</method>
+		<method name="set_use_measure">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member use_measure] value.
+			</description>
+		</method>
+		<method name="get_measure_kind">
+			<return type="int" />
+			<description>
+				Returns the [member measure_kind] value.
+			</description>
+		</method>
+		<method name="set_measure_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member measure_kind] value.
+			</description>
+		</method>
+		<method name="get_measure_min">
+			<return type="double" />
+			<description>
+				Returns the [member measure_min] value.
+			</description>
+		</method>
+		<method name="set_measure_min">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member measure_min] value.
+			</description>
+		</method>
+		<method name="get_measure_max">
+			<return type="double" />
+			<description>
+				Returns the [member measure_max] value.
+			</description>
+		</method>
+		<method name="set_measure_max">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member measure_max] value.
+			</description>
+		</method>
+		<method name="get_sort_key">
+			<return type="int" />
+			<description>
+				Returns the [member sort_key] value.
+			</description>
+		</method>
+		<method name="set_sort_key">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member sort_key] value.
+			</description>
+		</method>
+		<method name="get_sort_direction">
+			<return type="int" />
+			<description>
+				Returns the [member sort_direction] value.
+			</description>
+		</method>
+		<method name="set_sort_direction">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member sort_direction] value.
+			</description>
+		</method>
+		<method name="get_sort_axis">
+			<return type="int" />
+			<description>
+				Returns the [member sort_axis] value.
+			</description>
+		</method>
+		<method name="set_sort_axis">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member sort_axis] value.
+			</description>
+		</method>
+		<method name="get_sort_measure_kind">
+			<return type="int" />
+			<description>
+				Returns the [member sort_measure_kind] value.
+			</description>
+		</method>
+		<method name="set_sort_measure_kind">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member sort_measure_kind] value.
+			</description>
+		</method>
+		<method name="get_sort_point">
+			<return type="Ref<OcctlPoint3>" />
+			<description>
+				Returns the [member sort_point] value.
+			</description>
+		</method>
+		<method name="set_sort_point">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlPoint3>" />
+			<description>
+				Sets the [member sort_point] value.
+			</description>
+		</method>
+	</methods>
+</class>

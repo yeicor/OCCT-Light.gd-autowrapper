@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlGraphUvBounds" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_graph_uv_bounds_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_graph_uv_bounds_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_u_min">
+			<return type="double" />
+			<description>
+				Returns the [member u_min] value.
+			</description>
+		</method>
+		<method name="set_u_min">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member u_min] value.
+			</description>
+		</method>
+		<method name="get_u_max">
+			<return type="double" />
+			<description>
+				Returns the [member u_max] value.
+			</description>
+		</method>
+		<method name="set_u_max">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member u_max] value.
+			</description>
+		</method>
+		<method name="get_v_min">
+			<return type="double" />
+			<description>
+				Returns the [member v_min] value.
+			</description>
+		</method>
+		<method name="set_v_min">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member v_min] value.
+			</description>
+		</method>
+		<method name="get_v_max">
+			<return type="double" />
+			<description>
+				Returns the [member v_max] value.
+			</description>
+		</method>
+		<method name="set_v_max">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member v_max] value.
+			</description>
+		</method>
+		<method name="get_is_natural_restriction">
+			<return type="int" />
+			<description>
+				Returns the [member is_natural_restriction] value.
+			</description>
+		</method>
+		<method name="set_is_natural_restriction">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_natural_restriction] value.
+			</description>
+		</method>
+	</methods>
+</class>

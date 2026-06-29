@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTextInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_text_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_text_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_placement">
+			<return type="Ref<OcctlAxis2Placement>" />
+			<description>
+				Returns the [member placement] value.
+			</description>
+		</method>
+		<method name="set_placement">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis2Placement>" />
+			<description>
+				Sets the [member placement] value.
+			</description>
+		</method>
+		<method name="get_utf8_text">
+			<return type="String" />
+			<description>
+				Returns the [member utf8_text] value.
+			</description>
+		</method>
+		<method name="set_utf8_text">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member utf8_text] value.
+			</description>
+		</method>
+		<method name="get_font_family">
+			<return type="String" />
+			<description>
+				Returns the [member font_family] value.
+			</description>
+		</method>
+		<method name="set_font_family">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member font_family] value.
+			</description>
+		</method>
+		<method name="get_font_path">
+			<return type="String" />
+			<description>
+				Returns the [member font_path] value.
+			</description>
+		</method>
+		<method name="set_font_path">
+			<return type="void" />
+			<argument index="0" name="val" type="String" />
+			<description>
+				Sets the [member font_path] value.
+			</description>
+		</method>
+		<method name="get_font_aspect">
+			<return type="int" />
+			<description>
+				Returns the [member font_aspect] value.
+			</description>
+		</method>
+		<method name="set_font_aspect">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member font_aspect] value.
+			</description>
+		</method>
+		<method name="get_height">
+			<return type="double" />
+			<description>
+				Returns the [member height] value.
+			</description>
+		</method>
+		<method name="set_height">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member height] value.
+			</description>
+		</method>
+		<method name="get_horizontal_align">
+			<return type="int" />
+			<description>
+				Returns the [member horizontal_align] value.
+			</description>
+		</method>
+		<method name="set_horizontal_align">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member horizontal_align] value.
+			</description>
+		</method>
+		<method name="get_vertical_align">
+			<return type="int" />
+			<description>
+				Returns the [member vertical_align] value.
+			</description>
+		</method>
+		<method name="set_vertical_align">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member vertical_align] value.
+			</description>
+		</method>
+	</methods>
+</class>

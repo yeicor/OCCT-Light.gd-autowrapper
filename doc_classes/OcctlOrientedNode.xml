@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlOrientedNode" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_oriented_node_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_oriented_node_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_id">
+			<return type="int64_t" />
+			<description>
+				Returns the [member id] value.
+			</description>
+		</method>
+		<method name="set_id">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member id] value.
+			</description>
+		</method>
+		<method name="get_orientation">
+			<return type="int" />
+			<description>
+				Returns the [member orientation] value.
+			</description>
+		</method>
+		<method name="set_orientation">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member orientation] value.
+			</description>
+		</method>
+	</methods>
+</class>

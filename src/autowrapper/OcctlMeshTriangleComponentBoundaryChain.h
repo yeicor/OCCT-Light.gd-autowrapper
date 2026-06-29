@@ -1,0 +1,41 @@
+#ifndef OCCTLMESHTRIANGLECOMPONENTBOUNDARYCHAIN_H
+#define OCCTLMESHTRIANGLECOMPONENTBOUNDARYCHAIN_H
+
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/vector3.hpp>
+#include <godot_cpp/variant/vector2.hpp>
+#include <godot_cpp/variant/transform3d.hpp>
+#include <godot_cpp/variant/aabb.hpp>
+#include <godot_cpp/variant/color.hpp>
+#include <cstdint>
+#include <vector>
+#include "occtl/occtl_mesh.h"
+
+
+using namespace godot;
+
+class OcctlMeshTriangleComponentBoundaryChain : public godot::RefCounted {
+    GDCLASS(OcctlMeshTriangleComponentBoundaryChain, godot::RefCounted)
+protected:
+    static void _bind_methods();
+public:
+    int first_edge;
+    int edge_count;
+    int is_closed;
+
+    int get_first_edge() const;
+    void set_first_edge(int val);
+    int get_edge_count() const;
+    void set_edge_count(int val);
+    int get_is_closed() const;
+    void set_is_closed(int val);
+
+    occtl_mesh_triangle_component_boundary_chain_t to_c() const;
+    static Ref<OcctlMeshTriangleComponentBoundaryChain> from_c(const occtl_mesh_triangle_component_boundary_chain_t& val);
+    void copy_from_c(const occtl_mesh_triangle_component_boundary_chain_t& val);
+};
+
+#endif // OCCTLMESHTRIANGLECOMPONENTBOUNDARYCHAIN_H

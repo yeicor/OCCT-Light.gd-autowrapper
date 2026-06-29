@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoSewResult" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_sew_result_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_sew_result_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_is_done">
+			<return type="int" />
+			<description>
+				Returns the [member is_done] value.
+			</description>
+		</method>
+		<method name="set_is_done">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member is_done] value.
+			</description>
+		</method>
+		<method name="get_free_edge_count_before">
+			<return type="int" />
+			<description>
+				Returns the [member free_edge_count_before] value.
+			</description>
+		</method>
+		<method name="set_free_edge_count_before">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member free_edge_count_before] value.
+			</description>
+		</method>
+		<method name="get_free_edge_count_after">
+			<return type="int" />
+			<description>
+				Returns the [member free_edge_count_after] value.
+			</description>
+		</method>
+		<method name="set_free_edge_count_after">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member free_edge_count_after] value.
+			</description>
+		</method>
+		<method name="get_sewn_edge_count">
+			<return type="int" />
+			<description>
+				Returns the [member sewn_edge_count] value.
+			</description>
+		</method>
+		<method name="set_sewn_edge_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member sewn_edge_count] value.
+			</description>
+		</method>
+		<method name="get_multiple_edge_count">
+			<return type="int" />
+			<description>
+				Returns the [member multiple_edge_count] value.
+			</description>
+		</method>
+		<method name="set_multiple_edge_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member multiple_edge_count] value.
+			</description>
+		</method>
+		<method name="get_degenerated_edge_count">
+			<return type="int" />
+			<description>
+				Returns the [member degenerated_edge_count] value.
+			</description>
+		</method>
+		<method name="set_degenerated_edge_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member degenerated_edge_count] value.
+			</description>
+		</method>
+		<method name="get_deleted_face_count">
+			<return type="int" />
+			<description>
+				Returns the [member deleted_face_count] value.
+			</description>
+		</method>
+		<method name="set_deleted_face_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member deleted_face_count] value.
+			</description>
+		</method>
+		<method name="get_rejected_by_tolerance_count">
+			<return type="int" />
+			<description>
+				Returns the [member rejected_by_tolerance_count] value.
+			</description>
+		</method>
+		<method name="set_rejected_by_tolerance_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member rejected_by_tolerance_count] value.
+			</description>
+		</method>
+	</methods>
+</class>

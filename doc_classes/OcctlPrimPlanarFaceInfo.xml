@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlPrimPlanarFaceInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_prim_planar_face_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_prim_planar_face_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_outer_wire">
+			<return type="int64_t" />
+			<description>
+				Returns the [member outer_wire] value.
+			</description>
+		</method>
+		<method name="set_outer_wire">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member outer_wire] value.
+			</description>
+		</method>
+		<method name="get_inner_wires">
+			<return type="PackedInt64Array" />
+			<description>
+				Returns the [member inner_wires] value.
+			</description>
+		</method>
+		<method name="set_inner_wires">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedInt64Array" />
+			<description>
+				Sets the [member inner_wires] value.
+			</description>
+		</method>
+		<method name="get_inner_wire_count">
+			<return type="int" />
+			<description>
+				Returns the [member inner_wire_count] value.
+			</description>
+		</method>
+		<method name="set_inner_wire_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member inner_wire_count] value.
+			</description>
+		</method>
+	</methods>
+</class>

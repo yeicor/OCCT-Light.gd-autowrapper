@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoWrapOnFaceOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_wrap_on_face_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_wrap_on_face_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_source">
+			<return type="int64_t" />
+			<description>
+				Returns the [member source] value.
+			</description>
+		</method>
+		<method name="set_source">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member source] value.
+			</description>
+		</method>
+		<method name="get_target_face">
+			<return type="int64_t" />
+			<description>
+				Returns the [member target_face] value.
+			</description>
+		</method>
+		<method name="set_target_face">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member target_face] value.
+			</description>
+		</method>
+		<method name="get_surface_location">
+			<return type="Ref<OcctlAxis3Placement>" />
+			<description>
+				Returns the [member surface_location] value.
+			</description>
+		</method>
+		<method name="set_surface_location">
+			<return type="void" />
+			<argument index="0" name="val" type="Ref<OcctlAxis3Placement>" />
+			<description>
+				Sets the [member surface_location] value.
+			</description>
+		</method>
+		<method name="get_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member tolerance] value.
+			</description>
+		</method>
+		<method name="set_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member tolerance] value.
+			</description>
+		</method>
+		<method name="get_initial_subdivisions">
+			<return type="int" />
+			<description>
+				Returns the [member initial_subdivisions] value.
+			</description>
+		</method>
+		<method name="set_initial_subdivisions">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member initial_subdivisions] value.
+			</description>
+		</method>
+		<method name="get_max_refinements">
+			<return type="int" />
+			<description>
+				Returns the [member max_refinements] value.
+			</description>
+		</method>
+		<method name="set_max_refinements">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member max_refinements] value.
+			</description>
+		</method>
+		<method name="get_intersection_extent">
+			<return type="double" />
+			<description>
+				Returns the [member intersection_extent] value.
+			</description>
+		</method>
+		<method name="set_intersection_extent">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member intersection_extent] value.
+			</description>
+		</method>
+		<method name="get_wire_fix_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member wire_fix_tolerance] value.
+			</description>
+		</method>
+		<method name="set_wire_fix_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member wire_fix_tolerance] value.
+			</description>
+		</method>
+	</methods>
+</class>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlPrimThickSolidInfo" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_prim_thick_solid_info_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_prim_thick_solid_info_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_solid">
+			<return type="int64_t" />
+			<description>
+				Returns the [member solid] value.
+			</description>
+		</method>
+		<method name="set_solid">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member solid] value.
+			</description>
+		</method>
+		<method name="get_closing_faces">
+			<return type="PackedInt64Array" />
+			<description>
+				Returns the [member closing_faces] value.
+			</description>
+		</method>
+		<method name="set_closing_faces">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedInt64Array" />
+			<description>
+				Sets the [member closing_faces] value.
+			</description>
+		</method>
+		<method name="get_closing_face_count">
+			<return type="int" />
+			<description>
+				Returns the [member closing_face_count] value.
+			</description>
+		</method>
+		<method name="set_closing_face_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member closing_face_count] value.
+			</description>
+		</method>
+		<method name="get_offset">
+			<return type="double" />
+			<description>
+				Returns the [member offset] value.
+			</description>
+		</method>
+		<method name="set_offset">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member offset] value.
+			</description>
+		</method>
+		<method name="get_tolerance">
+			<return type="double" />
+			<description>
+				Returns the [member tolerance] value.
+			</description>
+		</method>
+		<method name="set_tolerance">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member tolerance] value.
+			</description>
+		</method>
+		<method name="get_mode">
+			<return type="int" />
+			<description>
+				Returns the [member mode] value.
+			</description>
+		</method>
+		<method name="set_mode">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member mode] value.
+			</description>
+		</method>
+		<method name="get_join">
+			<return type="int" />
+			<description>
+				Returns the [member join] value.
+			</description>
+		</method>
+		<method name="set_join">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member join] value.
+			</description>
+		</method>
+		<method name="get_intersection">
+			<return type="int" />
+			<description>
+				Returns the [member intersection] value.
+			</description>
+		</method>
+		<method name="set_intersection">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member intersection] value.
+			</description>
+		</method>
+		<method name="get_self_intersection">
+			<return type="int" />
+			<description>
+				Returns the [member self_intersection] value.
+			</description>
+		</method>
+		<method name="set_self_intersection">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member self_intersection] value.
+			</description>
+		</method>
+		<method name="get_remove_internal_edges">
+			<return type="int" />
+			<description>
+				Returns the [member remove_internal_edges] value.
+			</description>
+		</method>
+		<method name="set_remove_internal_edges">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member remove_internal_edges] value.
+			</description>
+		</method>
+	</methods>
+</class>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlTopoFaceChamfer2dOptions" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Value type wrapper for occtl_topo_face_chamfer_2d_options_t.	</brief_description>
+	<description>Auto-generated wrapper for the C struct occtl_topo_face_chamfer_2d_options_t.	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_struct_version">
+			<return type="int" />
+			<description>
+				Returns the [member struct_version] value.
+			</description>
+		</method>
+		<method name="set_struct_version">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member struct_version] value.
+			</description>
+		</method>
+		<method name="get_p_next">
+			<return type="int64_t" />
+			<description>
+				Returns the [member p_next] value.
+			</description>
+		</method>
+		<method name="set_p_next">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member p_next] value.
+			</description>
+		</method>
+		<method name="get_face">
+			<return type="int64_t" />
+			<description>
+				Returns the [member face] value.
+			</description>
+		</method>
+		<method name="set_face">
+			<return type="void" />
+			<argument index="0" name="val" type="int64_t" />
+			<description>
+				Sets the [member face] value.
+			</description>
+		</method>
+		<method name="get_vertices">
+			<return type="PackedInt64Array" />
+			<description>
+				Returns the [member vertices] value.
+			</description>
+		</method>
+		<method name="set_vertices">
+			<return type="void" />
+			<argument index="0" name="val" type="PackedInt64Array" />
+			<description>
+				Sets the [member vertices] value.
+			</description>
+		</method>
+		<method name="get_vertex_count">
+			<return type="int" />
+			<description>
+				Returns the [member vertex_count] value.
+			</description>
+		</method>
+		<method name="set_vertex_count">
+			<return type="void" />
+			<argument index="0" name="val" type="int" />
+			<description>
+				Sets the [member vertex_count] value.
+			</description>
+		</method>
+		<method name="get_distance1">
+			<return type="double" />
+			<description>
+				Returns the [member distance1] value.
+			</description>
+		</method>
+		<method name="set_distance1">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member distance1] value.
+			</description>
+		</method>
+		<method name="get_distance2">
+			<return type="double" />
+			<description>
+				Returns the [member distance2] value.
+			</description>
+		</method>
+		<method name="set_distance2">
+			<return type="void" />
+			<argument index="0" name="val" type="double" />
+			<description>
+				Sets the [member distance2] value.
+			</description>
+		</method>
+	</methods>
+</class>
