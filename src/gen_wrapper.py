@@ -379,7 +379,11 @@ def _get_two_call_buffer_arrays(f: CFunction) -> list[tuple[str, str, str]]:
     elif base == "const_char_ptr":
         arrays.append((tname, "const char*", "PackedStringArray"))
     else:
-        arrays.append((tname, base, "PackedInt64Array"))
+        raise ValueError(
+            f"[two_call_buffer] Unknown trailing buffer base type {base!r} "
+            f"in two-call function. Not in TWO_CALL_PACKED_RETURN, not a value struct, "
+            f"not char/const_char_ptr. Add it to the appropriate dictionary."
+        )
 
     return arrays
 
@@ -437,12 +441,12 @@ def _is_const_char_double_ptr(t: str) -> bool:
     return t in ("const char**", "const char * *")
 
 
-def _find_const_view_pairs(f: CFunction) -> list[tuple[int, int]]:
-    """Find (const T** ptr_idx, size_t* count_idx) pairs for
+def _find_const_view_pairs(f: CFunction) -> list[tuple[int, list[int]]]:
+    """Find (const T** ptr_idx, [count_idx_1, count_idx_2, ...]) pairs for
     view/allocation patterns where T is a value struct or uint64_id type.
-    The count param must follow the ptr param.
-    Returns list of (ptr_param_index, count_param_index)."""
-    pairs: list[tuple[int, int]] = []
+    Count params must follow the ptr param consecutively.
+    Returns list of (ptr_param_index, list_of_count_param_indices)."""
+    pairs: list[tuple[int, list[int]]] = []
     params = f.params
     for i, p in enumerate(params):
         t = p.type_name.strip()
@@ -455,14 +459,18 @@ def _find_const_view_pairs(f: CFunction) -> list[tuple[int, int]]:
             continue
         if not (is_value_struct_type(inner) or inner in UINT64_ID_TYPES):
             continue
-        # Look for following size_t* count param
+        # Look for consecutive size_t* count params after the ptr
+        count_indices: list[int] = []
         for j in range(i + 1, len(params)):
             ot = params[j].type_name.strip()
             if ot == "size_t*" and is_out_param(
                 ot, params[j].name, f.return_type.strip()
             ):
-                pairs.append((i, j))
+                count_indices.append(j)
+            else:
                 break
+        if count_indices:
+            pairs.append((i, count_indices))
     return pairs
 
 
@@ -800,20 +808,28 @@ def _build_kept_params(
 
     Strips out-params (handle**), buffer triplet params, size params
     from string+size pairs, size params from input ptr+size pairs,
-    and size_t* count params from const view pairs.
+    and size_t* count params from const view pairs (first count only;
+    additional counts like out_v_count remain as params).
     """
     input_ptr_size_pairs = _find_input_ptr_size_pairs(f)
     input_ptr_size_indices = {size_idx for _, size_idx in input_ptr_size_pairs}
 
     # Find const view pair count indices to strip
     const_view_pairs = _find_const_view_pairs(f)
-    const_view_count_indices = {count_idx for _, count_idx in const_view_pairs}
+    # Strip ptr indices and ONLY the FIRST count of each view pair
+    # from the method signature.  Additional counts (e.g. out_v_count
+    # for 2D pole grids) remain as out-params so the caller can
+    # retrieve them.
+    const_view_first_count_indices: set[int] = set()
+    for _, count_idxs in const_view_pairs:
+        if count_idxs:
+            const_view_first_count_indices.add(count_idxs[0])
     const_view_ptr_indices = {ptr_idx for ptr_idx, _ in const_view_pairs}
 
     kept = []
     for i, p in enumerate(f.params):
-        if i in const_view_count_indices:
-            continue  # skip count params from const view pairs
+        if i in const_view_first_count_indices:
+            continue  # skip first (main) count param from const view pairs
         if i in const_view_ptr_indices:
             continue  # skip ptr params from const view pairs (handled by _is_stripped_out_param too)
         if _is_stripped_out_param(p, ret):
@@ -1061,7 +1077,10 @@ def _generate_out_param_copy_line(
         return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
     if resolved in ("const char", "char"):
         return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
-    return ""
+    raise ValueError(
+        f"[out_param_copy] Unhandled out-param type: resolved={resolved!r}, "
+        f"base={base!r}, t={t!r}"
+    )
 
 
 def _generate_body(
@@ -1076,11 +1095,20 @@ def _generate_body(
     lines = []
     ret_mapped = _func_return_type_mapped(f)
 
-    # Const view pairs: (const T** ptr, size_t* count) → return Array of Ref<T>
+    # Const view pairs: (const T** ptr, size_t* count...) → return Array of Ref<T>
     const_view_pairs = _find_const_view_pairs(f)
     const_view_ptr_indices = {ptr_idx for ptr_idx, _ in const_view_pairs}
-    const_view_count_indices = {count_idx for _, count_idx in const_view_pairs}
-    const_view_ptr_to_count = dict(const_view_pairs)
+    const_view_count_indices: set[int] = set()
+    const_view_first_count_indices: set[int] = set()
+    const_view_extra_count_indices: set[int] = set()
+    for _, count_idxs in const_view_pairs:
+        for ci in count_idxs:
+            const_view_count_indices.add(ci)
+        if count_idxs:
+            const_view_first_count_indices.add(count_idxs[0])
+            for ci in count_idxs[1:]:
+                const_view_extra_count_indices.add(ci)
+    const_view_ptr_to_counts = dict(const_view_pairs)
 
     # Two-call buffer pattern (trailing ptr, size_t, size_t*)
     if _is_two_call_buffer_func(f):
@@ -1553,10 +1581,9 @@ def _generate_body(
         if is_out_param(t, p.name, ret):
             base = _c_type_strip_ptr(t).strip()
             if t.endswith("**"):
-                # View pair: const T** ptr + size_t* count → Array of Ref<T>
+                # View pair: const T** ptr + size_t* counts → Array of Ref<T>
                 if p_idx in const_view_ptr_indices:
-                    count_idx = const_view_ptr_to_count[p_idx]
-                    count_name = f.params[count_idx].name
+                    count_indices = const_view_ptr_to_counts[p_idx]
                     inner_type = re.sub(r"^(const|volatile)\s+", "", base).strip()
                     # Preserve constness: const T** → const T*, T** → T*
                     ptr_is_const = t.startswith("const ")
@@ -1564,10 +1591,12 @@ def _generate_body(
                         lines.append(f"    const {inner_type}* _{name}_ptr = nullptr;")
                     else:
                         lines.append(f"    {inner_type}* _{name}_ptr = nullptr;")
-                    lines.append(f"    size_t _{count_name}_cnt = 0;")
                     call_args.append(f"&_{name}_ptr")
-                    call_args.append(f"&_{count_name}_cnt")
-                    continue  # count param handled here, skip when loop reaches it
+                    for ci in count_indices:
+                        cname = f.params[ci].name
+                        lines.append(f"    size_t _{cname}_cnt = 0;")
+                        call_args.append(f"&_{cname}_cnt")
+                    continue  # count params handled here, skip when loop reaches them
                 # Handle** or const char** out-param
                 if t == "const char**" or t == "const char * *":
                     local = f"_{name}_buf"
@@ -1860,30 +1889,44 @@ def _generate_body(
     # Build return
     if const_view_pairs and _func_is_occtl_status(f):
         # const T** view pair → return Array of Ref<T> (or PackedArray for id types)
-        for ptr_idx, cnt_idx in const_view_pairs:
+        for ptr_idx, cnt_idxs in const_view_pairs:
             p = f.params[ptr_idx]
-            cnt = f.params[cnt_idx]
             ptr_name = p.name if p.name else "out"
-            cnt_name = cnt.name
+            cnt_name = f.params[cnt_idxs[0]].name
         inner_type = re.sub(
             r"^(const|volatile)\s+", "", _c_type_strip_ptr(p.type_name.strip()).strip()
         ).strip()
         view_resolved = _resolve_typedef(inner_type)
         if _func_is_occtl_status(f):
             lines.append(f"    if (_status != OCCTL_OK) {{ return Array(); }}")
+
+        # Copy back extra (non-stripped) count param values to their Ref<T> wrappers
+        for ci in const_view_extra_count_indices:
+            cp = f.params[ci]
+            cname = cp.name
+            lines.append(
+                f"    if ({cname}.is_valid()) {cname}->copy_from_c(_{cname}_cnt);"
+            )
+
+        # Build total count expression: multiply all consecutive count params
+        if len(cnt_idxs) == 1:
+            total_expr = f"_{cnt_name}_cnt"
+        else:
+            total_expr = " * ".join(f"_{f.params[ci].name}_cnt" for ci in cnt_idxs)
+
         if view_resolved in UINT64_ID_TYPES:
             # PackedInt64Array for id types (occtl_rep_id_t, occtl_uid_t, etc.)
             lines.append(f"    PackedInt64Array _result;")
-            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+            lines.append(f"    _result.resize(static_cast<int64_t>({total_expr}));")
             lines.append(
-                f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{ _result[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{ptr_name}_ptr[_i].bits); }}"
+                f"    for (size_t _i = 0; _i < {total_expr}; _i++) {{ _result[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{ptr_name}_ptr[_i].bits); }}"
             )
             lines.append(f"    return _result;")
         elif is_value_struct_type(view_resolved):
             cls = c_type_to_godot_class(view_resolved)
             lines.append(f"    Array _result;")
-            lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
-            lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{")
+            lines.append(f"    _result.resize(static_cast<int64_t>({total_expr}));")
+            lines.append(f"    for (size_t _i = 0; _i < {total_expr}; _i++) {{")
             lines.append(f"        Ref<{cls}> _item;")
             lines.append(f"        _item.instantiate();")
             lines.append(f"        _item->copy_from_c(_{ptr_name}_ptr[_i]);")
@@ -2369,6 +2412,12 @@ def _describe_return(ret_mapped: str, c_ret: str) -> str:
         return "    [return] Array of double values."
     if ret_mapped == "PackedInt32Array":
         return "    [return] Array of int values."
+    if ret_mapped == "PackedStringArray":
+        return "    [return] Array of strings."
+    if ret_mapped == "PackedByteArray":
+        return "    [return] Byte buffer."
+    if ret_mapped == "Array":
+        return "    [return] Array of objects."
     if ret_mapped == "String":
         return "    [return] String result."
     if ret_mapped == "bool":
