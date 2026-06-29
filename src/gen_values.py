@@ -56,7 +56,7 @@ def _field_godot_type(field: CField) -> str:
     if t.endswith("**"):
         return "int64_t"
     if t.endswith("*"):
-        inner = t[:-1].strip().replace('const ', '', 1).strip()
+        inner = t[:-1].strip().replace("const ", "", 1).strip()
         if inner in UINT64_ID_TYPES:
             return "int64_t"
         if inner in VALUE_STRUCT_TYPES:
@@ -87,107 +87,164 @@ def _field_clean_name(field: CField) -> str:
 # (method_name, [(param_name, param_type)], [assignment_lines])
 FACTORY_METHODS: dict[str, list[tuple[str, list[tuple[str, str]], list[str]]]] = {
     "OcctlPoint3": [
-        ("from_vector3", [("v", "Vector3")], [
-            "instance->x = v.x;",
-            "instance->y = v.y;",
-            "instance->z = v.z;",
-        ]),
+        (
+            "from_vector3",
+            [("v", "Vector3")],
+            [
+                "instance->x = v.x;",
+                "instance->y = v.y;",
+                "instance->z = v.z;",
+            ],
+        ),
     ],
     "OcctlPoint2": [
-        ("from_vector2", [("v", "Vector2")], [
-            "instance->x = v.x;",
-            "instance->y = v.y;",
-        ]),
+        (
+            "from_vector2",
+            [("v", "Vector2")],
+            [
+                "instance->x = v.x;",
+                "instance->y = v.y;",
+            ],
+        ),
     ],
     "OcctlDirection3": [
-        ("from_vector3", [("v", "Vector3")], [
-            "instance->x = v.x;",
-            "instance->y = v.y;",
-            "instance->z = v.z;",
-        ]),
+        (
+            "from_vector3",
+            [("v", "Vector3")],
+            [
+                "instance->x = v.x;",
+                "instance->y = v.y;",
+                "instance->z = v.z;",
+            ],
+        ),
     ],
     "OcctlDirection2": [
-        ("from_vector2", [("v", "Vector2")], [
-            "instance->x = v.x;",
-            "instance->y = v.y;",
-        ]),
+        (
+            "from_vector2",
+            [("v", "Vector2")],
+            [
+                "instance->x = v.x;",
+                "instance->y = v.y;",
+            ],
+        ),
     ],
     "OcctlVector3": [
-        ("from_vector3", [("v", "Vector3")], [
-            "instance->x = v.x;",
-            "instance->y = v.y;",
-            "instance->z = v.z;",
-        ]),
+        (
+            "from_vector3",
+            [("v", "Vector3")],
+            [
+                "instance->x = v.x;",
+                "instance->y = v.y;",
+                "instance->z = v.z;",
+            ],
+        ),
     ],
     "OcctlVector2": [
-        ("from_vector2", [("v", "Vector2")], [
-            "instance->x = v.x;",
-            "instance->y = v.y;",
-        ]),
+        (
+            "from_vector2",
+            [("v", "Vector2")],
+            [
+                "instance->x = v.x;",
+                "instance->y = v.y;",
+            ],
+        ),
     ],
     "OcctlTransform": [
-        ("from_transform3d", [("t", "Transform3D")], [
-            "instance->m.resize(12);",
-            "instance->m[0] = t.basis[0].x;",
-            "instance->m[1] = t.basis[0].y;",
-            "instance->m[2] = t.basis[0].z;",
-            "instance->m[3] = t.origin.x;",
-            "instance->m[4] = t.basis[1].x;",
-            "instance->m[5] = t.basis[1].y;",
-            "instance->m[6] = t.basis[1].z;",
-            "instance->m[7] = t.origin.y;",
-            "instance->m[8] = t.basis[2].x;",
-            "instance->m[9] = t.basis[2].y;",
-            "instance->m[10] = t.basis[2].z;",
-            "instance->m[11] = t.origin.z;",
-        ]),
+        (
+            "from_transform3d",
+            [("t", "Transform3D")],
+            [
+                "instance->m.resize(12);",
+                "instance->m[0] = t.basis[0].x;",
+                "instance->m[1] = t.basis[0].y;",
+                "instance->m[2] = t.basis[0].z;",
+                "instance->m[3] = t.origin.x;",
+                "instance->m[4] = t.basis[1].x;",
+                "instance->m[5] = t.basis[1].y;",
+                "instance->m[6] = t.basis[1].z;",
+                "instance->m[7] = t.origin.y;",
+                "instance->m[8] = t.basis[2].x;",
+                "instance->m[9] = t.basis[2].y;",
+                "instance->m[10] = t.basis[2].z;",
+                "instance->m[11] = t.origin.z;",
+            ],
+        ),
     ],
     "OcctlAabb3": [
-        ("from_aabb", [("a", "AABB")], [
-            "{ auto _c = occtl_point3_t{}; _c.x = a.position.x; _c.y = a.position.y; _c.z = a.position.z; instance->min = OcctlPoint3::from_c(_c); }",
-            "{ auto _c = occtl_point3_t{}; _c.x = a.position.x + a.size.x; _c.y = a.position.y + a.size.y; _c.z = a.position.z + a.size.z; instance->max = OcctlPoint3::from_c(_c); }",
-        ]),
+        (
+            "from_aabb",
+            [("a", "AABB")],
+            [
+                "{ auto _c = occtl_point3_t{}; _c.x = a.position.x; _c.y = a.position.y; _c.z = a.position.z; instance->min = OcctlPoint3::from_c(_c); }",
+                "{ auto _c = occtl_point3_t{}; _c.x = a.position.x + a.size.x; _c.y = a.position.y + a.size.y; _c.z = a.position.z + a.size.z; instance->max = OcctlPoint3::from_c(_c); }",
+            ],
+        ),
     ],
     "OcctlColorRgba": [
-        ("from_color", [("c", "Color")], [
-            "instance->r = c.r;",
-            "instance->g = c.g;",
-            "instance->b = c.b;",
-            "instance->a = c.a;",
-        ]),
+        (
+            "from_color",
+            [("c", "Color")],
+            [
+                "instance->r = c.r;",
+                "instance->g = c.g;",
+                "instance->b = c.b;",
+                "instance->a = c.a;",
+            ],
+        ),
     ],
     "OcctlAxis1Placement": [
-        ("from_components", [("point", "Vector3"), ("direction", "Vector3")], [
-            "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
-            "{ auto _dir = occtl_direction3_t{}; _dir.x = direction.x; _dir.y = direction.y; _dir.z = direction.z; instance->direction = OcctlDirection3::from_c(_dir); }",
-        ]),
+        (
+            "from_components",
+            [("point", "Vector3"), ("direction", "Vector3")],
+            [
+                "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
+                "{ auto _dir = occtl_direction3_t{}; _dir.x = direction.x; _dir.y = direction.y; _dir.z = direction.z; instance->direction = OcctlDirection3::from_c(_dir); }",
+            ],
+        ),
     ],
     "OcctlAxis2Placement": [
-        ("from_components", [("point", "Vector3"), ("z_dir", "Vector3"), ("x_dir", "Vector3")], [
-            "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
-            "{ auto _x = occtl_direction3_t{}; _x.x = x_dir.x; _x.y = x_dir.y; _x.z = x_dir.z; instance->x_dir = OcctlDirection3::from_c(_x); }",
-            "{ auto _ref = occtl_direction3_t{}; _ref.x = z_dir.x; _ref.y = z_dir.y; _ref.z = z_dir.z; instance->x_dir_ref = OcctlDirection3::from_c(_ref); }",
-        ]),
+        (
+            "from_components",
+            [("point", "Vector3"), ("z_dir", "Vector3"), ("x_dir", "Vector3")],
+            [
+                "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
+                "{ auto _x = occtl_direction3_t{}; _x.x = x_dir.x; _x.y = x_dir.y; _x.z = x_dir.z; instance->x_dir = OcctlDirection3::from_c(_x); }",
+                "{ auto _ref = occtl_direction3_t{}; _ref.x = z_dir.x; _ref.y = z_dir.y; _ref.z = z_dir.z; instance->x_dir_ref = OcctlDirection3::from_c(_ref); }",
+            ],
+        ),
     ],
     "OcctlAxis3Placement": [
-        ("from_components", [("point", "Vector3"), ("z_dir", "Vector3"), ("x_dir", "Vector3")], [
-            "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
-            "{ auto _x = occtl_direction3_t{}; _x.x = x_dir.x; _x.y = x_dir.y; _x.z = x_dir.z; instance->x_dir = OcctlDirection3::from_c(_x); }",
-            "{ auto _y = occtl_direction3_t{}; _y.x = point.x; _y.y = point.y; _y.z = point.z; instance->y_dir = OcctlDirection3::from_c(_y); }",
-            "{ auto _z = occtl_direction3_t{}; _z.x = z_dir.x; _z.y = z_dir.y; _z.z = z_dir.z; instance->z_dir = OcctlDirection3::from_c(_z); }",
-        ]),
+        (
+            "from_components",
+            [("point", "Vector3"), ("z_dir", "Vector3"), ("x_dir", "Vector3")],
+            [
+                "{ auto _loc = occtl_point3_t{}; _loc.x = point.x; _loc.y = point.y; _loc.z = point.z; instance->location = OcctlPoint3::from_c(_loc); }",
+                "{ auto _x = occtl_direction3_t{}; _x.x = x_dir.x; _x.y = x_dir.y; _x.z = x_dir.z; instance->x_dir = OcctlDirection3::from_c(_x); }",
+                "{ auto _y = occtl_direction3_t{}; _y.x = point.x; _y.y = point.y; _y.z = point.z; instance->y_dir = OcctlDirection3::from_c(_y); }",
+                "{ auto _z = occtl_direction3_t{}; _z.x = z_dir.x; _z.y = z_dir.y; _z.z = z_dir.z; instance->z_dir = OcctlDirection3::from_c(_z); }",
+            ],
+        ),
     ],
     "OcctlAxis2Placement2d": [
-        ("from_components", [("point", "Vector2"), ("z_dir", "Vector2"), ("x_dir", "Vector2")], [
-            "{ auto _loc = occtl_point2_t{}; _loc.x = point.x; _loc.y = point.y; instance->location = OcctlPoint2::from_c(_loc); }",
-            "{ auto _x = occtl_direction2_t{}; _x.x = x_dir.x; _x.y = x_dir.y; instance->x_dir = OcctlDirection2::from_c(_x); }",
-        ]),
+        (
+            "from_components",
+            [("point", "Vector2"), ("z_dir", "Vector2"), ("x_dir", "Vector2")],
+            [
+                "(void)z_dir;",  # unused - 2D struct has no z-dir field, kept for API consistency
+                "{ auto _loc = occtl_point2_t{}; _loc.x = point.x; _loc.y = point.y; instance->location = OcctlPoint2::from_c(_loc); }",
+                "{ auto _x = occtl_direction2_t{}; _x.x = x_dir.x; _x.y = x_dir.y; instance->x_dir = OcctlDirection2::from_c(_x); }",
+            ],
+        ),
     ],
     "OcctlError": [
-        ("from_values", [("status", "int"), ("message", "String")], [
-            "instance->status = status;",
-            "instance->message = message;",
-        ]),
+        (
+            "from_values",
+            [("status", "int"), ("message", "String")],
+            [
+                "instance->status = status;",
+                "instance->message = message;",
+            ],
+        ),
     ],
 }
 
@@ -220,23 +277,25 @@ def generate_value_type_header(struct: CStruct) -> str:
     added_includes = set()
     for field in struct.fields:
         ft = field.type_name.strip()
-        base = ft.rstrip("* \t").replace('const ', '', 1).strip()
+        base = ft.rstrip("* \t").replace("const ", "", 1).strip()
         if base in VALUE_STRUCT_TYPES or is_value_struct_type(base):
             sub_cls = c_type_to_godot_class(base)
             if sub_cls != cls and sub_cls not in added_includes:
                 lines.append(f'#include "{sub_cls}.h"')
                 added_includes.add(sub_cls)
 
-    lines.extend([
-        "",
-        "using namespace godot;",
-        "",
-        f"class {cls} : public godot::RefCounted {{",
-        f"    GDCLASS({cls}, godot::RefCounted)",
-        "protected:",
-        "    static void _bind_methods();",
-        "public:",
-    ])
+    lines.extend(
+        [
+            "",
+            "using namespace godot;",
+            "",
+            f"class {cls} : public godot::RefCounted {{",
+            f"    GDCLASS({cls}, godot::RefCounted)",
+            "protected:",
+            "    static void _bind_methods();",
+            "public:",
+        ]
+    )
 
     # Fields
     for field in struct.fields:
@@ -244,7 +303,9 @@ def generate_value_type_header(struct: CStruct) -> str:
         clean = _field_clean_name(field)
         if _field_is_array(field):
             # Use PackedFloat64Array for double arrays, Array for others
-            arr_type = "PackedFloat64Array" if field.type_name.strip() == "double" else "Array"
+            arr_type = (
+                "PackedFloat64Array" if field.type_name.strip() == "double" else "Array"
+            )
             lines.append(f"    {arr_type} {clean};")
         else:
             lines.append(f"    {gt} {clean};")
@@ -265,7 +326,9 @@ def generate_value_type_header(struct: CStruct) -> str:
         lines.append("")
         for method_name, params, _ in FACTORY_METHODS[cls]:
             param_decls = ", ".join(f"{pt} {pn}" for pn, pt in params)
-            lines.append(f"    static Ref<{cls}> {method_name}({param_decls}); // NOLINT")
+            lines.append(
+                f"    static Ref<{cls}> {method_name}({param_decls}); // NOLINT"
+            )
     lines.append("};")
     lines.append("")
     lines.append(f"#endif // {guard}")
@@ -321,15 +384,23 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         gt = _field_godot_type(field)
         clean = _field_clean_name(field)
         vt = param_type_to_variant_type(gt)
-        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("get_{clean}"), &{cls}::get_{clean});')
-        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("set_{clean}", "val"), &{cls}::set_{clean});')
-        lines.append(f'    ADD_PROPERTY(PropertyInfo(Variant::{vt}, "{clean}"), "set_{clean}", "get_{clean}");')
+        lines.append(
+            f'    godot::ClassDB::bind_method(godot::D_METHOD("get_{clean}"), &{cls}::get_{clean});'
+        )
+        lines.append(
+            f'    godot::ClassDB::bind_method(godot::D_METHOD("set_{clean}", "val"), &{cls}::set_{clean});'
+        )
+        lines.append(
+            f'    ADD_PROPERTY(PropertyInfo(Variant::{vt}, "{clean}"), "set_{clean}", "get_{clean}");'
+        )
     if cls in FACTORY_METHODS:
         for method_name, params, _ in FACTORY_METHODS[cls]:
             param_str = ", ".join(f'"{pn}"' for pn, _ in params)
             if param_str:
                 param_str = ", " + param_str
-            lines.append(f'    godot::ClassDB::bind_static_method("{cls}", godot::D_METHOD("{method_name}"{param_str}), &{cls}::{method_name});')
+            lines.append(
+                f'    godot::ClassDB::bind_static_method("{cls}", godot::D_METHOD("{method_name}"{param_str}), &{cls}::{method_name});'
+            )
     lines.append("}")
     lines.append("")
 
@@ -346,13 +417,21 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         elif t.endswith("*"):
             inner = t[:-1].strip()
             if inner in UINT64_ID_TYPES:
-                lines.append(f"    // pointer to {inner} field not directly representable")
+                lines.append(
+                    f"    // pointer to {inner} field not directly representable"
+                )
             elif _is_value_struct(inner):
-                lines.append(f"    // value pointer field {clean}: use .to_c() and address")
+                lines.append(
+                    f"    // value pointer field {clean}: use .to_c() and address"
+                )
             elif inner == "char":
-                lines.append(f"    result.{clean} = const_cast<char*>(({clean}).utf8().get_data());")
+                lines.append(
+                    f"    result.{clean} = const_cast<char*>(({clean}).utf8().get_data());"
+                )
             else:
-                lines.append(f"    result.{clean} = reinterpret_cast<{t}>(static_cast<uintptr_t>({clean}));")
+                lines.append(
+                    f"    result.{clean} = reinterpret_cast<{t}>(static_cast<uintptr_t>({clean}));"
+                )
         elif t in ("occtl_status_t",):
             lines.append(f"    result.{clean} = static_cast<{t}>({clean});")
         elif _is_uint64_id(t):
@@ -362,13 +441,28 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             lines.append(f"    result.{clean} = {clean}->to_c();")
         elif _field_is_array(field):
             size = _field_array_size(field)
-            lines.append(f"    for (int _i = 0; _i < {size}; _i++) result.{clean}[_i] = {clean}[_i];")
-        elif t in ("double", "float", "bool", "int32_t", "uint32_t", "uint16_t", "int64_t", "uint64_t", "size_t", "int"):
+            lines.append(
+                f"    for (int _i = 0; _i < {size}; _i++) result.{clean}[_i] = {clean}[_i];"
+            )
+        elif t in (
+            "double",
+            "float",
+            "bool",
+            "int32_t",
+            "uint32_t",
+            "uint16_t",
+            "int64_t",
+            "uint64_t",
+            "size_t",
+            "int",
+        ):
             lines.append(f"    result.{clean} = {clean};")
         elif _is_enum_type(t):
             lines.append(f"    result.{clean} = static_cast<{t}>({clean});")
         else:
-            raise ValueError(f"Unhandled type '{t}' in to_c() for field '{clean}' of {c_type}")
+            raise ValueError(
+                f"Unhandled type '{t}' in to_c() for field '{clean}' of {c_type}"
+            )
     lines.append("    return result;")
     lines.append("}")
     lines.append("")
@@ -381,18 +475,24 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         t = field.type_name.strip()
         clean = _field_clean_name(field)
         if t == "const void*":
-            lines.append(f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+            lines.append(
+                f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+            )
         elif t.startswith("const ") and t.endswith("*"):
-            inner = t[len("const "):-1].strip()
+            inner = t[len("const ") : -1].strip()
             if _is_uint64_id(inner):
-                lines.append(f"    r->{clean} = static_cast<int64_t>(val.{clean}->bits);")
+                lines.append(
+                    f"    r->{clean} = static_cast<int64_t>(val.{clean}->bits);"
+                )
             elif inner in VALUE_STRUCT_TYPES:
                 sub_cls = c_type_to_godot_class(inner)
                 lines.append(f"    r->{clean} = {sub_cls}::from_c(*val.{clean});")
             elif inner == "char":
                 lines.append(f"    r->{clean} = String(val.{clean});")
             else:
-                lines.append(f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+                lines.append(
+                    f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+                )
         elif t.endswith("*") and not t.startswith("const"):
             inner = t[:-1].strip()
             if inner == "char":
@@ -401,9 +501,13 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
                 sub_cls = c_type_to_godot_class(inner)
                 lines.append(f"    r->{clean} = {sub_cls}::from_c(*val.{clean});")
             elif _is_uint64_id(inner):
-                lines.append(f"    r->{clean} = static_cast<int64_t>(val.{clean}->bits);")
+                lines.append(
+                    f"    r->{clean} = static_cast<int64_t>(val.{clean}->bits);"
+                )
             else:
-                lines.append(f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+                lines.append(
+                    f"    r->{clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+                )
         elif t == "const char*":
             lines.append(f"    r->{clean} = String(val.{clean});")
         elif t in ("occtl_status_t",):
@@ -417,13 +521,28 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             size = _field_array_size(field)
             arr_type = "PackedFloat64Array" if t == "double" else "Array"
             lines.append(f"    r->{clean}.resize({size});")
-            lines.append(f"    for (int _i = 0; _i < {size}; _i++) r->{clean}[_i] = val.{clean}[_i];")
-        elif t in ("double", "float", "bool", "int32_t", "uint32_t", "uint16_t", "int64_t", "uint64_t", "size_t", "int"):
+            lines.append(
+                f"    for (int _i = 0; _i < {size}; _i++) r->{clean}[_i] = val.{clean}[_i];"
+            )
+        elif t in (
+            "double",
+            "float",
+            "bool",
+            "int32_t",
+            "uint32_t",
+            "uint16_t",
+            "int64_t",
+            "uint64_t",
+            "size_t",
+            "int",
+        ):
             lines.append(f"    r->{clean} = val.{clean};")
         elif _is_enum_type(t):
             lines.append(f"    r->{clean} = static_cast<int>(val.{clean});")
         else:
-            raise ValueError(f"Unhandled type '{t}' in from_c() for field '{clean}' of {c_type}")
+            raise ValueError(
+                f"Unhandled type '{t}' in from_c() for field '{clean}' of {c_type}"
+            )
     lines.append("    return r;")
     lines.append("}")
     lines.append("")
@@ -434,9 +553,11 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         t = field.type_name.strip()
         clean = _field_clean_name(field)
         if t == "const void*":
-            lines.append(f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+            lines.append(
+                f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+            )
         elif t.startswith("const ") and t.endswith("*"):
-            inner = t[len("const "):-1].strip()
+            inner = t[len("const ") : -1].strip()
             if _is_uint64_id(inner):
                 lines.append(f"    {clean} = static_cast<int64_t>(val.{clean}->bits);")
             elif inner in VALUE_STRUCT_TYPES:
@@ -445,7 +566,9 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             elif inner == "char":
                 lines.append(f"    {clean} = String(val.{clean});")
             else:
-                lines.append(f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+                lines.append(
+                    f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+                )
         elif t.endswith("*") and not t.startswith("const"):
             inner = t[:-1].strip()
             if inner == "char":
@@ -456,7 +579,9 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             elif _is_uint64_id(inner):
                 lines.append(f"    {clean} = static_cast<int64_t>(val.{clean}->bits);")
             else:
-                lines.append(f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));")
+                lines.append(
+                    f"    {clean} = static_cast<int64_t>(reinterpret_cast<uintptr_t>(val.{clean}));"
+                )
         elif t == "const char*":
             lines.append(f"    {clean} = String(val.{clean});")
         elif t in ("occtl_status_t",):
@@ -470,13 +595,28 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             size = _field_array_size(field)
             arr_type = "PackedFloat64Array" if t == "double" else "Array"
             lines.append(f"    {clean}.resize({size});")
-            lines.append(f"    for (int _i = 0; _i < {size}; _i++) {clean}[_i] = val.{clean}[_i];")
-        elif t in ("double", "float", "bool", "int32_t", "uint32_t", "uint16_t", "int64_t", "uint64_t", "size_t", "int"):
+            lines.append(
+                f"    for (int _i = 0; _i < {size}; _i++) {clean}[_i] = val.{clean}[_i];"
+            )
+        elif t in (
+            "double",
+            "float",
+            "bool",
+            "int32_t",
+            "uint32_t",
+            "uint16_t",
+            "int64_t",
+            "uint64_t",
+            "size_t",
+            "int",
+        ):
             lines.append(f"    {clean} = val.{clean};")
         elif _is_enum_type(t):
             lines.append(f"    {clean} = static_cast<int>(val.{clean});")
         else:
-            raise ValueError(f"Unhandled type '{t}' in copy_from_c() for field '{clean}' of {c_type}")
+            raise ValueError(
+                f"Unhandled type '{t}' in copy_from_c() for field '{clean}' of {c_type}"
+            )
     lines.append("}")
     lines.append("")
 
@@ -523,9 +663,13 @@ def generate_value_type_doc_xml(struct: CStruct) -> str:
             methods.append(f'\t\t<method name="{method_name}">')
             methods.append(f'\t\t\t<return type="RefCounted" />')
             for i, (pn, pt) in enumerate(params):
-                methods.append(f'\t\t\t<argument index="{i}" name="{pn}" type="{pt}" />')
+                methods.append(
+                    f'\t\t\t<argument index="{i}" name="{pn}" type="{pt}" />'
+                )
             methods.append("\t\t\t<description>")
-            methods.append(f"\t\t\t\tConstructs a [{cls}] from Godot-native components.")
+            methods.append(
+                f"\t\t\t\tConstructs a [{cls}] from Godot-native components."
+            )
             for pn, pt in params:
                 methods.append(f"\t\t\t\t[param {pn}] Input {pt} value.")
             methods.append(f"\t\t\t\t[return] A new [{cls}] with fields populated.")

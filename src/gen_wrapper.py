@@ -9,16 +9,31 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 from parser import (
-    CConstant, CEnum, CEnumValue, CField, CFunction, CParameter,
-    CStruct, ParsedHeader,
+    CConstant,
+    CEnum,
+    CEnumValue,
+    CField,
+    CFunction,
+    CParameter,
+    CStruct,
+    ParsedHeader,
 )
 from type_map import (
-    CALLBACK_TYPES, ENUM_TYPES, HANDLE_TYPES,
-    UINT64_ID_TYPES, VALUE_STRUCT_TYPES,
-    c_type_to_godot_class, godot_param_type, godot_return_type,
-    is_callback_type, is_opaque_ptr_t_type, is_out_param,
-    is_value_struct_type, _resolve_typedef,
-    CPP_TO_GODOT_TYPE, param_type_to_variant_type,
+    CALLBACK_TYPES,
+    CPP_TO_GODOT_TYPE,
+    ENUM_TYPES,
+    HANDLE_TYPES,
+    UINT64_ID_TYPES,
+    VALUE_STRUCT_TYPES,
+    _resolve_typedef,
+    c_type_to_godot_class,
+    godot_param_type,
+    godot_return_type,
+    is_callback_type,
+    is_opaque_ptr_t_type,
+    is_out_param,
+    is_value_struct_type,
+    param_type_to_variant_type,
 )
 
 # C type → short human-readable description for doc generation
@@ -32,9 +47,8 @@ _C_TYPE_DOC_DESC: dict[str, str] = {
 }
 
 
-
 def _c_type_strip_ptr(t: str) -> str:
-    t = re.sub(r'\s+(const|volatile)\s*$', '', t)
+    t = re.sub(r"\s+(const|volatile)\s*$", "", t)
     return t.rstrip("* \t")
 
 
@@ -50,7 +64,7 @@ def _filtered_constants(constants: list) -> list:
             continue
         if not val or val == "\\" or val.startswith("\\"):
             continue
-        if '{' in val or '(' in val or ')' in val:
+        if "{" in val or "(" in val or ")" in val:
             continue
         if val.startswith("__"):
             continue
@@ -169,9 +183,24 @@ TWO_CALL_PACKED_RETURN: dict[str, str] = {
 }
 
 # Two-call buffer param name suffixes for detection
-TWO_CALL_BUF_SUFFIXES = ("_buf", "_nodes", "_uids", "_colors", "_wires", "_tags",
-                         "_issues", "_joints", "_data", "_keys", "_rgba", "_count",
-                         "_required", "_size", "buf", "name_buf")
+TWO_CALL_BUF_SUFFIXES = (
+    "_buf",
+    "_nodes",
+    "_uids",
+    "_colors",
+    "_wires",
+    "_tags",
+    "_issues",
+    "_joints",
+    "_data",
+    "_keys",
+    "_rgba",
+    "_count",
+    "_required",
+    "_size",
+    "buf",
+    "name_buf",
+)
 TWO_CALL_CAP_NAMES = {"cap", "capacity", "bufsize", "name_buf_size"}
 TWO_CALL_COUNT_NAMES = {"out_count", "out_size", "out_required", "out_name_required"}
 
@@ -413,6 +442,7 @@ def _is_occtl_error_param(p: CParameter) -> bool:
 # Value conversion helpers
 # ---------------------------------------------------------------
 
+
 def _c_to_godot_val(c_type: str, expr: str) -> str:
     t = c_type.strip()
     if t == "const char*":
@@ -458,14 +488,19 @@ def _godot_to_c_val(c_type: str, expr: str) -> str:
 # In-parameter handling
 # ---------------------------------------------------------------
 
+
 def _in_param_decl(p: CParameter) -> str | None:
     t = p.type_name.strip()
     if t == "char*":
         return f"    godot::CharString _{p.name}_cs = {p.name}.utf8();\n    std::vector<char> _{p.name}_buf(_{p.name}_cs.get_data(), _{p.name}_cs.get_data() + _{p.name}_cs.length() + 1);\n    char* _{p.name}_c = _{p.name}_buf.data();"
-    t_stripped = re.sub(r'\s+(const|volatile)\s*$', '', t)
-    if t_stripped.startswith("const ") and t_stripped.endswith("*") and not t_stripped.endswith("**"):
+    t_stripped = re.sub(r"\s+(const|volatile)\s*$", "", t)
+    if (
+        t_stripped.startswith("const ")
+        and t_stripped.endswith("*")
+        and not t_stripped.endswith("**")
+    ):
         base_raw = _c_type_strip_ptr(t_stripped).strip()
-        base = re.sub(r'^(const|volatile)\s+', '', base_raw).strip()
+        base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
         if is_value_struct_type(base):
             return f"    {base_raw} _{p.name}_c = {p.name}->to_c();"
         if base in UINT64_ID_TYPES:
@@ -483,7 +518,7 @@ def _in_param_call_arg(p: CParameter) -> str:
     name = p.name if p.name else ""
     if t.startswith("const ") and t.endswith("*"):
         base_raw = _c_type_strip_ptr(t).strip()
-        base = re.sub(r'^(const|volatile)\s+', '', base_raw).strip()
+        base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
         if is_value_struct_type(base):
             return f"&_{name}_c"
         if base in UINT64_ID_TYPES:
@@ -517,6 +552,7 @@ def _in_param_call_arg(p: CParameter) -> str:
 # Function classification
 # ---------------------------------------------------------------
 
+
 def _func_is_occtl_status(f: CFunction) -> bool:
     return f.return_type.strip() == "occtl_status_t"
 
@@ -545,7 +581,7 @@ def _func_return_type_mapped(f: CFunction) -> str:
     if handle_outs:
         p = handle_outs[0]
         base = _c_type_strip_ptr(p.type_name).strip()
-        inner = re.sub(r'^(const|volatile)\s+', '', base.rstrip("* \t")).strip()
+        inner = re.sub(r"^(const|volatile)\s+", "", base.rstrip("* \t")).strip()
         if inner in HANDLE_TYPES:
             return f"Ref<{c_type_to_godot_class(base)}Handle>"
         return "int"  # fallback
@@ -562,6 +598,7 @@ def _func_return_type_mapped(f: CFunction) -> str:
 # Method declarations — only handle** and const occtl_error_t**
 # are stripped from method args; all other out-params stay as Ref<T> params.
 # ---------------------------------------------------------------
+
 
 def _is_stripped_out_param(p: CParameter, ret: str) -> bool:
     """True if this out-param should be REMOVED from the Godot method signature.
@@ -602,11 +639,22 @@ def _is_buffer_triplet_param(f: CFunction, p: CParameter) -> bool:
 
 def _method_args_decl(f: CFunction) -> str:
     ret = f.return_type.strip()
-    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)]
+    kept_params = [
+        p
+        for p in f.params
+        if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)
+    ]
     callback_pairs = _find_callback_userdata_pairs(f.params)
     # Build set of param indices to exclude (user_data part of callback pairs)
     exclude_indices = {ud_idx for _, ud_idx in callback_pairs}
-    if not (kept_params and any(p for i, p in enumerate(kept_params) if id(p) not in (id(f.params[ei]) for ei in exclude_indices))):
+    if not (
+        kept_params
+        and any(
+            p
+            for i, p in enumerate(kept_params)
+            if id(p) not in (id(f.params[ei]) for ei in exclude_indices)
+        )
+    ):
         if callback_pairs:
             return "const Callable& callable"
         return "void"
@@ -636,7 +684,13 @@ def _method_args_decl(f: CFunction) -> str:
                 args.append(f"const Ref<{wrapper_cls}>& {p.name}")
                 continue
         gt = godot_param_type(t)
-        if gt in ("String", "Variant", "Array", "Dictionary", "PackedByteArray") or gt.startswith("Ref<"):
+        if gt in (
+            "String",
+            "Variant",
+            "Array",
+            "Dictionary",
+            "PackedByteArray",
+        ) or gt.startswith("Ref<"):
             args.append(f"const {gt}& {p.name}")
         else:
             args.append(f"{gt} {p.name}")
@@ -645,7 +699,11 @@ def _method_args_decl(f: CFunction) -> str:
 
 def _method_arg_names(f: CFunction) -> str:
     ret = f.return_type.strip()
-    kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)]
+    kept_params = [
+        p
+        for p in f.params
+        if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)
+    ]
     callback_pairs = _find_callback_userdata_pairs(f.params)
     exclude_indices = {ud_idx for _, ud_idx in callback_pairs}
     names = []
@@ -697,7 +755,7 @@ def _common_function_prefix(functions: list[CFunction]) -> str:
     if prefix and not prefix.endswith("_"):
         last_us = prefix.rfind("_")
         if last_us >= 0:
-            prefix = prefix[:last_us + 1]
+            prefix = prefix[: last_us + 1]
         else:
             prefix = ""
     return prefix
@@ -706,7 +764,7 @@ def _common_function_prefix(functions: list[CFunction]) -> str:
 def _function_method_name(f: CFunction, all_functions: list[CFunction]) -> str:
     prefix = _common_function_prefix(all_functions)
     if prefix and f.name.startswith(prefix):
-        return f.name[len(prefix):]
+        return f.name[len(prefix) :]
     return f.name
 
 
@@ -718,7 +776,10 @@ def _function_method_names(functions: list[CFunction]) -> dict[str, str]:
 # Body generation
 # ---------------------------------------------------------------
 
-def _generate_out_param_copy_line(p: CParameter, local_var: str, indent: str = "    ") -> str:
+
+def _generate_out_param_copy_line(
+    p: CParameter, local_var: str, indent: str = "    "
+) -> str:
     """Generate line to copy a C out-param value into a Godot wrapper ref."""
     t = p.type_name.strip()
     base = _c_type_strip_ptr(t).strip()
@@ -738,11 +799,15 @@ def _generate_out_param_copy_line(p: CParameter, local_var: str, indent: str = "
     return ""
 
 
-def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None = None) -> str:
+def _generate_body(
+    f: CFunction, wrapper_name: str, parsed: ParsedHeader | None = None
+) -> str:
     ret = f.return_type.strip()
     out_params = [p for p in f.params if is_out_param(p.type_name, p.name, ret)]
     handle_out_params = [p for p in out_params if _is_direct_return_out_param(p)]
-    non_handle_out_params = [p for p in out_params if not _is_direct_return_out_param(p)]
+    non_handle_out_params = [
+        p for p in out_params if not _is_direct_return_out_param(p)
+    ]
     lines = []
     ret_mapped = _func_return_type_mapped(f)
 
@@ -774,7 +839,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
 
         # Detect string buffer in leading positions too
         leading_string_count = sum(1 for _, lb in leading if lb == "char")
-        is_returning_string = is_string and len(buffer_indices) == 1 and leading_string_count == 0
+        is_returning_string = (
+            is_string and len(buffer_indices) == 1 and leading_string_count == 0
+        )
 
         arrays = _get_two_call_buffer_arrays(f)
         single_packed = len(arrays) == 1 and arrays[0][2].startswith("Packed")
@@ -807,7 +874,12 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             elif is_out_param(p.type_name, p.name, ret):
                 base = _c_type_strip_ptr(p.type_name).strip()
                 resolved = _resolve_typedef(base)
-                if resolved in (VALUE_STRUCT_TYPES | UINT64_ID_TYPES | ENUM_TYPES | set(OUT_PARAM_PRIM_TYPES.keys())):
+                if resolved in (
+                    VALUE_STRUCT_TYPES
+                    | UINT64_ID_TYPES
+                    | ENUM_TYPES
+                    | set(OUT_PARAM_PRIM_TYPES.keys())
+                ):
                     lines.append(f"    {resolved} _{name}_val = {{}};")
                 elif resolved in ("const char", "char"):
                     lines.append(f"    const char* _{name}_val = nullptr;")
@@ -817,16 +889,31 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
                 call_args_buf.append(f"&_{name}_val")
             else:
                 # Regular in-param - generate its conversion inline
-                t_stripped = re.sub(r'\s+(const|volatile)\s*$', '', p.type_name.strip())
-                if t_stripped.startswith("const ") and t_stripped.endswith("*") and not t_stripped.endswith("**"):
+                t_stripped = re.sub(r"\s+(const|volatile)\s*$", "", p.type_name.strip())
+                if (
+                    t_stripped.startswith("const ")
+                    and t_stripped.endswith("*")
+                    and not t_stripped.endswith("**")
+                ):
                     base_r = _c_type_strip_ptr(t_stripped).strip()
-                    b = re.sub(r'^(const|volatile)\s+', '', base_r).strip()
+                    b = re.sub(r"^(const|volatile)\s+", "", base_r).strip()
                     if is_value_struct_type(b):
-                        if f.name in DEFAULT_NULLABLE_PARAMS and p.name in DEFAULT_NULLABLE_PARAMS[f.name]:
-                            base_no_const = base_r.replace("const ", "", 1) if base_r.startswith("const ") else base_r
+                        if (
+                            f.name in DEFAULT_NULLABLE_PARAMS
+                            and p.name in DEFAULT_NULLABLE_PARAMS[f.name]
+                        ):
+                            base_no_const = (
+                                base_r.replace("const ", "", 1)
+                                if base_r.startswith("const ")
+                                else base_r
+                            )
                             lines.append(f"    {base_no_const} _{name}_c = {{}};")
-                            lines.append(f"    const {base_no_const}* _{name}_ptr = nullptr;")
-                            lines.append(f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}")
+                            lines.append(
+                                f"    const {base_no_const}* _{name}_ptr = nullptr;"
+                            )
+                            lines.append(
+                                f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
+                            )
                             call_args_null.append(f"_{name}_ptr")
                             call_args_buf.append(f"_{name}_ptr")
                         else:
@@ -839,7 +926,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
                         call_args_buf.append(arg)
                     elif b == "char":
                         cs_name = f"_{name}_cs"
-                        string_convs.append(f"    godot::CharString {cs_name} = {name}.utf8();")
+                        string_convs.append(
+                            f"    godot::CharString {cs_name} = {name}.utf8();"
+                        )
                         call_args_null.append(f"{cs_name}.get_data()")
                         call_args_buf.append(f"{cs_name}.get_data()")
                     elif b == "void":
@@ -850,19 +939,32 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
                         call_args_null.append(name)
                         call_args_buf.append(name)
                 elif t_stripped in UINT64_ID_TYPES:
-                    call_args_null.append(f"{t_stripped}{{static_cast<uint64_t>({name})}}")
-                    call_args_buf.append(f"{t_stripped}{{static_cast<uint64_t>({name})}}")
+                    call_args_null.append(
+                        f"{t_stripped}{{static_cast<uint64_t>({name})}}"
+                    )
+                    call_args_buf.append(
+                        f"{t_stripped}{{static_cast<uint64_t>({name})}}"
+                    )
                 elif t_stripped == "occtl_status_t":
                     call_args_null.append(f"static_cast<{t_stripped}>({name})")
                     call_args_buf.append(f"static_cast<{t_stripped}>({name})")
                 elif is_opaque_ptr_t_type(t_stripped):
-                    call_args_null.append(f"reinterpret_cast<{t_stripped}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
-                    call_args_buf.append(f"reinterpret_cast<{t_stripped}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
-                elif t_stripped.startswith("const occtl_") and t_stripped.endswith("*") and not t_stripped.endswith("**") and not t_stripped.startswith("const occtl_"):
+                    call_args_null.append(
+                        f"reinterpret_cast<{t_stripped}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                    )
+                    call_args_buf.append(
+                        f"reinterpret_cast<{t_stripped}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                    )
+                elif (
+                    t_stripped.startswith("const occtl_")
+                    and t_stripped.endswith("*")
+                    and not t_stripped.endswith("**")
+                    and not t_stripped.startswith("const occtl_")
+                ):
                     call_args_null.append(name)
                     call_args_buf.append(name)
                 else:
-                    t_clean = re.sub(r'\s+(const|volatile)\s*$', '', t_stripped)
+                    t_clean = re.sub(r"\s+(const|volatile)\s*$", "", t_stripped)
                     if t_clean.endswith("*") and not t_clean.endswith("**"):
                         base = _c_type_strip_ptr(t_clean).strip()
                         if base in HANDLE_TYPES:
@@ -871,7 +973,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
                             call_args_buf.append(arg)
                         elif base == "char":
                             cs_name = f"_{name}_cs"
-                            string_convs.append(f"    godot::CharString {cs_name} = {name}.utf8();")
+                            string_convs.append(
+                                f"    godot::CharString {cs_name} = {name}.utf8();"
+                            )
                             call_args_null.append(f"{cs_name}.get_data()")
                             call_args_buf.append(f"{cs_name}.get_data()")
                         elif base == "void":
@@ -896,7 +1000,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
         call_null_str = ", ".join(call_args_null)
         if _func_is_occtl_status(f):
             lines.append(f"    occtl_status_t _err = ::{f.name}({call_null_str});")
-            lines.append(f"    if (_err != 0 && _err != OCCTL_BUFFER_TOO_SMALL) {{ return {ret_type_str}(); }}")
+            lines.append(
+                f"    if (_err != 0 && _err != OCCTL_BUFFER_TOO_SMALL) {{ return {ret_type_str}(); }}"
+            )
         else:
             lines.append(f"    ::{f.name}({call_null_str});")
 
@@ -906,13 +1012,17 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             btype = f.params[bi].type_name.strip()
             bbase = _c_type_strip_ptr(btype).strip()
             if bbase == "char":
-                lines.append(f"    std::vector<char> _{bname}_buf(_{cnt_name}_cnt + 1);")
+                lines.append(
+                    f"    std::vector<char> _{bname}_buf(_{cnt_name}_cnt + 1);"
+                )
             elif bbase == "uint8_t":
                 lines.append(f"    std::vector<uint8_t> _{bname}_buf(_{cnt_name}_cnt);")
             elif bbase in ("double", "int32_t", "int64_t", "uint32_t", "size_t"):
                 lines.append(f"    std::vector<{bbase}> _{bname}_buf(_{cnt_name}_cnt);")
             elif is_value_struct_type(bbase):
-                lines.append(f"    std::vector<{bbase}> _{bname}_buf(static_cast<size_t>(_{cnt_name}_cnt));")
+                lines.append(
+                    f"    std::vector<{bbase}> _{bname}_buf(static_cast<size_t>(_{cnt_name}_cnt));"
+                )
             else:
                 lines.append(f"    std::vector<{bbase}> _{bname}_buf(_{cnt_name}_cnt);")
 
@@ -938,15 +1048,25 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             lines.append(f"    _result.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
             if pk_type == "PackedInt64Array":
                 if base0 != "int64_t":
-                    lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{buf_name}_buf[_i].bits);")
+                    lines.append(
+                        f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{buf_name}_buf[_i].bits);"
+                    )
                 else:
-                    lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+                    lines.append(
+                        f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];"
+                    )
             elif pk_type == "PackedFloat64Array":
-                lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+                lines.append(
+                    f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];"
+                )
             elif pk_type == "PackedInt32Array":
-                lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+                lines.append(
+                    f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];"
+                )
             elif pk_type == "PackedByteArray":
-                lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];")
+                lines.append(
+                    f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _result[static_cast<int64_t>(_i)] = _{buf_name}_buf[_i];"
+                )
             lines.append("    return _result;")
         elif single_string:
             buf_name = f.params[buf_idx].name
@@ -964,38 +1084,58 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             lines.append(f"    }}")
             lines.append("    return _result;")
         elif return_dict:
+
             def _dict_key(n):
-                return re.sub(r'^out_', '', n).lstrip('_')
+                return re.sub(r"^out_", "", n).lstrip("_")
+
             lines.append("    Dictionary _result;")
-            for (aname, atype, aret) in arrays:
-                buf_entry = next((bi for bi in buffer_indices if f.params[bi].name == aname), buf_idx)
+            for aname, atype, aret in arrays:
+                buf_entry = next(
+                    (bi for bi in buffer_indices if f.params[bi].name == aname), buf_idx
+                )
                 if aret.startswith("Packed"):
                     aname_cpp = _dict_key(aname)
                     lines.append(f"    {aret} _{aname_cpp};")
-                    lines.append(f"    _{aname_cpp}.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
+                    lines.append(
+                        f"    _{aname_cpp}.resize(static_cast<int64_t>(_{cnt_name}_cnt));"
+                    )
                     if aret == "PackedInt64Array":
                         if atype != "int64_t":
-                            lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _{aname_cpp}[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{aname}_buf[_i].bits);")
+                            lines.append(
+                                f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _{aname_cpp}[static_cast<int64_t>(_i)] = static_cast<int64_t>(_{aname}_buf[_i].bits);"
+                            )
                         else:
-                            lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _{aname_cpp}[static_cast<int64_t>(_i)] = _{aname}_buf[_i];")
+                            lines.append(
+                                f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _{aname_cpp}[static_cast<int64_t>(_i)] = _{aname}_buf[_i];"
+                            )
                     else:
-                        lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _{aname_cpp}[static_cast<int64_t>(_i)] = _{aname}_buf[_i];")
-                    lines.append(f"    _result[\"{aname_cpp}\"] = _{aname_cpp};")
+                        lines.append(
+                            f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) _{aname_cpp}[static_cast<int64_t>(_i)] = _{aname}_buf[_i];"
+                        )
+                    lines.append(f'    _result["{aname_cpp}"] = _{aname_cpp};')
                 elif aret.startswith("Array[Ref["):
                     struct_cls = aret.replace("Array[Ref[", "").rstrip("]")
                     aname_cpp = _dict_key(aname)
                     lines.append(f"    Array _{aname_cpp};")
-                    lines.append(f"    _{aname_cpp}.resize(static_cast<int64_t>(_{cnt_name}_cnt));")
-                    lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{")
+                    lines.append(
+                        f"    _{aname_cpp}.resize(static_cast<int64_t>(_{cnt_name}_cnt));"
+                    )
+                    lines.append(
+                        f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{"
+                    )
                     lines.append(f"        Ref<{struct_cls}> _item;")
                     lines.append(f"        _item.instantiate();")
                     lines.append(f"        _item->copy_from_c(_{aname}_buf[_i]);")
-                    lines.append(f"        _{aname_cpp}[static_cast<int64_t>(_i)] = _item;")
+                    lines.append(
+                        f"        _{aname_cpp}[static_cast<int64_t>(_i)] = _item;"
+                    )
                     lines.append(f"    }}")
-                    lines.append(f"    _result[\"{aname_cpp}\"] = _{aname_cpp};")
+                    lines.append(f'    _result["{aname_cpp}"] = _{aname_cpp};')
                 elif aret == "String":
                     aname_cpp = _dict_key(aname)
-                    lines.append(f"    _result[\"{aname_cpp}\"] = godot::String(_{aname}_buf.data());")
+                    lines.append(
+                        f'    _result["{aname_cpp}"] = godot::String(_{aname}_buf.data());'
+                    )
             lines.append("    return _result;")
         else:
             lines.append(f"    return {ret_type_str}();")
@@ -1046,12 +1186,18 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
                     local = f"_{name}_buf"
                     cap_param = None
                     for other in f.params:
-                        if other.name != p.name and other.type_name.strip() == "size_t" and not is_out_param(other.type_name, other.name, ret):
+                        if (
+                            other.name != p.name
+                            and other.type_name.strip() == "size_t"
+                            and not is_out_param(other.type_name, other.name, ret)
+                        ):
                             cap_param = other
                             break
                     if cap_param:
                         cap_name = cap_param.name
-                        lines.append(f"    std::vector<const char*> {local}(static_cast<size_t>({cap_name}));")
+                        lines.append(
+                            f"    std::vector<const char*> {local}(static_cast<size_t>({cap_name}));"
+                        )
                         call_args.append(f"{local}.data()")
                     else:
                         local = f"_{name}_val"
@@ -1083,7 +1229,12 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             else:
                 local = f"_{name}_val"
                 resolved = _resolve_typedef(base)
-                if resolved in (VALUE_STRUCT_TYPES | UINT64_ID_TYPES | ENUM_TYPES | set(OUT_PARAM_PRIM_TYPES.keys())):
+                if resolved in (
+                    VALUE_STRUCT_TYPES
+                    | UINT64_ID_TYPES
+                    | ENUM_TYPES
+                    | set(OUT_PARAM_PRIM_TYPES.keys())
+                ):
                     lines.append(f"    {resolved} {local} = {{}};")
                     call_args.append(f"&{local}")
                 else:
@@ -1091,32 +1242,53 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
                     call_args.append(f"&{local}")
         else:
             # In-param
-            t_stripped = re.sub(r'\s+(const|volatile)\s*$', '', t)
-            if t_stripped.startswith("const ") and t_stripped.endswith("*") and not t_stripped.endswith("**"):
+            t_stripped = re.sub(r"\s+(const|volatile)\s*$", "", t)
+            if (
+                t_stripped.startswith("const ")
+                and t_stripped.endswith("*")
+                and not t_stripped.endswith("**")
+            ):
                 base_raw = _c_type_strip_ptr(t_stripped).strip()
-                base = re.sub(r'^(const|volatile)\s+', '', base_raw).strip()
+                base = re.sub(r"^(const|volatile)\s+", "", base_raw).strip()
                 if base == "uint8_t":
                     lines.append(f"    const uint8_t* _{name}_c = {name}.ptr();")
                     call_args.append(f"_{name}_c")
                 elif is_value_struct_type(base):
-                    if f.name in DEFAULT_NULLABLE_PARAMS and p.name in DEFAULT_NULLABLE_PARAMS[f.name]:
-                        base_no_const = base_raw.replace("const ", "", 1) if base_raw.startswith("const ") else base_raw
+                    if (
+                        f.name in DEFAULT_NULLABLE_PARAMS
+                        and p.name in DEFAULT_NULLABLE_PARAMS[f.name]
+                    ):
+                        base_no_const = (
+                            base_raw.replace("const ", "", 1)
+                            if base_raw.startswith("const ")
+                            else base_raw
+                        )
                         lines.append(f"    {base_no_const} _{name}_c = {{}};")
-                        lines.append(f"    const {base_no_const}* _{name}_ptr = nullptr;")
-                        lines.append(f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}")
+                        lines.append(
+                            f"    const {base_no_const}* _{name}_ptr = nullptr;"
+                        )
+                        lines.append(
+                            f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
+                        )
                         call_args.append(f"_{name}_ptr")
                     else:
                         lines.append(f"    {base_raw} _{name}_c = {name}->to_c();")
                         call_args.append(f"&_{name}_c")
                 elif base in HANDLE_TYPES:
-                    call_args.append(f"reinterpret_cast<const {base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))")
+                    call_args.append(
+                        f"reinterpret_cast<const {base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
+                    )
                 elif base in UINT64_ID_TYPES:
-                    lines.append(f"    {base} _{name}_c = {{static_cast<uint64_t>({name})}};")
+                    lines.append(
+                        f"    {base} _{name}_c = {{static_cast<uint64_t>({name})}};"
+                    )
                     call_args.append(f"&_{name}_c")
                 elif base == "char":
                     call_args.append(f"{name}.utf8().get_data()")
                 elif base == "void":
-                    call_args.append(f"reinterpret_cast<{base_raw}*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
+                    call_args.append(
+                        f"reinterpret_cast<{base_raw}*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                    )
                 else:
                     call_args.append(name if name else "")
             elif t in UINT64_ID_TYPES:
@@ -1124,33 +1296,47 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             elif t == "occtl_status_t":
                 call_args.append(f"static_cast<{t}>({name})")
             elif is_opaque_ptr_t_type(t):
-                call_args.append(f"reinterpret_cast<{t}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
+                call_args.append(
+                    f"reinterpret_cast<{t}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                )
             elif is_value_struct_type(t):
                 call_args.append(f"{name}->to_c()")
             elif t == "char*":
                 local = f"_{name}_c"
                 lines.append(f"    godot::CharString _{name}_cs = {name}.utf8();")
-                lines.append(f"    std::vector<char> _{name}_buf(_{name}_cs.get_data(), _{name}_cs.get_data() + _{name}_cs.length() + 1);")
+                lines.append(
+                    f"    std::vector<char> _{name}_buf(_{name}_cs.get_data(), _{name}_cs.get_data() + _{name}_cs.length() + 1);"
+                )
                 lines.append(f"    char* {local} = _{name}_buf.data();")
                 call_args.append(local)
             else:
                 if t in ENUM_TYPES:
                     call_args.append(f"static_cast<{t}>({name})")
                     continue
-                t_clean = re.sub(r'\s+(const|volatile)\s*$', '', t)
+                t_clean = re.sub(r"\s+(const|volatile)\s*$", "", t)
                 if t_clean.endswith("*"):
                     base = _c_type_strip_ptr(t_clean).strip()
                     if base in HANDLE_TYPES:
-                        call_args.append(f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))")
+                        call_args.append(
+                            f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
+                        )
                     elif base == "char":
-                        lines.append(f"    godot::CharString _{name}_cs = {name}.utf8();")
-                        lines.append(f"    std::vector<char> _{name}_buf(_{name}_cs.get_data(), _{name}_cs.get_data() + _{name}_cs.length() + 1);")
+                        lines.append(
+                            f"    godot::CharString _{name}_cs = {name}.utf8();"
+                        )
+                        lines.append(
+                            f"    std::vector<char> _{name}_buf(_{name}_cs.get_data(), _{name}_cs.get_data() + _{name}_cs.length() + 1);"
+                        )
                         lines.append(f"    char* _{name}_c = _{name}_buf.data();")
                         call_args.append(f"_{name}_c")
                     elif base == "void":
-                        call_args.append(f"reinterpret_cast<void*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
+                        call_args.append(
+                            f"reinterpret_cast<void*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                        )
                     elif is_opaque_ptr_t_type(base):
-                        call_args.append(f"reinterpret_cast<{base}*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))")
+                        call_args.append(
+                            f"reinterpret_cast<{base}*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
+                        )
                     elif t_clean.startswith("const "):
                         call_args.append(name if name else "")
                     else:
@@ -1160,7 +1346,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
 
     # Call the C function
     if _func_is_occtl_status(f):
-        lines.append(f"    occtl_status_t _status = ::{c_func_name}({', '.join(call_args)});")
+        lines.append(
+            f"    occtl_status_t _status = ::{c_func_name}({', '.join(call_args)});"
+        )
     else:
         if ret == "void":
             lines.append(f"    ::{c_func_name}({', '.join(call_args)});")
@@ -1176,12 +1364,21 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             local = f"_{name}_buf"
             for other in f.params:
                 ot = other.type_name.strip()
-                if other.name != p.name and ot.endswith("*") and ot.rstrip("*") == "size_t" and is_out_param(ot, other.name, ret):
+                if (
+                    other.name != p.name
+                    and ot.endswith("*")
+                    and ot.rstrip("*") == "size_t"
+                    and is_out_param(ot, other.name, ret)
+                ):
                     count_local = f"_{other.name}_val"
-                    lines.append(f"    if ({name}.is_valid()) {name}->copy_from_c({local}.data(), {count_local});")
+                    lines.append(
+                        f"    if ({name}.is_valid()) {name}->copy_from_c({local}.data(), {count_local});"
+                    )
                     break
             else:
-                lines.append(f"    if ({name}.is_valid()) {name}->copy_from_c({local});")
+                lines.append(
+                    f"    if ({name}.is_valid()) {name}->copy_from_c({local});"
+                )
         elif base == "uint8_t":
             buf_size = 16
             if parsed:
@@ -1194,7 +1391,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             lines.append(f"    if ({name}.is_valid()) {{")
             lines.append(f"        PackedByteArray _ba;")
             lines.append(f"        _ba.resize({buf_size});")
-            lines.append(f"        for (int _i = 0; _i < {buf_size}; ++_i) _ba[_i] = _{name}_buf[_i];")
+            lines.append(
+                f"        for (int _i = 0; _i < {buf_size}; ++_i) _ba[_i] = _{name}_buf[_i];"
+            )
             lines.append(f"        {name}->copy_from_c(_ba);")
             lines.append(f"    }}")
         else:
@@ -1207,7 +1406,7 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
     if handle_out_params and _func_is_occtl_status(f):
         p = handle_out_params[0]
         base = _c_type_strip_ptr(p.type_name).strip()
-        inner = re.sub(r'^(const|volatile)\s+', '', base.rstrip("* \t")).strip()
+        inner = re.sub(r"^(const|volatile)\s+", "", base.rstrip("* \t")).strip()
         local = f"_{p.name}_val"
         if inner in HANDLE_TYPES:
             cls = c_type_to_godot_class(base) + "Handle"
@@ -1215,7 +1414,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             lines.append(f"    if (!{local}) {{ return Ref<{cls}>(); }}")
             lines.append(f"    Ref<{cls}> _h;")
             lines.append(f"    _h.instantiate();")
-            lines.append(f"    _h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local})));")
+            lines.append(
+                f"    _h->set_handle(static_cast<int64_t>(reinterpret_cast<uintptr_t>({local})));"
+            )
             lines.append(f"    return _h;")
         elif inner in UINT64_ID_TYPES:
             lines.append(f"    if (_status != OCCTL_OK) {{ return 0; }}")
@@ -1224,7 +1425,9 @@ def _generate_body(f: CFunction, wrapper_name: str, parsed: ParsedHeader | None 
             lines.append(f"    return static_cast<int>(_status);")
     elif handle_out_params and not _func_is_occtl_status(f):
         # Non-status C return with handle** out-param (unusual)
-        lines.append(f"    return static_cast<int64_t>(reinterpret_cast<uintptr_t>(_{handle_out_params[0].name}_val));")
+        lines.append(
+            f"    return static_cast<int64_t>(reinterpret_cast<uintptr_t>(_{handle_out_params[0].name}_val));"
+        )
     elif _func_is_occtl_status(f):
         lines.append("    return static_cast<int>(_status);")
     elif ret == "void":
@@ -1261,6 +1464,7 @@ def _c_to_godot_return(c_type: str, expr: str) -> str:
 # Header generation
 # ---------------------------------------------------------------
 
+
 def generate_wrapper_header(
     parsed: ParsedHeader,
     value_type_includes: list[str],
@@ -1269,9 +1473,7 @@ def generate_wrapper_header(
     guard = f"{cls.upper()}_H"
     functions = parsed.functions
 
-    has_callbacks = any(
-        _find_callback_userdata_pairs(f.params) for f in functions
-    )
+    has_callbacks = any(_find_callback_userdata_pairs(f.params) for f in functions)
     lines = [
         f"#ifndef {guard}",
         f"#define {guard}",
@@ -1294,16 +1496,18 @@ def generate_wrapper_header(
     ]
     for inc in sorted(set(value_type_includes)):
         lines.append(f'#include "{inc}"')
-    lines.extend([
-        "",
-        "using namespace godot;",
-        "",
-        f"class {cls} : public godot::RefCounted {{",
-        f"    GDCLASS({cls}, godot::RefCounted)",
-        "protected:",
-        "    static void _bind_methods();",
-        "public:",
-    ])
+    lines.extend(
+        [
+            "",
+            "using namespace godot;",
+            "",
+            f"class {cls} : public godot::RefCounted {{",
+            f"    GDCLASS({cls}, godot::RefCounted)",
+            "protected:",
+            "    static void _bind_methods();",
+            "public:",
+        ]
+    )
     for c in _filtered_constants(parsed.constants):
         ret = _constant_godot_return_type(c, parsed.constants)
         if ret != "int":
@@ -1317,12 +1521,14 @@ def generate_wrapper_header(
         lines.append(f"    {ret_mapped} {mname}({args_decl}); // NOLINT")
     if not functions and not parsed.constants and not parsed.enums:
         lines.append("    void _unused();")
-    lines.extend([
-        "};",
-        "",
-        f"#endif // {guard}",
-        "",
-    ])
+    lines.extend(
+        [
+            "};",
+            "",
+            f"#endif // {guard}",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -1345,7 +1551,9 @@ def _constant_value_resolve(v: str, consts: list[CConstant]) -> str:
     return v
 
 
-def _constant_godot_return_type(c: CConstant, consts: list[CConstant] | None = None) -> str:
+def _constant_godot_return_type(
+    c: CConstant, consts: list[CConstant] | None = None
+) -> str:
     v = c.value.strip()
     # Resolve through #define chains if we have a constant lookup
     if consts is not None:
@@ -1377,6 +1585,7 @@ def _constant_godot_return_type(c: CConstant, consts: list[CConstant] | None = N
 # Source generation
 # ---------------------------------------------------------------
 
+
 def generate_wrapper_source(
     parsed: ParsedHeader,
 ) -> str:
@@ -1384,7 +1593,8 @@ def generate_wrapper_source(
     functions = parsed.functions
 
     has_vector = any(
-        p.type_name.strip() == "char*" or p.type_name.strip() in ("const char**", "const char * *")
+        p.type_name.strip() == "char*"
+        or p.type_name.strip() in ("const char**", "const char * *")
         for f in functions
         for p in f.params
     ) or any(_is_two_call_buffer_func(f) for f in functions)
@@ -1421,17 +1631,25 @@ def generate_wrapper_source(
         if ret == "int":
             lines.append(f"    BIND_CONSTANT({c.name});")
         else:
-            lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("const_{c.name}"), &{cls}::const_{c.name});')
+            lines.append(
+                f'    godot::ClassDB::bind_method(godot::D_METHOD("const_{c.name}"), &{cls}::const_{c.name});'
+            )
     for enum in parsed.enums:
         for ev in enum.values:
-            lines.append(f'    godot::ClassDB::bind_integer_constant(get_class_static(), "{escape(enum.enum_name)}", "{ev.name}", {ev.name});')
+            lines.append(
+                f'    godot::ClassDB::bind_integer_constant(get_class_static(), "{escape(enum.enum_name)}", "{ev.name}", {ev.name});'
+            )
     method_names = _function_method_names(functions)
     for f in functions:
         mname = method_names[f.name]
         defvals = _method_defvals(f)
-        lines.append(f'    godot::ClassDB::bind_method(godot::D_METHOD("{mname}"{_method_arg_names(f)}), &{cls}::{mname}{defvals});')
+        lines.append(
+            f'    godot::ClassDB::bind_method(godot::D_METHOD("{mname}"{_method_arg_names(f)}), &{cls}::{mname}{defvals});'
+        )
     if not functions and not parsed.constants and not parsed.enums:
-        lines.append(f"    godot::ClassDB::bind_method(godot::D_METHOD(\"_unused\"), &{cls}::_unused);")
+        lines.append(
+            f'    godot::ClassDB::bind_method(godot::D_METHOD("_unused"), &{cls}::_unused);'
+        )
     lines.append("}")
     lines.append("")
 
@@ -1507,11 +1725,17 @@ def _eval_const(expr: str) -> str:
         e = e.replace(k, val)
     import ast
     import operator as op
+
     allowed_ops = {
-        ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
-        ast.Div: op.truediv, ast.USub: op.neg, ast.UAdd: op.pos,
+        ast.Add: op.add,
+        ast.Sub: op.sub,
+        ast.Mult: op.mul,
+        ast.Div: op.truediv,
+        ast.USub: op.neg,
+        ast.UAdd: op.pos,
         ast.Pow: op.pow,
     }
+
     def _eval(node):
         if isinstance(node, ast.Expression):
             return _eval(node.body)
@@ -1522,6 +1746,7 @@ def _eval_const(expr: str) -> str:
         if isinstance(node, ast.BinOp):
             return allowed_ops[type(node.op)](_eval(node.left), _eval(node.right))
         raise ValueError(f"Unsupported: {type(node)}")
+
     result = _eval(ast.parse(e, mode="eval"))
     return repr(result)
 
@@ -1540,11 +1765,17 @@ def _eval_simple_int(expr: str) -> str:
     for k, val in replacements.items():
         e = e.replace(k, val)
     try:
-        import ast, operator as op
+        import ast
+        import operator as op
+
         allowed_ops = {
-            ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
-            ast.FloorDiv: op.floordiv, ast.USub: op.neg,
+            ast.Add: op.add,
+            ast.Sub: op.sub,
+            ast.Mult: op.mul,
+            ast.FloorDiv: op.floordiv,
+            ast.USub: op.neg,
         }
+
         def _eval(node):
             if isinstance(node, ast.Expression):
                 return _eval(node.body)
@@ -1555,6 +1786,7 @@ def _eval_simple_int(expr: str) -> str:
             if isinstance(node, ast.BinOp):
                 return allowed_ops[type(node.op)](_eval(node.left), _eval(node.right))
             raise ValueError
+
         return str(int(_eval(ast.parse(e, mode="eval"))))
     except Exception:
         return e
@@ -1564,14 +1796,19 @@ def _eval_simple_int(expr: str) -> str:
 # Doc XML generation
 # ---------------------------------------------------------------
 
+
 def _c_type_to_doc_type_ref(c_type: str, rest: str = "") -> str:
     """Convert a C type to a Godot doc cross-reference link string.
     Returns e.g. '[OcctlPoint3]' or empty string if no good link."""
     t = c_type.strip()
-    t_base = re.sub(r'(?:^const\s+|\s*\*+$)', '', t).strip() if not c_type.startswith("const") else re.sub(r'^\s*const\s+', '', t).rstrip("* ").strip()
+    t_base = (
+        re.sub(r"(?:^const\s+|\s*\*+$)", "", t).strip()
+        if not c_type.startswith("const")
+        else re.sub(r"^\s*const\s+", "", t).rstrip("* ").strip()
+    )
     # Handle const pointers
     if t.startswith("const ") and t.endswith("*"):
-        inner = t[len("const "):-1].strip()
+        inner = t[len("const ") : -1].strip()
         if is_value_struct_type(inner):
             cls = c_type_to_godot_class(inner)
             return f"[{cls}]{rest}"
@@ -1642,7 +1879,7 @@ def _describe_param(p: CParameter, ret: str) -> str:
         cls = c_type_to_godot_class(t) + "Handle"
         base_desc = f"A [{cls}] handle."
     elif t.startswith("const ") and t.endswith("*"):
-        inner = t[len("const "):-1].strip()
+        inner = t[len("const ") : -1].strip()
         if is_value_struct_type(inner):
             cls = c_type_to_godot_class(inner)
             base_desc = f"A [{cls}]."
@@ -1663,25 +1900,30 @@ def _describe_param(p: CParameter, ret: str) -> str:
 def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
     cls = _wrapper_class_name(parsed.header_include)
     methods = []
+    constants = []
 
     for c in parsed.constants:
         ret = _constant_godot_return_type(c, parsed.constants)
         if ret in ("int", "bool"):
-            methods.append(f'\t\t<constant name="{escape(c.name)}" value="{escape(str(c.value))}">')
-            desc = c.doc_comment or f'Constant for #define {c.name}'
+            # Integer/bool constants go in <constants> section (class-level)
+            constants.append(
+                f'\t\t<constant name="{escape(c.name)}" value="{escape(str(c.value))}">'
+            )
+            desc = c.doc_comment or f"Constant for #define {c.name}"
             # Add cross-reference hint
             val_lower = str(c.value).lower()
             if val_lower in ("occtl_ok", "0") and "ok" in c.name.lower():
                 desc += " Success status."
             elif val_lower == "occtl_buffer_too_small":
                 desc += " Returned when a buffer is too small for the output."
-            methods.append(f"\t\t\t{desc}.")
-            methods.append("\t\t</constant>")
+            constants.append(f"\t\t\t{desc}.")
+            constants.append("\t\t</constant>")
         else:
+            # Float/double/string constants keep as <method> tags (no GDScript constant)
             methods.append(f'\t\t<method name="const_{escape(c.name)}">')
             methods.append(f'\t\t\t<return type="{ret}" />')
             methods.append("\t\t\t<description>")
-            desc = c.doc_comment or f'Constant wrapper for #define {c.name}'
+            desc = c.doc_comment or f"Constant wrapper for #define {c.name}"
             if "pi" in c.name.lower():
                 desc += " Mathematical constant pi."
             methods.append(f"\t\t\t\t{desc}.")
@@ -1690,17 +1932,22 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
 
     for enum in parsed.enums:
         for ev in enum.values:
-            methods.append(f'\t\t<constant name="{escape(ev.name)}" value="{escape(str(ev.value))}">')
+            # Enum values go in <constants> section (class-level)
+            constants.append(
+                f'\t\t<constant name="{escape(ev.name)}" value="{escape(str(ev.value))}">'
+            )
             desc = f"Enum value = {ev.value}"
             enum_name_lower = enum.enum_name.lower()
             if "status" in enum_name_lower:
-                desc += f" Status code. Defined in [enum {cls}.{escape(enum.enum_name)}]."
+                desc += (
+                    f" Status code. Defined in [enum {cls}.{escape(enum.enum_name)}]."
+                )
             elif "kind" in enum_name_lower:
                 desc += f" Kind identifier. Defined in [enum {cls}.{escape(enum.enum_name)}]."
             else:
                 desc += f" Defined in [enum {cls}.{escape(enum.enum_name)}]."
-            methods.append(f"\t\t\t{desc}")
-            methods.append("\t\t</constant>")
+            constants.append(f"\t\t\t{desc}")
+            constants.append("\t\t</constant>")
 
     method_names = _function_method_names(parsed.functions)
     for f in parsed.functions:
@@ -1713,10 +1960,16 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         if ret_mapped != "void":
             methods.append(f'\t\t\t<return type="{ret_mapped}" />')
         ret = f.return_type.strip()
-        kept_params = [p for p in f.params if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)]
+        kept_params = [
+            p
+            for p in f.params
+            if not _is_stripped_out_param(p, ret) and not _is_buffer_triplet_param(f, p)
+        ]
         for i, p in enumerate(kept_params):
             gt = _c_type_to_godot_doc_type(p.type_name.strip())
-            methods.append(f'\t\t\t<argument index="{i}" name="{escape(p.name)}" type="{gt}" />')
+            methods.append(
+                f'\t\t\t<argument index="{i}" name="{escape(p.name)}" type="{gt}" />'
+            )
         methods.append("\t\t\t<description>")
         doc = f.doc_comment or f"Generated binding for {f.name}."
         methods.append(f"\t\t\t\t{doc}")
@@ -1728,10 +1981,12 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         ret_desc = _describe_return(ret_mapped, ret)
         if ret_desc:
             methods.append(f"\t\t\t\t{ret_desc}")
-        methods.append("\t\t\t</description>")
+        methods.append("\t\t</description>")
         methods.append("\t\t</method>")
 
     methods_xml = "\n".join(methods)
+    constants_xml = "\n".join(constants)
+    has_constants = bool(constants)
     return (
         '<?xml version="1.0" encoding="UTF-8" ?>\n'
         f'<class name="{cls}" inherits="RefCounted" version="4.0" '
@@ -1747,13 +2002,15 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         "\t<methods>\n"
         f"{methods_xml}\n"
         "\t</methods>\n"
-        "</class>\n"
+        + (f"\t<constants>\n{constants_xml}\n\t</constants>\n" if has_constants else "")
+        + "</class>\n"
     )
 
 
 # ---------------------------------------------------------------
 # GDScript test generation
 # ---------------------------------------------------------------
+
 
 def generate_gdscript_tests(
     parsed: ParsedHeader,
@@ -1778,7 +2035,7 @@ def generate_gdscript_tests(
         else:
             mname = f"const_{c.name}"
             lines.append(f"    var v = {cls}.new().{mname}()")
-            lines.append("    if v == null: return \"Failed: {c.name} returned null\"")
+            lines.append('    if v == null: return "Failed: {c.name} returned null"')
         lines.append('    return ""')
         lines.append("")
 
@@ -1786,7 +2043,7 @@ def generate_gdscript_tests(
         for ev in enum.values:
             lines.append(f"static func test_{ev.name}() -> String:")
             lines.append(f"    var v = {cls}.{ev.name}")
-            lines.append("    if v < 0: return \"Failed: enum value negative\"")
+            lines.append('    if v < 0: return "Failed: enum value negative"')
             lines.append('    return ""')
             lines.append("")
 
