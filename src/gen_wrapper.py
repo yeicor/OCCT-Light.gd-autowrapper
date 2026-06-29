@@ -68,7 +68,7 @@ def _filtered_constants(constants: list) -> list:
             continue
         if not val or val == "\\" or val.startswith("\\"):
             continue
-        if "{" in val or "(" in val or ")" in val:
+        if "{" in val:
             continue
         if val.startswith("__"):
             continue
@@ -495,7 +495,12 @@ def _godot_to_c_val(c_type: str, expr: str) -> str:
         return f"static_cast<{t}>({expr})"
     if t == "uint32_t":
         return f"static_cast<{t}>({expr})"
-    return expr
+    if t in ("bool", "int", "uint8_t"):
+        return f"static_cast<{t}>({expr})"
+    if t in ENUM_TYPES:
+        return f"static_cast<{t}>({expr})"
+    # ----- FALLTHROUGH HARDENED -----
+    raise NotImplementedError(f"_godot_to_c_val: unknown type {t!r} (expr={expr!r})")
 
 
 # ---------------------------------------------------------------
@@ -548,7 +553,10 @@ def _in_param_call_arg(p: CParameter) -> str:
             return f"{name}.utf8().get_data()"
         if base == "uint8_t":
             return f"_{name}_c"
-        return name
+        # ----- FALLTHROUGH HARDENED -----
+        raise NotImplementedError(
+            f"_in_param_call_arg: unknown const pointer type {t!r} (name={name!r})"
+        )
     if t in UINT64_ID_TYPES:
         return f"{t}{{static_cast<uint64_t>({name})}}"
     if is_value_struct_type(t):
@@ -559,12 +567,32 @@ def _in_param_call_arg(p: CParameter) -> str:
         return ""
     if t == "char*":
         return f"_{name}_c"
+    if t in (
+        "double",
+        "float",
+        "int32_t",
+        "uint32_t",
+        "int64_t",
+        "uint64_t",
+        "size_t",
+        "uint16_t",
+        "uint8_t",
+        "bool",
+        "int",
+    ):
+        return f"static_cast<{t}>({name})"
+    if t in ENUM_TYPES:
+        return f"static_cast<{t}>({name})"
     if t.endswith("*"):
         base = _c_type_strip_ptr(t).strip()
         if base in HANDLE_TYPES:
             return f"reinterpret_cast<{base}*>(static_cast<uintptr_t>({name}.is_valid() ? {name}->get_handle() : 0))"
-        return name
-    return name
+        # ----- FALLTHROUGH HARDENED -----
+        raise NotImplementedError(
+            f"_in_param_call_arg: unknown pointer type {t!r} (base={base!r})"
+        )
+    # ----- FALLTHROUGH HARDENED -----
+    raise NotImplementedError(f"_in_param_call_arg: unknown type {t!r} (name={name!r})")
 
 
 # ---------------------------------------------------------------
@@ -1213,8 +1241,11 @@ def _generate_body(
                         call_args_null.append(arg)
                         call_args_buf.append(arg)
                     else:
-                        call_args_null.append(name)
-                        call_args_buf.append(name)
+                        # ----- FALLTHROUGH HARDENED (two-call, const pointer) -----
+                        raise ValueError(
+                            f"[_generate_body/two-call] Unknown const pointer param: {f.name}.{name}, "
+                            f"t={t!r}, base={b!r}"
+                        )
                 elif t_stripped in UINT64_ID_TYPES:
                     call_args_null.append(
                         f"{t_stripped}{{static_cast<uint64_t>({name})}}"
@@ -1252,16 +1283,37 @@ def _generate_body(
                             call_args_null.append(arg)
                             call_args_buf.append(arg)
                         else:
-                            call_args_null.append(name)
-                            call_args_buf.append(name)
+                            # ----- FALLTHROUGH HARDENED (two-call, non-const pointer) -----
+                            raise ValueError(
+                                f"[_generate_body/two-call] Unknown non-const pointer param: {f.name}.{name}, "
+                                f"t={t!r}, base={base!r}"
+                            )
                     elif t_stripped in ENUM_TYPES:
                         call_args_null.append(f"static_cast<{t_stripped}>({name})")
                         call_args_buf.append(f"static_cast<{t_stripped}>({name})")
+                    elif t_stripped in (
+                        "double",
+                        "float",
+                        "int32_t",
+                        "uint32_t",
+                        "int64_t",
+                        "uint64_t",
+                        "size_t",
+                        "uint16_t",
+                        "uint8_t",
+                        "bool",
+                        "int",
+                    ):
+                        call_args_null.append(f"static_cast<{t_stripped}>({name})")
+                        call_args_buf.append(f"static_cast<{t_stripped}>({name})")
                     else:
-                        call_args_null.append(name)
-                        call_args_buf.append(name)
+                        # ----- FALLTHROUGH HARDENED (two-call, general else) -----
+                        raise ValueError(
+                            f"[_generate_body/two-call] Unknown param type: {f.name}.{name}, "
+                            f"t={t_stripped!r}"
+                        )
 
-        # Emit deferred string conversions before first call
+            # Emit deferred string conversions before first call
         for conv in string_convs:
             lines.append(conv)
 
@@ -1631,7 +1683,11 @@ def _generate_body(
                         f"reinterpret_cast<{base_raw}*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
                     )
                 else:
-                    call_args.append(name if name else "")
+                    # ----- FALLTHROUGH HARDENED -----
+                    raise ValueError(
+                        f"[_generate_body] Unknown const pointer in-param type: param={f.name}.{name}, "
+                        f"c_type={t!r}, base={base!r}"
+                    )
             elif t in UINT64_ID_TYPES:
                 call_args.append(f"{t}{{static_cast<uint64_t>({name})}}")
             elif t == "occtl_status_t":
@@ -1650,6 +1706,20 @@ def _generate_body(
                 )
                 lines.append(f"    char* {local} = _{name}_buf.data();")
                 call_args.append(local)
+            elif t in (
+                "double",
+                "float",
+                "int32_t",
+                "uint32_t",
+                "int64_t",
+                "uint64_t",
+                "size_t",
+                "uint16_t",
+                "uint8_t",
+                "bool",
+                "int",
+            ):
+                call_args.append(f"static_cast<{t}>({name})")
             else:
                 if t in ENUM_TYPES:
                     call_args.append(f"static_cast<{t}>({name})")
@@ -1687,11 +1757,23 @@ def _generate_body(
                             f"reinterpret_cast<{base}*>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
                         )
                     elif t_clean.startswith("const "):
-                        call_args.append(name if name else "")
+                        # ----- FALLTHROUGH HARDENED -----
+                        raise ValueError(
+                            f"[_generate_body] Unknown const pointer in-param (2nd pass): {f.name}.{name}, "
+                            f"t={t!r}, base={base!r}"
+                        )
                     else:
-                        call_args.append(name if name else "")
+                        # ----- FALLTHROUGH HARDENED -----
+                        raise ValueError(
+                            f"[_generate_body] Unknown non-const pointer in-param (2nd pass): {f.name}.{name}, "
+                            f"t={t!r}, base={base!r}"
+                        )
                 else:
-                    call_args.append(name if name else "")
+                    # ----- FALLTHROUGH HARDENED -----
+                    raise ValueError(
+                        f"[_generate_body] Unknown non-pointer in-param: {f.name}.{name}, "
+                        f"t={t!r}"
+                    )
 
     # Call the C function
     if _func_is_occtl_status(f):
