@@ -259,6 +259,215 @@ FACTORY_METHODS: dict[str, list[tuple[str, list[tuple[str, str]], list[str]]]] =
 }
 
 
+# To-methods for value types: maps class_name → list of
+# (method_name, return_type, [implementation_lines])
+# These generate `to_*()` methods that convert from the value type to a
+# Godot-native type.
+TO_METHODS: dict[str, list[tuple[str, str, list[str]]]] = {
+    "OcctlPoint3": [
+        (
+            "to_vector3",
+            "Vector3",
+            [
+                "Vector3 result;",
+                "result.x = x;",
+                "result.y = y;",
+                "result.z = z;",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlVector3": [
+        (
+            "to_vector3",
+            "Vector3",
+            [
+                "Vector3 result;",
+                "result.x = x;",
+                "result.y = y;",
+                "result.z = z;",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlDirection3": [
+        (
+            "to_vector3",
+            "Vector3",
+            [
+                "Vector3 result;",
+                "result.x = x;",
+                "result.y = y;",
+                "result.z = z;",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlPoint2": [
+        (
+            "to_vector2",
+            "Vector2",
+            [
+                "Vector2 result;",
+                "result.x = x;",
+                "result.y = y;",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlVector2": [
+        (
+            "to_vector2",
+            "Vector2",
+            [
+                "Vector2 result;",
+                "result.x = x;",
+                "result.y = y;",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlDirection2": [
+        (
+            "to_vector2",
+            "Vector2",
+            [
+                "Vector2 result;",
+                "result.x = x;",
+                "result.y = y;",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlTransform": [
+        (
+            "to_transform3d",
+            "Transform3D",
+            [
+                "Transform3D result;",
+                "result.basis[0][0] = m[0];",
+                "result.basis[0][1] = m[1];",
+                "result.basis[0][2] = m[2];",
+                "result.origin.x = m[3];",
+                "result.basis[1][0] = m[4];",
+                "result.basis[1][1] = m[5];",
+                "result.basis[1][2] = m[6];",
+                "result.origin.y = m[7];",
+                "result.basis[2][0] = m[8];",
+                "result.basis[2][1] = m[9];",
+                "result.basis[2][2] = m[10];",
+                "result.origin.z = m[11];",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlAabb3": [
+        (
+            "to_aabb",
+            "AABB",
+            [
+                "AABB result;",
+                "result.position = Vector3(min->get_x(), min->get_y(), min->get_z());",
+                "result.size = Vector3(max->get_x() - min->get_x(), max->get_y() - min->get_y(), max->get_z() - min->get_z());",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlColorRgba": [
+        (
+            "to_color",
+            "Color",
+            [
+                "return Color(r, g, b, a);",
+            ],
+        ),
+    ],
+    "OcctlAxis1Placement": [
+        (
+            "to_transform3d",
+            "Transform3D",
+            [
+                "Transform3D result;",
+                "{",
+                "    const double zx = direction->get_x(), zy = direction->get_y(), zz = direction->get_z();",
+                "    double xd_x, xd_y, xd_z;",
+                "    const double azx = std::fabs(zx), azy = std::fabs(zy), azz = std::fabs(zz);",
+                "    if (azx <= azy && azx <= azz) {",
+                "        xd_x = 0.0; xd_y = zz; xd_z = -zy;",
+                "    } else if (azy <= azx && azy <= azz) {",
+                "        xd_x = -zz; xd_y = 0.0; xd_z = zx;",
+                "    } else {",
+                "        xd_x = zy; xd_y = -zx; xd_z = 0.0;",
+                "    }",
+                "    const double x_len = std::sqrt(xd_x * xd_x + xd_y * xd_y + xd_z * xd_z);",
+                "    if (x_len < 1e-15) return Transform3D();",
+                "    const double inv_x = 1.0 / x_len;",
+                "    xd_x *= inv_x; xd_y *= inv_x; xd_z *= inv_x;",
+                "    const double yd_x = zy * xd_z - zz * xd_y;",
+                "    const double yd_y = zz * xd_x - zx * xd_z;",
+                "    const double yd_z = zx * xd_y - zy * xd_x;",
+                "    Basis basis;",
+                "    basis.rows[0] = Vector3(xd_x, xd_y, xd_z);",
+                "    basis.rows[1] = Vector3(yd_x, yd_y, yd_z);",
+                "    basis.rows[2] = Vector3(zx, zy, zz);",
+                "    result.set_basis(basis);",
+                "    result.set_origin(Vector3(location->get_x(), location->get_y(), location->get_z()));",
+                "}",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlAxis2Placement": [
+        (
+            "to_transform3d",
+            "Transform3D",
+            [
+                "Transform3D result;",
+                "{",
+                "    const double x_x = x_dir->get_x(), x_y = x_dir->get_y(), x_z = x_dir->get_z();",
+                "    const double dot = x_x * x_dir_ref->get_x() + x_y * x_dir_ref->get_y() + x_z * x_dir_ref->get_z();",
+                "    double y_x = x_dir_ref->get_x() - dot * x_x;",
+                "    double y_y = x_dir_ref->get_y() - dot * x_y;",
+                "    double y_z = x_dir_ref->get_z() - dot * x_z;",
+                "    const double y_len = std::sqrt(y_x * y_x + y_y * y_y + y_z * y_z);",
+                "    if (y_len < 1e-15) return Transform3D();",
+                "    const double inv_y = 1.0 / y_len;",
+                "    y_x *= inv_y; y_y *= inv_y; y_z *= inv_y;",
+                "    const double z_x = x_y * y_z - x_z * y_y;",
+                "    const double z_y = x_z * y_x - x_x * y_z;",
+                "    const double z_z = x_x * y_y - x_y * y_x;",
+                "    Basis basis;",
+                "    basis.rows[0] = Vector3(x_x, x_y, x_z);",
+                "    basis.rows[1] = Vector3(y_x, y_y, y_z);",
+                "    basis.rows[2] = Vector3(z_x, z_y, z_z);",
+                "    result.set_basis(basis);",
+                "    result.set_origin(Vector3(location->get_x(), location->get_y(), location->get_z()));",
+                "}",
+                "return result;",
+            ],
+        ),
+    ],
+    "OcctlAxis3Placement": [
+        (
+            "to_transform3d",
+            "Transform3D",
+            [
+                "Transform3D result;",
+                "{",
+                "    Basis basis;",
+                "    basis.rows[0] = Vector3(x_dir->get_x(), x_dir->get_y(), x_dir->get_z());",
+                "    basis.rows[1] = Vector3(y_dir->get_x(), y_dir->get_y(), y_dir->get_z());",
+                "    basis.rows[2] = Vector3(z_dir->get_x(), z_dir->get_y(), z_dir->get_z());",
+                "    result.set_basis(basis);",
+                "    result.set_origin(Vector3(location->get_x(), location->get_y(), location->get_z()));",
+                "}",
+                "return result;",
+            ],
+        ),
+    ],
+}
+
+
 def generate_value_type_header(struct: CStruct) -> str:
     """Generate the .h file for a value type class."""
     cls = c_type_to_godot_class(struct.type_name)
@@ -279,6 +488,7 @@ def generate_value_type_header(struct: CStruct) -> str:
         "#include <godot_cpp/variant/aabb.hpp>",
         "#include <godot_cpp/variant/color.hpp>",
         "#include <cstdint>",
+        "#include <cmath>",
         "#include <vector>",
         f'#include "occtl/{struct.header_include}"',
         "",
@@ -348,7 +558,11 @@ def generate_value_type_header(struct: CStruct) -> str:
             lines.append(
                 f"    static Ref<{cls}> {method_name}({param_decls}); // NOLINT"
             )
-    lines.append("};")
+    # To-methods (convert to Godot native type)
+    if cls in TO_METHODS:
+        for method_name, ret_type, _ in TO_METHODS[cls]:
+            lines.append(f"    {ret_type} {method_name}() const;")
+    lines.append("};")  # class close
     lines.append("")
     lines.append(f"#endif // {guard}")
     lines.append("")
@@ -419,6 +633,11 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
                 param_str = ", " + param_str
             lines.append(
                 f'    godot::ClassDB::bind_static_method("{cls}", godot::D_METHOD("{method_name}"{param_str}), &{cls}::{method_name});'
+            )
+    if cls in TO_METHODS:
+        for method_name, ret_type, _ in TO_METHODS[cls]:
+            lines.append(
+                f'    godot::ClassDB::bind_method(godot::D_METHOD("{method_name}"), &{cls}::{method_name});'
             )
     lines.append("}")
     lines.append("")
@@ -701,6 +920,15 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             lines.append("}")
             lines.append("")
 
+    # To-method implementations
+    if cls in TO_METHODS:
+        for method_name, ret_type, body in TO_METHODS[cls]:
+            lines.append(f"{ret_type} {cls}::{method_name}() const {{")
+            for line in body:
+                lines.append(f"    {line}")
+            lines.append("}")
+            lines.append("")
+
     return "\n".join(lines)
 
 
@@ -741,6 +969,16 @@ def generate_value_type_doc_xml(struct: CStruct) -> str:
             for pn, pt in params:
                 methods.append(f"\t\t\t\t[param {pn}] Input {pt} value.")
             methods.append(f"\t\t\t\t[return] A new [{cls}] with fields populated.")
+            methods.append("\t\t\t</description>")
+            methods.append("\t\t</method>")
+
+    # To-method doc entries
+    if cls in TO_METHODS:
+        for method_name, ret_type, _ in TO_METHODS[cls]:
+            methods.append(f'\t\t<method name="{method_name}">')
+            methods.append(f'\t\t\t<return type="{ret_type}" />')
+            methods.append("\t\t\t<description>")
+            methods.append(f"\t\t\t\tConverts this [{cls}] to a [{ret_type}].")
             methods.append("\t\t\t</description>")
             methods.append("\t\t</method>")
 

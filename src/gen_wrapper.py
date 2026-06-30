@@ -57,6 +57,16 @@ def _c_type_strip_ptr(t: str) -> str:
 
 
 def _filtered_constants(constants: list) -> list:
+    """Filter out non-API constants.
+
+    Filters:
+    - SKIP_NAMES (OCCTL_API, OCCTL_CALL): compiler attributes, not constants.
+    - _H suffix or function-like macros (...): include guards / function-like macros,
+      not usable as GDScript constants.
+    - Empty/continuation values: incomplete macro fragments.
+    - Values containing '{': multi-line struct initializers, not simple constants.
+    - '__' prefix: compiler built-in or reserved symbols, not part of the public API.
+    """
     SKIP_NAMES = {"OCCTL_API", "OCCTL_CALL"}
     result = []
     for c in constants:
@@ -1034,12 +1044,9 @@ def _c_default_to_godot(c_val: str) -> str:
         float(v_clean)
         return v_clean
     except ValueError:
-        import sys
-
-        print(
-            f"Warning [_c_default_to_godot]: Could not parse default value {c_val!r} as number, "
-            f"using raw value.",
-            file=sys.stderr,
+        raise ValueError(
+            f"[_c_default_to_godot] Could not parse default value {c_val!r} as number, "
+            f"cannot determine Godot default."
         )
     # Fall back to the raw value
     return v
@@ -1682,6 +1689,11 @@ def _generate_body(
                             try:
                                 buf_size = int(c.value.strip())
                             except ValueError:
+                                # KNOWN EXCEPTION: the constant name heuristic
+                                # (matching WIRE_SIZE or BUFFER_SIZE) is best-effort.
+                                # Some matching constants may have non-integer
+                                # expression values; we fall back to the default
+                                # buffer size (16) in that case.
                                 pass
                 local = f"_{name}_buf"
                 lines.append(f"    uint8_t {local}[{buf_size}] = {{}};")
@@ -1695,10 +1707,6 @@ def _generate_body(
                     | ENUM_TYPES
                     | set(OUT_PARAM_PRIM_TYPES.keys())
                 ):
-                    # Initialize versioned structs with their init function
-                    # so struct_version is set correctly.
-                    # Only call init if the function exists in the parsed
-                    # header (check by constructing the expected name).
                     # Initialize versioned structs with their init function
                     # so struct_version is set correctly.
                     # Only call init if the function exists in the parsed
@@ -1903,6 +1911,8 @@ def _generate_body(
                         try:
                             buf_size = int(c.value.strip())
                         except ValueError:
+                            # KNOWN EXCEPTION: same best-effort heuristic as
+                            # the call-site uint8_t buffer sizing above.
                             pass
             lines.append(f"    if ({name}.is_valid()) {{")
             lines.append(f"        PackedByteArray _ba;")
@@ -2177,6 +2187,8 @@ def _constant_godot_return_type(
         int(clean)
         return "int"
     except ValueError:
+        # KNOWN EXCEPTION: complex constant expressions (e.g. (2.0 * PI))
+        # can't be parsed as simple integers; fall through to heuristic.
         pass
     if any(c in v for c in "+-*/"):
         return "double" if ("." in v or v_lower.startswith("pi")) else "int"
@@ -2313,13 +2325,17 @@ def _generate_constant_body(c: CConstant, consts: list[CConstant] | None = None)
         try:
             evaluated = _eval_const(v)
             return f"return {evaluated};"
-        except Exception:
+        except (ValueError, KeyError, SyntaxError):
+            # KNOWN EXCEPTION: constant expressions that can't be evaluated
+            # at Python codegen time (e.g. complex macros) are passed through
+            # as raw C++ code which compiles correctly.
             return f"return {v};"
     elif ret == "int":
         try:
             evaluated = int(_eval_simple_int(v))
             return f"return {evaluated};"
-        except Exception:
+        except (ValueError, KeyError, SyntaxError):
+            # KNOWN EXCEPTION: same as above - fall back to raw C++ expression.
             return f"return {v};"
     elif ret == "bool":
         if v.lower() in ("true", "false"):
@@ -2344,7 +2360,9 @@ def _eval_const(expr: str) -> str:
         "OCCTL_ANGLE_30_DEG_RAD": "0.52359877559829887308",
         "OCCTL_ANGLE_90_DEG_RAD": "1.57079632679489661923",
     }
-    for k, val in replacements.items():
+    # Sort longest-first to avoid partial replacement (e.g. OCCTL_PI matching
+    # before OCCTL_PI_OVER_TWO).
+    for k, val in sorted(replacements.items(), key=lambda x: -len(x[0])):
         e = e.replace(k, val)
     import ast
     import operator as op
@@ -2411,7 +2429,9 @@ def _eval_simple_int(expr: str) -> str:
             raise ValueError
 
         return str(int(_eval(ast.parse(e, mode="eval"))))
-    except Exception:
+    except (ValueError, KeyError):
+        # KNOWN EXCEPTION: complex constant expressions that can't be evaluated
+        # at Python codegen time are passed through as raw C++ code.
         return e
 
 
