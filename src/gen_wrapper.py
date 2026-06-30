@@ -158,7 +158,13 @@ def _callback_types_needed(functions: list[CFunction]) -> set[str]:
 
 
 def _bridge_function_name(callback_type: str) -> str:
-    return BRIDGE_FUNCTION_NAMES.get(callback_type, f"_{callback_type}_bridge")
+    result = BRIDGE_FUNCTION_NAMES.get(callback_type)
+    if result is None:
+        raise ValueError(
+            f"Callback type {callback_type!r} has no bridge function name "
+            f"in BRIDGE_FUNCTION_NAMES. Add an entry for it."
+        )
+    return result
 
 
 def _is_handle_ptr(c_type: str) -> bool:
@@ -175,6 +181,26 @@ def _is_uint64_id_ptr(c_type: str) -> bool:
     base = _c_type_strip_ptr(c_type).strip()
     return base in UINT64_ID_TYPES
 
+
+# ---------------------------------------------------------------
+# Allocating view pairs — ** out-params that allocate memory that
+# must be freed after copying.
+# Maps allocating function name -> free function name (None => ::free()).
+# ---------------------------------------------------------------
+ALLOCATING_VIEW_PAIR_FREE_FUNCTIONS: dict[str, str | None] = {
+    "occtl_curve_to_bezier_segments": "occtl_curve_free_bezier_segments",
+    "occtl_curve2d_to_bezier_segments": "occtl_curve2d_free_bezier_segments",
+    "occtl_curve_intersect": "occtl_curve_free_intersection_points",
+    "occtl_surface_surface_intersect": None,  # Use C free()
+}
+
+# Free functions that should be skipped from public wrapper generation
+# since their memory management is auto-called in the allocating function.
+ALLOCATING_FREE_FUNCTIONS: set[str] = {
+    "occtl_curve_free_bezier_segments",
+    "occtl_curve2d_free_bezier_segments",
+    "occtl_curve_free_intersection_points",
+}
 
 # ---------------------------------------------------------------
 # Out-param classification
@@ -1008,7 +1034,13 @@ def _c_default_to_godot(c_val: str) -> str:
         float(v_clean)
         return v_clean
     except ValueError:
-        pass
+        import sys
+
+        print(
+            f"Warning [_c_default_to_godot]: Could not parse default value {c_val!r} as number, "
+            f"using raw value.",
+            file=sys.stderr,
+        )
     # Fall back to the raw value
     return v
 
@@ -1914,6 +1946,20 @@ def _generate_body(
         else:
             total_expr = " * ".join(f"_{f.params[ci].name}_cnt" for ci in cnt_idxs)
 
+        # Free the C-allocated memory if this is an allocating function
+        _alloc_free_fn = ALLOCATING_VIEW_PAIR_FREE_FUNCTIONS.get(f.name)
+        if _alloc_free_fn is not None:
+            _ptr_is_const = p.type_name.strip().startswith("const ")
+            if _ptr_is_const:
+                lines.append(
+                    f"    ::{_alloc_free_fn}(const_cast<{view_resolved}*>(_{ptr_name}_ptr));"
+                )
+            else:
+                lines.append(f"    ::{_alloc_free_fn}(_{ptr_name}_ptr);")
+        elif f.name in ALLOCATING_VIEW_PAIR_FREE_FUNCTIONS:
+            # Free with C's ::free() (dict value is None)
+            lines.append(f"    ::free(_{ptr_name}_ptr);")
+
         if view_resolved in UINT64_ID_TYPES:
             # PackedInt64Array for id types (occtl_rep_id_t, occtl_uid_t, etc.)
             lines.append(f"    PackedInt64Array _result;")
@@ -2167,8 +2213,15 @@ def generate_wrapper_source(
         lines.append("#include <vector>")
         lines.append("")
 
-    # Callback bridge functions
+    # Validate callback bridge functions
     needed_callbacks = _callback_types_needed(functions)
+    for cb_type in needed_callbacks:
+        if cb_type not in CALLBACK_BRIDGE_SOURCE:
+            raise ValueError(
+                f"Callback type {cb_type!r} is needed by functions in "
+                f"'{parsed.header_include}' but has no bridge source "
+                f"in CALLBACK_BRIDGE_SOURCE. Add an entry for it."
+            )
     if needed_callbacks:
         lines.append("namespace {")
         lines.append("struct _CallbackContext {")
@@ -2182,6 +2235,18 @@ def generate_wrapper_source(
                     lines.append(line)
         lines.append("} // namespace")
         lines.append("")
+
+    # Check if any function needs ::free()
+    needs_free = any(
+        ALLOCATING_VIEW_PAIR_FREE_FUNCTIONS.get(f.name) is None for f in functions
+    )
+    if needs_free:
+        lines.append("#include <cstdlib>")
+        lines.append("")
+
+    # Filter out allocating free functions whose memory management
+    # is auto-handled inside the allocating wrapper.
+    public_functions = [f for f in functions if f.name not in ALLOCATING_FREE_FUNCTIONS]
 
     lines.append(f"void {cls}::_bind_methods() {{")
     for c in _filtered_constants(parsed.constants):
@@ -2197,14 +2262,14 @@ def generate_wrapper_source(
             lines.append(
                 f'    godot::ClassDB::bind_integer_constant(get_class_static(), "{escape(enum.enum_name)}", "{ev.name}", {ev.name});'
             )
-    method_names = _function_method_names(functions)
-    for f in functions:
+    method_names = _function_method_names(public_functions)
+    for f in public_functions:
         mname = method_names[f.name]
         defvals = _method_defvals(f)
         lines.append(
             f'    godot::ClassDB::bind_method(godot::D_METHOD("{mname}"{_method_arg_names(f)}), &{cls}::{mname}{defvals});'
         )
-    if not functions and not parsed.constants and not parsed.enums:
+    if not public_functions and not parsed.constants and not parsed.enums:
         lines.append(
             f'    godot::ClassDB::bind_method(godot::D_METHOD("_unused"), &{cls}::_unused);'
         )
@@ -2220,8 +2285,8 @@ def generate_wrapper_source(
             lines.append("}")
             lines.append("")
 
-    method_names = _function_method_names(functions)
-    for f in functions:
+    method_names = _function_method_names(public_functions)
+    for f in public_functions:
         ret_mapped = _func_return_type_mapped(f)
         args_decl = _method_args_decl(f)
         mname = method_names[f.name]
@@ -2234,7 +2299,7 @@ def generate_wrapper_source(
         lines.append("}")
         lines.append("")
 
-    if not functions and not parsed.constants and not parsed.enums:
+    if not public_functions and not parsed.constants and not parsed.enums:
         lines.append(f"void {cls}::_unused() {{}}")
         lines.append("")
 
