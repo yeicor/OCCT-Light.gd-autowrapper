@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OcctlGraphHandle" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>Handle wrapper for occtl_graph_t with built-in meshing methods.</brief_description>
+	<description>
+		Auto-generated handle for the opaque C type [code]occtl_graph_t[/code].
+		Wraps a C pointer, auto-frees it on destruction, and provides
+		convenient meshing methods ([method mesh_faces], [method mesh_edges],
+		[method mesh_vertices]) that are attached directly on the handle.
+
+		All meshing methods accept an optional [code]existing[/code] parameter
+		to reuse a previously created ArrayMesh/MultiMesh — this preserves any
+		user customizations (e.g. shader materials) while replacing the geometry.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="set_handle">
+			<return type="void" />
+			<argument index="0" name="handle" type="int" />
+			<description>Set the wrapped C pointer from an int64_t handle.</description>
+		</method>
+		<method name="get_handle">
+			<return type="int" />
+			<description>Get the wrapped C pointer as an int64_t handle.</description>
+		</method>
+		<method name="is_valid">
+			<return type="bool" />
+			<description>Check if the handle wraps a non-null pointer.</description>
+		</method>
+		<method name="release">
+			<return type="int" />
+			<description>Release ownership of the C pointer and return the handle. The destructor will not free it.</description>
+		</method>
+		<method name="free">
+			<return type="void" />
+			<description>Manually free the wrapped C pointer.</description>
+		</method>
+		<method name="mesh_faces">
+			<return type="ArrayMesh" />
+			<argument index="0" name="face_ids" type="Variant" />
+			<argument index="1" name="include_normals" type="bool" />
+			<argument index="2" name="include_uvs" type="bool" />
+			<argument index="3" name="include_tangents" type="bool" />
+			<argument index="4" name="include_feature_ids" type="bool" />
+			<argument index="5" name="options" type="OcctlMeshOptions" />
+			<argument index="6" name="existing" type="ArrayMesh" />
+			<description>
+				Triangulate faces into an [ArrayMesh].
+
+				- [code]face_ids[/code]: [code]null[/code] for all faces, or a [PackedInt64Array] of face node IDs.
+				- [code]include_normals[/code]: Compute angle-thresholded smooth normals (sharp/smooth edges are handled automatically based on the angle limit in [code]options[/code]).
+				- [code]include_uvs[/code]: Include UV coordinates if available.
+				- [code]include_tangents[/code]: Compute tangent vectors (requires normals and UVs).
+				- [code]include_feature_ids[/code]: Encode face node IDs as vertex colors (one colour per face).
+				- [code]options[/code]: Meshing options controlling deflection, angle, etc. When [code]null[/code], defaults are used.
+				- [code]existing[/code]: Optional [ArrayMesh] to reuse. Surfaces are cleared and re-created, but user customizations (materials, shaders) are preserved.
+
+				The cached triangulation is invalidated when deflection or angle parameters change.
+			</description>
+		</method>
+		<method name="mesh_edges">
+			<return type="MultiMesh" />
+			<argument index="0" name="edge_ids" type="Variant" />
+			<argument index="1" name="radius" type="float" />
+			<argument index="2" name="options" type="OcctlMeshOptions" />
+			<argument index="3" name="existing" type="MultiMesh" />
+			<description>
+				Build edge tube instances as a [MultiMesh].
+
+				A low-resolution cylinder mesh is instanced along each edge polyline segment using [MultiMesh] transforms — one cylinder per segment — for efficient rendering.
+
+				- [code]edge_ids[/code]: [code]null[/code] for all edges, or a [PackedInt64Array] of edge node IDs.
+				- [code]radius[/code]: Tube radius. Default [code]0.01[/code]. If [code]<= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal for consistent visual size across different models.
+				- [code]options[/code]: Meshing options (controls cylinder resolution via the angle parameter).
+				- [code]existing[/code]: Optional [MultiMesh] to reuse (mesh and transforms are replaced, user customizations preserved).
+			</description>
+		</method>
+		<method name="mesh_vertices">
+			<return type="MultiMesh" />
+			<argument index="0" name="vertex_ids" type="Variant" />
+			<argument index="1" name="radius" type="float" />
+			<argument index="2" name="options" type="OcctlMeshOptions" />
+			<argument index="3" name="existing" type="MultiMesh" />
+			<description>
+				Build vertex sphere instances as a [MultiMesh].
+
+				A low-resolution sphere mesh is instanced at each vertex position using [MultiMesh] transforms for efficient rendering.
+
+				- [code]vertex_ids[/code]: [code]null[/code] for all vertices, or a [PackedInt64Array] of vertex node IDs.
+				- [code]radius[/code]: Sphere radius. Default [code]0.02[/code] (double the edge radius default). If [code]<= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal.
+				- [code]options[/code]: Meshing options (controls sphere resolution via the angle parameter).
+				- [code]existing[/code]: Optional [MultiMesh] to reuse.
+			</description>
+		</method>
+	</methods>
+</class>

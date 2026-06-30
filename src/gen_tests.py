@@ -1,16 +1,19 @@
 """Generate GDScript test files for autowrapper-generated classes.
 
-Produces one test file per parsed header (using the wrapper's test generator)
-and an index.gd that references all test files.
+Produces test files for wrapped functions (one per parsed header) and
+handle classes (via template files in src/templates/).
+An index.gd is generated referencing all test files.
 """
 
 from pathlib import Path
 
+from gen_handles import _template_path
 from gen_wrapper import (
     _wrapper_class_name,
     generate_gdscript_tests,
 )
-from parser import ParsedHeader
+from parser import CStruct, ParsedHeader
+from type_map import HANDLE_TYPES, c_type_to_godot_class
 
 
 def generate_all_tests(
@@ -42,6 +45,19 @@ def generate_all_tests(
         f"test_{_wrapper_class_name(ph.header_include)}" for ph in parsed_headers
     }
     expected_tests.add("test_select_iter")
+
+    # Generate handle test files from templates (e.g. test_OcctlGraphHandle.gd)
+    for c_type in HANDLE_TYPES:
+        cls = c_type_to_godot_class(c_type) + "Handle"
+        fname = f"test_{cls}.gd"
+        tpath = _template_path(f"test_{cls}", "gd")
+        if tpath:
+            (tests_dir / fname).write_text(tpath.read_text())
+            written.append(fname)
+            test_paths.append(f"res://tests/{fname}")
+            expected_tests.add(f"test_{cls}")
+
+    # Clean up orphan test files
     for f in tests_dir.iterdir():
         if f.suffix == ".gd" and f.stem.startswith("test_Occtl"):
             if f.stem not in expected_tests:
