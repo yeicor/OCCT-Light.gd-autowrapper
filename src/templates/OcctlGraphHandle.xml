@@ -8,8 +8,16 @@
 		[method mesh_vertices]) that are attached directly on the handle.
 
 		All meshing methods accept an optional [code]existing[/code] parameter
-		to reuse a previously created ArrayMesh/MultiMesh — this preserves any
-		user customizations (e.g. shader materials) while replacing the geometry.
+		that can be an ArrayMesh, MultiMesh, or PhysicsBody3D:
+
+		- [b]ArrayMesh[/b] / [b]MultiMesh[/b]: surfaces/instances are cleared
+		  and re-created; user customizations (shader materials, etc.) are preserved.
+		- [b]PhysicsBody3D[/b] (StaticBody3D, RigidBody3D, CharacterBody3D, ...):
+		  one CollisionShape3D child is added per feature, each with
+		  [code]occtl[/code] metadata containing a [code]feature_id[/code]
+		  key that maps back to the original face/edge/vertex node ID.
+		  Faces use ConcavePolygonShape3D, edges use CapsuleShape3D,
+		  and vertices use SphereShape3D.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -43,9 +51,9 @@
 			<argument index="3" name="include_tangents" type="bool" />
 			<argument index="4" name="include_feature_ids" type="bool" />
 			<argument index="5" name="options" type="OcctlMeshOptions" />
-			<argument index="6" name="existing" type="ArrayMesh" />
+			<argument index="6" name="existing" type="Variant" />
 			<description>
-				Triangulate faces into an [ArrayMesh].
+				Triangulate faces into an [ArrayMesh] or create collision shapes on a [PhysicsBody3D].
 
 				- [code]face_ids[/code]: [code]null[/code] for all faces, or a [PackedInt64Array] of face node IDs.
 				- [code]include_normals[/code]: Compute angle-thresholded smooth normals (sharp/smooth edges are handled automatically based on the angle limit in [code]options[/code]).
@@ -53,7 +61,11 @@
 				- [code]include_tangents[/code]: Compute tangent vectors (requires normals and UVs).
 				- [code]include_feature_ids[/code]: Encode face node IDs as vertex colors (one colour per face).
 				- [code]options[/code]: Meshing options controlling deflection, angle, etc. When [code]null[/code], defaults are used.
-				- [code]existing[/code]: Optional [ArrayMesh] to reuse. Surfaces are cleared and re-created, but user customizations (materials, shaders) are preserved.
+				- [code]existing[/code]: [code]null[/code], [ArrayMesh], or [PhysicsBody3D].
+				  When an [ArrayMesh] is passed, surfaces are cleared and re-created
+				  preserving user customizations.
+				  When a [PhysicsBody3D] is passed, one [ConcavePolygonShape3D] child
+				  is added per face with [code]occtl.feature_id[/code] metadata.
 
 				The cached triangulation is invalidated when deflection or angle parameters change.
 			</description>
@@ -63,16 +75,20 @@
 			<argument index="0" name="edge_ids" type="Variant" />
 			<argument index="1" name="radius" type="float" />
 			<argument index="2" name="options" type="OcctlMeshOptions" />
-			<argument index="3" name="existing" type="MultiMesh" />
+			<argument index="3" name="existing" type="Variant" />
 			<description>
-				Build edge tube instances as a [MultiMesh].
+				Build edge tube instances as a [MultiMesh] or create collision shapes on a [PhysicsBody3D].
 
 				A low-resolution cylinder mesh is instanced along each edge polyline segment using [MultiMesh] transforms — one cylinder per segment — for efficient rendering.
 
 				- [code]edge_ids[/code]: [code]null[/code] for all edges, or a [PackedInt64Array] of edge node IDs.
 				- [code]radius[/code]: Tube radius. Default [code]0.01[/code]. If [code]<= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal for consistent visual size across different models.
 				- [code]options[/code]: Meshing options (controls cylinder resolution via the angle parameter).
-				- [code]existing[/code]: Optional [MultiMesh] to reuse (mesh and transforms are replaced, user customizations preserved).
+				- [code]existing[/code]: [code]null[/code], [MultiMesh], or [PhysicsBody3D].
+				  When a [MultiMesh] is passed, mesh and transforms are replaced
+				  preserving user customizations.
+				  When a [PhysicsBody3D] is passed, one [CapsuleShape3D] child
+				  is added per edge segment with [code]occtl.feature_id[/code] metadata.
 			</description>
 		</method>
 		<method name="mesh_vertices">
@@ -80,16 +96,20 @@
 			<argument index="0" name="vertex_ids" type="Variant" />
 			<argument index="1" name="radius" type="float" />
 			<argument index="2" name="options" type="OcctlMeshOptions" />
-			<argument index="3" name="existing" type="MultiMesh" />
+			<argument index="3" name="existing" type="Variant" />
 			<description>
-				Build vertex sphere instances as a [MultiMesh].
+				Build vertex sphere instances as a [MultiMesh] or create collision shapes on a [PhysicsBody3D].
 
 				A low-resolution sphere mesh is instanced at each vertex position using [MultiMesh] transforms for efficient rendering.
 
 				- [code]vertex_ids[/code]: [code]null[/code] for all vertices, or a [PackedInt64Array] of vertex node IDs.
 				- [code]radius[/code]: Sphere radius. Default [code]0.02[/code] (double the edge radius default). If [code]<= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal.
 				- [code]options[/code]: Meshing options (controls sphere resolution via the angle parameter).
-				- [code]existing[/code]: Optional [MultiMesh] to reuse.
+				- [code]existing[/code]: [code]null[/code], [MultiMesh], or [PhysicsBody3D].
+				  When a [MultiMesh] is passed, mesh and transforms are replaced
+				  preserving user customizations.
+				  When a [PhysicsBody3D] is passed, one [SphereShape3D] child
+				  is added per vertex with [code]occtl.feature_id[/code] metadata.
 			</description>
 		</method>
 	</methods>

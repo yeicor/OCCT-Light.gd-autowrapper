@@ -49,7 +49,7 @@ public:
 
     // --- Meshing methods ---
 
-    /// Triangulate faces into an ArrayMesh.
+    /// Triangulate faces into an ArrayMesh, or create collision shapes on a PhysicsBody3D.
     /// @param face_ids   Nil for all faces, or a PackedInt64Array of face node IDs.
     /// @param include_normals     Compute angle-thresholded smooth normals.
     /// @param include_uvs         Include UV coordinates if available.
@@ -57,8 +57,11 @@ public:
     /// @param include_feature_ids Encode face node IDs as vertex colors.
     /// @param options             Meshing options (deflection, angle, ...).
     ///                            When null, OCCTL_MESH_OPTIONS_INIT defaults are used.
-    /// @param existing            Optional ArrayMesh to reuse (surfaces cleared,
-    ///                            user material/shader customizations preserved).
+    /// @param existing            Optional ArrayMesh, MultiMesh, or PhysicsBody3D to reuse.
+    ///                            - ArrayMesh: surfaces cleared, user customizations preserved.
+    ///                            - PhysicsBody3D: one ConcavePolygonShape3D child per face
+    ///                              with metadata key "feature_id" mapping to the face node ID.
+    ///                            - Null/nil: a fresh ArrayMesh is created.
     Ref<ArrayMesh> mesh_faces(
         const Variant& face_ids = Variant(),
         bool include_normals = false,
@@ -66,35 +69,42 @@ public:
         bool include_tangents = false,
         bool include_feature_ids = false,
         const Ref<OcctlMeshOptions>& options = Ref<OcctlMeshOptions>(),
-        const Ref<ArrayMesh>& existing = Ref<ArrayMesh>()
+        const Variant& existing = Variant()
     );
 
-    /// Build edge tube instances as a MultiMesh.
+    /// Build edge tube instances as a MultiMesh, or create collision shapes on a PhysicsBody3D.
     /// A low-resolution cylinder mesh is instanced along each edge polyline
     /// segment using MultiMesh transforms.
     /// @param edge_ids  Nil for all edges, or a PackedInt64Array of edge node IDs.
     /// @param radius    Tube radius.  <= 0 uses opts.deflection * 10.
     /// @param options   Meshing options (controls cylinder resolution via angle).
-    /// @param existing  Optional MultiMesh to reuse (mesh+transforms replaced,
-    ///                  user customizations preserved).
+    /// @param existing  Optional MultiMesh or PhysicsBody3D to reuse.
+    ///                  - MultiMesh: mesh+transforms replaced, user customizations preserved.
+    ///                  - PhysicsBody3D: one CylinderShape3D child per segment
+    ///                    with metadata key "feature_id" mapping to the edge node ID.
+    ///                  - Null/nil: a fresh MultiMesh is created.
     Ref<MultiMesh> mesh_edges(
         const Variant& edge_ids = Variant(),
         double radius = 0.01,
         const Ref<OcctlMeshOptions>& options = Ref<OcctlMeshOptions>(),
-        const Ref<MultiMesh>& existing = Ref<MultiMesh>()
+        const Variant& existing = Variant()
     );
 
-    /// Build vertex sphere instances as a MultiMesh.
+    /// Build vertex sphere instances as a MultiMesh, or create collision shapes on a PhysicsBody3D.
     /// A low-resolution sphere mesh is instanced at each vertex position.
     /// @param vertex_ids  Nil for all vertices, or a PackedInt64Array of vertex IDs.
     /// @param radius      Sphere radius.  <= 0 uses opts.deflection * 10.
     /// @param options     Meshing options (controls sphere resolution via angle).
-    /// @param existing    Optional MultiMesh to reuse.
+    /// @param existing    Optional MultiMesh or PhysicsBody3D to reuse.
+    ///                    - MultiMesh: mesh+transforms replaced, user customizations preserved.
+    ///                    - PhysicsBody3D: one SphereShape3D child per vertex
+    ///                      with metadata key "feature_id" mapping to the vertex node ID.
+    ///                    - Null/nil: a fresh MultiMesh is created.
     Ref<MultiMesh> mesh_vertices(
         const Variant& vertex_ids = Variant(),
         double radius = 0.02,
         const Ref<OcctlMeshOptions>& options = Ref<OcctlMeshOptions>(),
-        const Ref<MultiMesh>& existing = Ref<MultiMesh>()
+        const Variant& existing = Variant()
     );
 };
 

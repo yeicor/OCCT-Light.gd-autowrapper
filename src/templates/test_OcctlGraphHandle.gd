@@ -350,3 +350,163 @@ static func test_mesh_bbox_consistency() -> String:
 		return "expected vertex instances"
 
 	return ""
+
+# ---------------------------------------------------------------------------
+# PhysicsBody3D collision shape tests
+# ---------------------------------------------------------------------------
+
+static func test_mesh_faces_physics_body() -> String:
+	var result = _make_box_graph()
+	if result.has("error"):
+		return result.error
+
+	var graph: OcctlGraphHandle = result.graph
+
+	var mw = OcctlMesh.new()
+	var mesh_opts = OcctlMeshOptions.new()
+	mw.options_init(mesh_opts)
+	mesh_opts.set_deflection(1.0)
+	var root_id = PackedInt64Array([result.root.get_bits()])
+	var mesh_status = mw.generate(graph, root_id, mesh_opts)
+	if mesh_status != 0:
+		return "mesh generate failed: %d" % mesh_status
+
+	var face_ids = _collect_node_kind_ids(graph, OcctlCore.OCCTL_KIND_FACE)
+	if face_ids.size() == 0:
+		return "no faces found"
+
+	var body = StaticBody3D.new()
+	var ret = graph.mesh_faces(PackedInt64Array(face_ids), false, false, false, false, mesh_opts, body)
+	# Should return null when using a PhysicsBody3D
+	if ret != null:
+		return "expected null return when passing PhysicsBody3D, got %s" % ret
+
+	# Verify children were added
+	if body.get_child_count() == 0:
+		return "expected at least 1 CollisionShape3D child"
+	# Check a child has occtl metadata
+	var cs = body.get_child(0) as CollisionShape3D
+	if cs == null:
+		return "expected CollisionShape3D children"
+	var meta = cs.get_meta("occtl") as Dictionary
+	if meta == null or not meta.has("feature_id"):
+		return "expected occtl metadata with feature_id"
+	var shape = cs.get_shape()
+	if shape == null:
+		return "expected shape on CollisionShape3D"
+	if not (shape is ConcavePolygonShape3D):
+		return "expected ConcavePolygonShape3D for faces, got %s" % shape.get_class()
+	return ""
+
+static func test_mesh_edges_physics_body() -> String:
+	var result = _make_box_graph()
+	if result.has("error"):
+		return result.error
+
+	var graph: OcctlGraphHandle = result.graph
+
+	var mw = OcctlMesh.new()
+	var mesh_opts = OcctlMeshOptions.new()
+	mw.options_init(mesh_opts)
+	mesh_opts.set_deflection(1.0)
+	var root_id = PackedInt64Array([result.root.get_bits()])
+	var mesh_status = mw.generate(graph, root_id, mesh_opts)
+	if mesh_status != 0:
+		return "mesh generate failed: %d" % mesh_status
+
+	var edge_ids = _collect_node_kind_ids(graph, OcctlCore.OCCTL_KIND_EDGE)
+	if edge_ids.size() == 0:
+		return "no edges found"
+
+	var body = StaticBody3D.new()
+	var ret = graph.mesh_edges(PackedInt64Array(edge_ids), 0.01, mesh_opts, body)
+	if ret != null:
+		return "expected null return when passing PhysicsBody3D"
+	if body.get_child_count() == 0:
+		return "expected at least 1 CollisionShape3D child"
+	var cs = body.get_child(0) as CollisionShape3D
+	if cs == null:
+		return "expected CollisionShape3D children"
+	var meta = cs.get_meta("occtl") as Dictionary
+	if meta == null or not meta.has("feature_id"):
+		return "expected occtl metadata with feature_id"
+	var shape = cs.get_shape()
+	if shape == null:
+		return "expected shape on CollisionShape3D"
+	if not (shape is CapsuleShape3D):
+		return "expected CapsuleShape3D for edges, got %s" % shape.get_class()
+	return ""
+
+static func test_mesh_vertices_physics_body() -> String:
+	var result = _make_box_graph()
+	if result.has("error"):
+		return result.error
+
+	var graph: OcctlGraphHandle = result.graph
+
+	var mw = OcctlMesh.new()
+	var mesh_opts = OcctlMeshOptions.new()
+	mw.options_init(mesh_opts)
+	mesh_opts.set_deflection(1.0)
+	var root_id = PackedInt64Array([result.root.get_bits()])
+	var mesh_status = mw.generate(graph, root_id, mesh_opts)
+	if mesh_status != 0:
+		return "mesh generate failed: %d" % mesh_status
+
+	var vert_ids = _collect_node_kind_ids(graph, OcctlCore.OCCTL_KIND_VERTEX)
+	if vert_ids.size() == 0:
+		return "no vertices found"
+
+	var body = StaticBody3D.new()
+	var ret = graph.mesh_vertices(PackedInt64Array(vert_ids), 0.02, mesh_opts, body)
+	if ret != null:
+		return "expected null return when passing PhysicsBody3D"
+	if body.get_child_count() == 0:
+		return "expected at least 1 CollisionShape3D child"
+	var cs = body.get_child(0) as CollisionShape3D
+	if cs == null:
+		return "expected CollisionShape3D children"
+	var meta = cs.get_meta("occtl") as Dictionary
+	if meta == null or not meta.has("feature_id"):
+		return "expected occtl metadata with feature_id"
+	var shape = cs.get_shape()
+	if shape == null:
+		return "expected shape on CollisionShape3D"
+	if not (shape is SphereShape3D):
+		return "expected SphereShape3D for vertices, got %s" % shape.get_class()
+	return ""
+
+static func test_physics_body_reuse_clears_children() -> String:
+	var result = _make_box_graph()
+	if result.has("error"):
+		return result.error
+
+	var graph: OcctlGraphHandle = result.graph
+
+	var mw = OcctlMesh.new()
+	var mesh_opts = OcctlMeshOptions.new()
+	mw.options_init(mesh_opts)
+	mesh_opts.set_deflection(1.0)
+	var root_id = PackedInt64Array([result.root.get_bits()])
+	var mesh_status = mw.generate(graph, root_id, mesh_opts)
+	if mesh_status != 0:
+		return "mesh generate failed: %d" % mesh_status
+
+	var edge_ids = _collect_node_kind_ids(graph, OcctlCore.OCCTL_KIND_EDGE)
+	if edge_ids.size() == 0:
+		return "no edges found"
+
+	var body = StaticBody3D.new()
+	# First call adds collision children
+	graph.mesh_edges(PackedInt64Array(edge_ids), 0.01, mesh_opts, body)
+	var first_count = body.get_child_count()
+	if first_count == 0:
+		return "expected children after first call"
+
+	# Second call with same body should clear previous children and re-add
+	graph.mesh_edges(PackedInt64Array(edge_ids), 0.01, mesh_opts, body)
+	var second_count = body.get_child_count()
+	if second_count != first_count:
+		return "expected same number of children after reuse, got %d vs %d" % [second_count, first_count]
+
+	return ""

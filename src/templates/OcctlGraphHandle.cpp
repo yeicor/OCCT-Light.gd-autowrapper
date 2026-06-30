@@ -8,11 +8,19 @@
 #include <godot_cpp/classes/array_mesh.hpp>
 #include <godot_cpp/classes/multi_mesh.hpp>
 
+#include <godot_cpp/classes/physics_body3d.hpp>
+#include <godot_cpp/classes/collision_shape3d.hpp>
+#include <godot_cpp/classes/concave_polygon_shape3d.hpp>
+#include <godot_cpp/classes/capsule_shape3d.hpp>
+#include <godot_cpp/classes/sphere_shape3d.hpp>
+#include <godot_cpp/classes/node3d.hpp>
+
 #include <godot_cpp/variant/packed_int64_array.hpp>
 #include <godot_cpp/variant/packed_vector3_array.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/packed_int32_array.hpp>
 #include <godot_cpp/variant/packed_color_array.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/vector3.hpp>
 #include <godot_cpp/variant/transform3d.hpp>
 #include <godot_cpp/variant/basis.hpp>
@@ -82,6 +90,23 @@ static double _get_graph_bbox_diag(occtl_graph_t* graph) {
     return (diag < 1e-15) ? 1.0 : diag;
 }
 
+/// Remove all child CollisionShape3D nodes previously created by a meshing
+/// call on this PhysicsBody3D (identified by name starting with "_occtl_").
+static void _clear_physics_children(PhysicsBody3D* body) {
+    if (!body) return;
+    std::vector<CollisionShape3D*> to_remove;
+    for (int i = 0; i < body->get_child_count(); i++) {
+        CollisionShape3D* cs = Object::cast_to<CollisionShape3D>(body->get_child(i));
+        if (cs && String(cs->get_name()).begins_with("_occtl_")) {
+            to_remove.push_back(cs);
+        }
+    }
+    for (auto* cs : to_remove) {
+        body->remove_child(cs);
+        cs->queue_free();
+    }
+}
+
 /// Hash combiner for std::pair<occtl_node_id_t, int> used in normal merging.
 struct PairHash {
     inline std::size_t operator()(const std::pair<int64_t, int>& p) const {
@@ -101,9 +126,9 @@ void OcctlGraphHandle::_bind_methods() {
     godot::ClassDB::bind_method(godot::D_METHOD("free"), static_cast<void(OcctlGraphHandle::*)()>(&OcctlGraphHandle::free));
 
     // --- Meshing methods ---
-    godot::ClassDB::bind_method(godot::D_METHOD("mesh_faces", "face_ids", "include_normals", "include_uvs", "include_tangents", "include_feature_ids", "options", "existing"), &OcctlGraphHandle::mesh_faces, DEFVAL(Variant()), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Ref<ArrayMesh>()));
-    godot::ClassDB::bind_method(godot::D_METHOD("mesh_edges", "edge_ids", "radius", "options", "existing"), &OcctlGraphHandle::mesh_edges, DEFVAL(Variant()), DEFVAL(0.01), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Ref<MultiMesh>()));
-    godot::ClassDB::bind_method(godot::D_METHOD("mesh_vertices", "vertex_ids", "radius", "options", "existing"), &OcctlGraphHandle::mesh_vertices, DEFVAL(Variant()), DEFVAL(0.02), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Ref<MultiMesh>()));
+    godot::ClassDB::bind_method(godot::D_METHOD("mesh_faces", "face_ids", "include_normals", "include_uvs", "include_tangents", "include_feature_ids", "options", "existing"), &OcctlGraphHandle::mesh_faces, DEFVAL(Variant()), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Variant()));
+    godot::ClassDB::bind_method(godot::D_METHOD("mesh_edges", "edge_ids", "radius", "options", "existing"), &OcctlGraphHandle::mesh_edges, DEFVAL(Variant()), DEFVAL(0.01), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Variant()));
+    godot::ClassDB::bind_method(godot::D_METHOD("mesh_vertices", "vertex_ids", "radius", "options", "existing"), &OcctlGraphHandle::mesh_vertices, DEFVAL(Variant()), DEFVAL(0.02), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Variant()));
 }
 
 // ---------------------------------------------------------------------------
@@ -380,17 +405,28 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
     bool include_tangents,
     bool include_feature_ids,
     const Ref<OcctlMeshOptions>& options,
-    const Ref<ArrayMesh>& existing)
+    const Variant& existing)
 {
-    // Determine output ArrayMesh: reuse or create
-    Ref<ArrayMesh> out_mesh = existing;
+    // Check if existing is a PhysicsBody3D (→ collision shapes) or ArrayMesh
+    PhysicsBody3D* existing_body = nullptr;
+    if (existing.get_type() == Variant::OBJECT) {
+        existing_body = Object::cast_to<PhysicsBody3D>(existing.operator godot::Object*());
+    }
+    Ref<ArrayMesh> out_mesh;
+    if (existing_body) {
+        _clear_physics_children(existing_body);
+    } else if (existing.get_type() == Variant::OBJECT) {
+        ArrayMesh* mesh_obj = Object::cast_to<ArrayMesh>(existing.operator godot::Object*());
+        if (mesh_obj) {
+            out_mesh = Ref<ArrayMesh>(mesh_obj);
+            // Clear all existing surfaces while preserving user customizations
+            while (out_mesh->get_surface_count() > 0) {
+                out_mesh->surface_remove(0);
+            }
+        }
+    }
     if (out_mesh.is_null()) {
         out_mesh.instantiate();
-    } else {
-        // Clear all existing surfaces while preserving user customizations
-        while (out_mesh->get_surface_count() > 0) {
-            out_mesh->surface_remove(0);
-        }
     }
 
     if (!_handle) {
@@ -546,6 +582,40 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
 
     if (face_data.empty()) {
         return out_mesh;
+    }
+
+    // If a PhysicsBody3D was passed, create collision shapes instead of ArrayMesh
+    if (existing_body) {
+        for (const auto& fd : face_data) {
+            // Build face triangles as a PackedVector3Array (consecutive triples)
+            PackedVector3Array tri_verts;
+            tri_verts.resize(fd.indices.size());
+            for (size_t i = 0; i < fd.indices.size(); i++) {
+                tri_verts[i] = fd.verts[fd.indices[i]];
+            }
+
+            Ref<ConcavePolygonShape3D> shape;
+            shape.instantiate();
+            shape->set_faces(tri_verts);
+
+            CollisionShape3D* cs = memnew(CollisionShape3D);
+            cs->set_shape(shape);
+
+            // Name prefix allows _clear_physics_children to find it later
+            cs->set_name(String("_occtl_face_") + String::num_uint64(fd.face_id.bits));
+
+            // Metadata maps back to the feature (face node ID)
+            Dictionary meta;
+            meta["feature_id"] = static_cast<int64_t>(fd.face_id.bits);
+            cs->set_meta("occtl", meta);
+
+            existing_body->add_child(cs, true);
+            cs->set_owner(
+                existing_body->get_owner()
+                    ? existing_body->get_owner()
+                    : existing_body);
+        }
+        return Ref<ArrayMesh>();
     }
 
     // Build merged vertex/triangle arrays
@@ -869,15 +939,27 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
     const Variant& edge_ids,
     double radius,
     const Ref<OcctlMeshOptions>& options,
-    const Ref<MultiMesh>& existing)
+    const Variant& existing)
 {
-    Ref<MultiMesh> out_mm = existing;
+    // Check if existing is a PhysicsBody3D (→ collision shapes) or MultiMesh
+    PhysicsBody3D* existing_body = nullptr;
+    if (existing.get_type() == Variant::OBJECT) {
+        existing_body = Object::cast_to<PhysicsBody3D>(existing.operator godot::Object*());
+    }
+    Ref<MultiMesh> out_mm;
+    if (existing_body) {
+        _clear_physics_children(existing_body);
+    } else if (existing.get_type() == Variant::OBJECT) {
+        MultiMesh* mm_obj = Object::cast_to<MultiMesh>(existing.operator godot::Object*());
+        if (mm_obj) {
+            out_mm = Ref<MultiMesh>(mm_obj);
+            // Clear existing data while preserving user customizations
+            out_mm->set_instance_count(0);
+            out_mm->set_mesh(Ref<ArrayMesh>());
+        }
+    }
     if (out_mm.is_null()) {
         out_mm.instantiate();
-    } else {
-        // Clear existing data while preserving user customizations (format, etc.)
-        out_mm->set_instance_count(0);
-        out_mm->set_mesh(Ref<ArrayMesh>());
     }
 
     if (!_handle) {
@@ -975,7 +1057,40 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
             xf = xf.scaled_local(Vector3(eff_radius, eff_radius, seg_len));
 
             xforms.push_back(xf);
+
+            // If a PhysicsBody3D was passed, create a CylinderShape3D collision child
+            if (existing_body) {
+                Ref<CapsuleShape3D> cshape;
+                cshape.instantiate();
+                cshape->set_radius(eff_radius);
+                // Height of the cylindrical part; total length = height + 2*radius
+                cshape->set_height(std::max(0.0, seg_len - 2.0 * eff_radius));
+
+                CollisionShape3D* cs = memnew(CollisionShape3D);
+                cs->set_shape(cshape);
+
+                // Position at midpoint with rotation aligning Y to segment direction
+                // CapsuleShape3D is Y-up, so orient the CollisionShape3D accordingly
+                cs->set_position(mid);
+                cs->set_basis(basis);
+
+                cs->set_name(String("_occtl_edge_") + String::num_uint64(eid.bits) + "_" + String::num_uint64(i));
+
+                Dictionary meta;
+                meta["feature_id"] = static_cast<int64_t>(eid.bits);
+                cs->set_meta("occtl", meta);
+
+                existing_body->add_child(cs, true);
+                cs->set_owner(
+                    existing_body->get_owner()
+                        ? existing_body->get_owner()
+                        : existing_body);
+            }
         }
+    }
+
+    if (existing_body) {
+        return Ref<MultiMesh>();
     }
 
     // Set up MultiMesh
@@ -998,14 +1113,26 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_vertices(
     const Variant& vertex_ids,
     double radius,
     const Ref<OcctlMeshOptions>& options,
-    const Ref<MultiMesh>& existing)
+    const Variant& existing)
 {
-    Ref<MultiMesh> out_mm = existing;
+    // Check if existing is a PhysicsBody3D (→ collision shapes) or MultiMesh
+    PhysicsBody3D* existing_body = nullptr;
+    if (existing.get_type() == Variant::OBJECT) {
+        existing_body = Object::cast_to<PhysicsBody3D>(existing.operator godot::Object*());
+    }
+    Ref<MultiMesh> out_mm;
+    if (existing_body) {
+        _clear_physics_children(existing_body);
+    } else if (existing.get_type() == Variant::OBJECT) {
+        MultiMesh* mm_obj = Object::cast_to<MultiMesh>(existing.operator godot::Object*());
+        if (mm_obj) {
+            out_mm = Ref<MultiMesh>(mm_obj);
+            out_mm->set_instance_count(0);
+            out_mm->set_mesh(Ref<ArrayMesh>());
+        }
+    }
     if (out_mm.is_null()) {
         out_mm.instantiate();
-    } else {
-        out_mm->set_instance_count(0);
-        out_mm->set_mesh(Ref<ArrayMesh>());
     }
 
     if (!_handle) {
@@ -1060,6 +1187,14 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_vertices(
     // Compute transforms for each vertex
     std::vector<Transform3D> xforms;
 
+    // Scale sphere by radius * bbox diagonal for model-size adaptation
+    double bbox_diag = _get_graph_bbox_diag(_handle);
+    double sphere_scale = radius;
+    if (sphere_scale <= 0.0) {
+        sphere_scale = deflection * 10.0;
+    }
+    sphere_scale *= bbox_diag;
+
     for (auto vid : ids_vec) {
         occtl_point3_t pt;
         occtl_status_t status = occtl_topo_vertex_point(_handle, vid, &pt);
@@ -1071,20 +1206,35 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_vertices(
 
         Transform3D xf;
         xf.origin = pos;
-        xforms.push_back(xf);
-    }
-
-    // Scale sphere by radius * bbox diagonal for model-size adaptation
-    double bbox_diag = _get_graph_bbox_diag(_handle);
-    double sphere_scale = radius;
-    if (sphere_scale <= 0.0) {
-        sphere_scale = deflection * 10.0;
-    }
-    sphere_scale *= bbox_diag;
-
-    // Apply scale to transforms
-    for (auto& xf : xforms) {
         xf = xf.scaled_local(Vector3(sphere_scale, sphere_scale, sphere_scale));
+        xforms.push_back(xf);
+
+        // If a PhysicsBody3D was passed, create a SphereShape3D collision child
+        if (existing_body) {
+            Ref<SphereShape3D> cshape;
+            cshape.instantiate();
+            cshape->set_radius(sphere_scale);
+
+            CollisionShape3D* cs = memnew(CollisionShape3D);
+            cs->set_shape(cshape);
+            cs->set_position(pos);
+
+            cs->set_name(String("_occtl_vertex_") + String::num_uint64(vid.bits));
+
+            Dictionary meta;
+            meta["feature_id"] = static_cast<int64_t>(vid.bits);
+            cs->set_meta("occtl", meta);
+
+            existing_body->add_child(cs, true);
+            cs->set_owner(
+                existing_body->get_owner()
+                    ? existing_body->get_owner()
+                    : existing_body);
+        }
+    }
+
+    if (existing_body) {
+        return Ref<MultiMesh>();
     }
 
     // Set up MultiMesh
