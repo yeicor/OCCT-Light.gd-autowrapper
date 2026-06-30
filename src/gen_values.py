@@ -1291,22 +1291,18 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             elif _is_value_struct(inner):
                 sub_cls = c_type_to_godot_class(inner)
                 lines.append(f"{gt} {cls}::get_{clean}() const {{")
-                lines.append(f"    if (_c_struct.{clean}) {{")
-                lines.append(f"        if (_{clean}_cache.is_null()) {{")
                 lines.append(
-                    f"            _{clean}_cache = {sub_cls}::from_c(*_c_struct.{clean});"
+                    f"    if (_c_struct.{clean} && _{clean}_cache.is_valid()) {{"
                 )
-                lines.append(f"        }} else {{")
                 lines.append(
-                    f"            _{clean}_cache->copy_from_c(*_c_struct.{clean});"
+                    f"        _{clean}_cache->copy_from_c(*_c_struct.{clean});"
                 )
-                lines.append(f"        }}")
                 lines.append(f"        return _{clean}_cache;")
                 lines.append(f"    }}")
                 lines.append(f"    return Ref<{sub_cls}>();")
                 lines.append(f"}}")
                 lines.append(
-                    f"void {cls}::set_{clean}({gt} val) {{ if (val.is_valid()) {{ _{clean}_holder = val->_c_struct; _c_struct.{clean} = &_{clean}_holder; }} }}"
+                    f"void {cls}::set_{clean}({gt} val) {{ if (val.is_valid()) {{ _{clean}_holder = val->_c_struct; _c_struct.{clean} = &_{clean}_holder; _{clean}_cache = val; }} }}"
                 )
             else:
                 lines.append(
@@ -1329,11 +1325,7 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             elif _is_value_struct(inner):
                 sub_cls = c_type_to_godot_class(inner)
                 lines.append(f"{gt} {cls}::get_{clean}() const {{")
-                lines.append(f"    if (_{clean}_cache.is_null()) {{")
-                lines.append(
-                    f"        _{clean}_cache = {sub_cls}::from_c(*_c_struct.{clean});"
-                )
-                lines.append(f"    }} else {{")
+                lines.append(f"    if (_{clean}_cache.is_valid()) {{")
                 lines.append(
                     f"        _{clean}_cache->copy_from_c(*_c_struct.{clean});"
                 )
@@ -1341,7 +1333,7 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
                 lines.append(f"    return _{clean}_cache;")
                 lines.append(f"}}")
                 lines.append(
-                    f"void {cls}::set_{clean}({gt} val) {{ if (val.is_valid()) *_c_struct.{clean} = val->_c_struct; }}"
+                    f"void {cls}::set_{clean}({gt} val) {{ if (val.is_valid()) {{ *_c_struct.{clean} = val->_c_struct; _{clean}_cache = val; }} }}"
                 )
             elif _is_uint64_id(inner):
                 lines.append(
@@ -1374,17 +1366,13 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         elif _is_value_struct(t):
             sub_cls = c_type_to_godot_class(t)
             lines.append(f"{gt} {cls}::get_{clean}() const {{")
-            lines.append(f"    if (_{clean}_cache.is_null()) {{")
-            lines.append(
-                f"        _{clean}_cache = {sub_cls}::from_c(_c_struct.{clean});"
-            )
-            lines.append(f"    }} else {{")
+            lines.append(f"    if (_{clean}_cache.is_valid()) {{")
             lines.append(f"        _{clean}_cache->copy_from_c(_c_struct.{clean});")
             lines.append(f"    }}")
             lines.append(f"    return _{clean}_cache;")
             lines.append(f"}}")
             lines.append(
-                f"void {cls}::set_{clean}({gt} val) {{ if (val.is_valid()) _c_struct.{clean} = val->_c_struct; }}"
+                f"void {cls}::set_{clean}({gt} val) {{ if (val.is_valid()) {{ _c_struct.{clean} = val->_c_struct; _{clean}_cache = val; }} }}"
             )
         elif _is_enum_type(t):
             lines.append(
@@ -1462,6 +1450,21 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
     lines.append(f"    Ref<{cls}> r;")
     lines.append(f"    r.instantiate();")
     lines.append(f"    r->_c_struct = val;")
+    # Eagerly initialize caches for value-struct fields (avoids "Instantiated"
+    # warnings from Godot's doc generator when default property values are read).
+    for field in struct.fields:
+        t = field.type_name.strip()
+        clean = _field_clean_name(field)
+        if _is_value_struct(t):
+            sub_cls = c_type_to_godot_class(t)
+            lines.append(f"    r->_{clean}_cache = {sub_cls}::from_c(val.{clean});")
+        elif t.startswith("const ") and t.endswith("*") and not t.endswith("**"):
+            inner = t[len("const ") : -1].strip()
+            if _is_value_struct(inner):
+                sub_cls = c_type_to_godot_class(inner)
+                lines.append(
+                    f"    if (val.{clean}) r->_{clean}_cache = {sub_cls}::from_c(*val.{clean});"
+                )
     lines.append(f"    return r;")
     lines.append(f"}}")
     lines.append("")
@@ -1469,8 +1472,52 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
     # copy_from_c() — replace _c_struct in-place
     lines.append(f"void {cls}::copy_from_c(const {c_type}& val) {{")
     lines.append(f"    _c_struct = val;")
+    # Update caches for value-struct fields
+    for field in struct.fields:
+        t = field.type_name.strip()
+        clean = _field_clean_name(field)
+        if _is_value_struct(t):
+            sub_cls = c_type_to_godot_class(t)
+            lines.append(f"    if (_{clean}_cache.is_valid()) {{")
+            lines.append(f"        _{clean}_cache->copy_from_c(val.{clean});")
+            lines.append(f"    }} else {{")
+            lines.append(f"        _{clean}_cache = {sub_cls}::from_c(val.{clean});")
+            lines.append(f"    }}")
+        elif t.startswith("const ") and t.endswith("*") and not t.endswith("**"):
+            inner = t[len("const ") : -1].strip()
+            if _is_value_struct(inner):
+                sub_cls = c_type_to_godot_class(inner)
+                lines.append(f"    if (val.{clean}) {{")
+                lines.append(f"        if (_{clean}_cache.is_valid()) {{")
+                lines.append(f"            _{clean}_cache->copy_from_c(*val.{clean});")
+                lines.append(f"        }} else {{")
+                lines.append(
+                    f"            _{clean}_cache = {sub_cls}::from_c(*val.{clean});"
+                )
+                lines.append(f"        }}")
+                lines.append(f"    }} else {{")
+                lines.append(f"        _{clean}_cache = Ref<{sub_cls}>();")
+                lines.append(f"    }}")
     lines.append(f"}}")
     lines.append("")
+
+    # Helper to generate cache initialization lines for value-struct fields
+    _cache_init_lines = []
+    for field in struct.fields:
+        t = field.type_name.strip()
+        clean = _field_clean_name(field)
+        if _is_value_struct(t):
+            sub_cls = c_type_to_godot_class(t)
+            _cache_init_lines.append(
+                f"    instance->_{clean}_cache = {sub_cls}::from_c(instance->_c_struct.{clean});"
+            )
+        elif t.startswith("const ") and t.endswith("*") and not t.endswith("**"):
+            inner = t[len("const ") : -1].strip()
+            if _is_value_struct(inner):
+                sub_cls = c_type_to_godot_class(inner)
+                _cache_init_lines.append(
+                    f"    if (instance->_c_struct.{clean}) instance->_{clean}_cache = {sub_cls}::from_c(*instance->_c_struct.{clean});"
+                )
 
     # Factory method implementations (explicit + auto-derived from TO_METHODS)
     if cls in FACTORY_METHODS:
@@ -1481,6 +1528,8 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             lines.append(f"    instance.instantiate();")
             for assignment in assignments:
                 lines.append(f"    {assignment}")
+            for cl in _cache_init_lines:
+                lines.append(cl)
             lines.append("    return instance;")
             lines.append("}")
             lines.append("")
@@ -1513,6 +1562,8 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
                     # No resize needed for raw arrays - std::vector would need it
             for assn in rev_assignments:
                 lines.append(f"    {assn}")
+            for cl in _cache_init_lines:
+                lines.append(cl)
             lines.append("    return instance;")
             lines.append("}")
             lines.append("")
