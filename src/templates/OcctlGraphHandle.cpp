@@ -27,6 +27,7 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <cmath>
+#include <cstring>
 #include <unordered_map>
 #include <vector>
 
@@ -422,9 +423,7 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
         if (mesh_obj) {
             out_mesh = Ref<ArrayMesh>(mesh_obj);
             // Clear all existing surfaces while preserving user customizations
-            while (out_mesh->get_surface_count() > 0) {
-                out_mesh->surface_remove(0);
-            }
+            out_mesh->clear_surfaces();
         }
     }
     if (out_mesh.is_null()) {
@@ -643,9 +642,10 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
         std::unordered_map<uint64_t, int> pos_map;
         auto pos_hash = [](const Vector3& v) -> uint64_t {
             // Quantize to ~1e-9 precision
-            uint64_t hx = *reinterpret_cast<const uint64_t*>(&v.x) >> 4;
-            uint64_t hy = *reinterpret_cast<const uint64_t*>(&v.y) >> 4;
-            uint64_t hz = *reinterpret_cast<const uint64_t*>(&v.z) >> 4;
+            uint64_t hx, hy, hz;
+            memcpy(&hx, &v.x, sizeof(hx)); hx >>= 4;
+            memcpy(&hy, &v.y, sizeof(hy)); hy >>= 4;
+            memcpy(&hz, &v.z, sizeof(hz)); hz >>= 4;
             return hx ^ (hy << 20) ^ (hz << 40);
         };
 

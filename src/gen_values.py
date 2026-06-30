@@ -914,7 +914,7 @@ def generate_value_type_header(struct: CStruct) -> str:
     )
 
     # Store the real C struct directly
-    lines.append(f"    {c_type} _c_struct;")
+    lines.append(f"    {c_type} _c_struct = {{}};")
     # Shadow string holders for pointer-type fields (e.g., const char*)
     # Shadow value holders for const pointer to value struct / uint64_id
     # For paired pointer+count fields: std::vector buffer instead of single holder
@@ -1244,7 +1244,7 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         elif t == "const char*":
             # const char*: getter returns String, setter stores shadow and updates pointer
             lines.append(
-                f"{gt} {cls}::get_{clean}() const {{ return String(_c_struct.{clean}); }}"
+                f"{gt} {cls}::get_{clean}() const {{ return _c_struct.{clean} ? String(_c_struct.{clean}) : String(); }}"
             )
             lines.append(
                 f"void {cls}::set_{clean}({gt} val) {{ _{clean}_holder = val.utf8(); _c_struct.{clean} = _{clean}_holder.get_data(); }}"
@@ -1261,7 +1261,7 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             inner = t[len("const ") : -1].strip()
             if inner == "char":
                 lines.append(
-                    f"{gt} {cls}::get_{clean}() const {{ return String(_c_struct.{clean}); }}"
+                    f"{gt} {cls}::get_{clean}() const {{ return _c_struct.{clean} ? String(_c_struct.{clean}) : String(); }}"
                 )
                 lines.append(
                     f"void {cls}::set_{clean}({gt} val) {{ _{clean}_holder = val.utf8(); _c_struct.{clean} = _{clean}_holder.get_data(); }}"
@@ -1295,7 +1295,7 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             if inner == "char":
                 # char* - currently stored as String, settable
                 lines.append(
-                    f"{gt} {cls}::get_{clean}() const {{ return String(_c_struct.{clean}); }}"
+                    f"{gt} {cls}::get_{clean}() const {{ return _c_struct.{clean} ? String(_c_struct.{clean}) : String(); }}"
                 )
                 lines.append(
                     f"void {cls}::set_{clean}({gt} val) {{ _{clean}_holder = val.utf8(); _c_struct.{clean} = const_cast<char*>(_{clean}_holder.get_data()); }}"
