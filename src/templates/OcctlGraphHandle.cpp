@@ -25,11 +25,13 @@
 #include <godot_cpp/variant/transform3d.hpp>
 #include <godot_cpp/variant/basis.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/classes/rendering_server.hpp>
 #include <cmath>
 #include <unordered_map>
 #include <vector>
 
 #include "OcctlMeshOptions.h"
+#include "occtl/occtl_topo_relation.h"
 
 using namespace godot;
 
@@ -231,7 +233,7 @@ static inline int _slices_from_angle(double angle) {
     return std::max(4, static_cast<int>(std::round(Math_PI / safe_angle)) + 2);
 }
 
-/// Build a low-resolution unit cylinder mesh (Z-up) with the given number of slices.
+/// Build a low-resolution unit cylinder mesh (Y-up) with the given number of slices.
 static Ref<ArrayMesh> _make_cylinder_mesh(int slices) {
     Ref<ArrayMesh> mesh;
     mesh.instantiate();
@@ -240,7 +242,7 @@ static Ref<ArrayMesh> _make_cylinder_mesh(int slices) {
     PackedInt32Array indices;
     PackedVector3Array normals;
 
-    // Cylinder around Z axis with radius 1, height 1
+    // Cylinder around Y axis with radius 1, height 1
     const double radius = 1.0;
     const double half_height = 0.5;
 
@@ -1013,6 +1015,22 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
         return out_mm;
     }
 
+    // Generate mesh with whole-graph dispatch so edge 3D polygons are cached.
+    // (Single-root dispatch only generates face triangulations, not edge data.)
+    {
+        occtl_mesh_options_t gen_opts = OCCTL_MESH_OPTIONS_INIT;
+        gen_opts.deflection = deflection;
+        gen_opts.angle = angle;
+        gen_opts.clean_model = 1;
+        occtl_status_t status = occtl_mesh_generate(_handle, nullptr, 0, &gen_opts);
+        if (status != OCCTL_OK) {
+            return out_mm;
+        }
+    }
+    // Sync cache so mesh_faces doesn't unnecessarily regenerate
+    _last_mesh_deflection = deflection;
+    _last_mesh_angle = angle;
+
     // Build cylinder mesh resolution from angle
     int slices = _slices_from_angle(angle);
     Ref<ArrayMesh> cyl_mesh = _make_cylinder_mesh(slices);
@@ -1021,88 +1039,210 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
     double bbox_diag = _get_graph_bbox_diag(_handle);
     eff_radius *= bbox_diag;
 
-    // Compute transforms for each edge segment (second pass: build transforms)
+    // Compute transforms for each edge segment
     std::vector<Transform3D> xforms;
 
-    for (auto eid : ids_vec) {
-        occtl_polygon3d_view_t pv;
-        occtl_status_t status = occtl_mesh_edge_polygon3d(_handle, eid, &pv);
-        if (status != OCCTL_OK || pv.node_count < 2) {
-            continue;
+    // Helper: build a tube segment transform from two points
+    auto _add_segment = [&](const Vector3& p0, const Vector3& p1, occtl_node_id_t eid, uint64_t seg_idx) {
+        Vector3 dir = p1 - p0;
+        double seg_len = dir.length();
+        if (seg_len < 1e-15) return;
+        dir /= seg_len;
+
+        Vector3 mid = (p0 + p1) * 0.5;
+
+        // Build transform with Y aligned to segment direction.
+        // The cylinder mesh is Y-up (axis along Y), so stretching Y by seg_len
+        // makes the tube follow the segment.
+        Basis basis;
+        Vector3 y_axis = dir;
+        Vector3 up = (std::abs(y_axis.y) < 0.9) ? Vector3(0, 1, 0) : Vector3(1, 0, 0);
+        Vector3 x_axis = up.cross(y_axis).normalized();
+        Vector3 z_axis = x_axis.cross(y_axis).normalized();
+        basis = Basis(x_axis, y_axis, z_axis);
+
+        Transform3D xf(basis, mid);
+        xf = xf.scaled_local(Vector3(eff_radius, seg_len, eff_radius));
+
+        xforms.push_back(xf);
+
+        if (existing_body) {
+            Ref<CapsuleShape3D> cshape;
+            cshape.instantiate();
+            cshape->set_radius(eff_radius);
+            cshape->set_height(std::max(0.0, seg_len - 2.0 * eff_radius));
+
+            CollisionShape3D* cs = memnew(CollisionShape3D);
+            cs->set_shape(cshape);
+            cs->set_position(mid);
+            cs->set_basis(basis);
+
+            cs->set_name(String("_occtl_edge_") + String::num_uint64(eid.bits) + "_" + String::num_uint64(seg_idx));
+
+            Dictionary meta;
+            meta["feature_id"] = static_cast<int64_t>(eid.bits);
+            cs->set_meta("occtl", meta);
+
+            existing_body->add_child(cs, true);
+            cs->set_owner(
+                existing_body->get_owner()
+                    ? existing_body->get_owner()
+                    : existing_body);
         }
+    };
 
-        // For each consecutive pair of nodes in the polygon, create a tube segment
-        for (size_t i = 0; i < pv.node_count - 1; i++) {
-            Vector3 p0(pv.nodes[3 * i], pv.nodes[3 * i + 1], pv.nodes[3 * i + 2]);
-            Vector3 p1(pv.nodes[3 * (i + 1)], pv.nodes[3 * (i + 1) + 1], pv.nodes[3 * (i + 1) + 2]);
-            Vector3 dir = p1 - p0;
-            double seg_len = dir.length();
-            if (seg_len < 1e-15) continue;
-            dir /= seg_len;
+    // Pre-build a mapping from edge → coedge + owning face for face-owned edges.
+    // Iterate all coedges and for each one find its parent edge and owning face.
+    std::unordered_map<uint64_t, std::pair<occtl_node_id_t, occtl_node_id_t>> edge_coedge_map;
+    {
+        occtl_node_iter_t* coedge_iter = nullptr;
+        occtl_status_t coedge_iter_status = occtl_graph_coedge_iter_create(_handle, &coedge_iter);
+        if (coedge_iter_status == OCCTL_OK && coedge_iter) {
+            occtl_node_id_t cid;
+            while (occtl_node_iter_next(coedge_iter, &cid) == OCCTL_OK) {
+                occtl_topo_related_iter_t* rel = nullptr;
+                if (occtl_topo_related_iter_create(_handle, cid, &rel) == OCCTL_OK && rel) {
+                    occtl_node_id_t rn;
+                    occtl_relation_kind_t rk;
+                    occtl_node_id_t parent_edge = {0};
+                    occtl_node_id_t owning_face = {0};
+                    while (occtl_topo_related_iter_next(rel, &rn, &rk) == OCCTL_OK) {
+                        if (rk == OCCTL_RELATION_PARENT_EDGE) {
+                            parent_edge = rn;
+                        } else if (rk == OCCTL_RELATION_OWNING_FACE) {
+                            owning_face = rn;
+                        }
+                    }
+                    occtl_topo_related_iter_free(rel);
 
-            Vector3 mid = (p0 + p1) * 0.5;
-
-            // Build transform: position at midpoint, scale to segment length, rotate Z to dir
-            Basis basis;
-            Vector3 z_axis = dir;
-            // Find an up vector that's not parallel to dir
-            Vector3 up = (std::abs(z_axis.y) < 0.9) ? Vector3(0, 1, 0) : Vector3(1, 0, 0);
-            Vector3 x_axis = up.cross(z_axis).normalized();
-            Vector3 y_axis = z_axis.cross(x_axis).normalized();
-            basis = Basis(x_axis, y_axis, z_axis);
-
-            Transform3D xf(basis, mid);
-            // Scale: radius in XZ, segment length in Y (cylinder is Y-up, but our mesh is Z-up)
-            // Our cylinder is Z-up (height=1 along Z), so scale Z by seg_len
-            xf = xf.scaled_local(Vector3(eff_radius, eff_radius, seg_len));
-
-            xforms.push_back(xf);
-
-            // If a PhysicsBody3D was passed, create a CylinderShape3D collision child
-            if (existing_body) {
-                Ref<CapsuleShape3D> cshape;
-                cshape.instantiate();
-                cshape->set_radius(eff_radius);
-                // Height of the cylindrical part; total length = height + 2*radius
-                cshape->set_height(std::max(0.0, seg_len - 2.0 * eff_radius));
-
-                CollisionShape3D* cs = memnew(CollisionShape3D);
-                cs->set_shape(cshape);
-
-                // Position at midpoint with rotation aligning Y to segment direction
-                // CapsuleShape3D is Y-up, so orient the CollisionShape3D accordingly
-                cs->set_position(mid);
-                cs->set_basis(basis);
-
-                cs->set_name(String("_occtl_edge_") + String::num_uint64(eid.bits) + "_" + String::num_uint64(i));
-
-                Dictionary meta;
-                meta["feature_id"] = static_cast<int64_t>(eid.bits);
-                cs->set_meta("occtl", meta);
-
-                existing_body->add_child(cs, true);
-                cs->set_owner(
-                    existing_body->get_owner()
-                        ? existing_body->get_owner()
-                        : existing_body);
+                    if (parent_edge.bits != 0) {
+                        edge_coedge_map.emplace(parent_edge.bits,
+                            std::make_pair(cid, owning_face));
+                    }
+                }
             }
+
+            occtl_node_iter_free(coedge_iter);
         }
     }
 
+    for (auto eid : ids_vec) {
+        // Collect 3D polyline points for this edge
+        std::vector<Vector3> edge_pts;
+
+        // Strategy 1: free edge — direct 3D polygon
+        {
+            occtl_polygon3d_view_t pv;
+            occtl_status_t status = occtl_mesh_edge_polygon3d(_handle, eid, &pv);
+            if (status == OCCTL_OK && pv.node_count >= 2) {
+                edge_pts.reserve(pv.node_count);
+                for (size_t i = 0; i < pv.node_count; i++) {
+                    edge_pts.emplace_back(pv.nodes[3 * i], pv.nodes[3 * i + 1], pv.nodes[3 * i + 2]);
+                }
+            }
+        }
+
+        // Strategy 2: face-owned edge — use pre-built coedge map
+        if (edge_pts.empty()) {
+            auto map_it = edge_coedge_map.find(eid.bits);
+            if (map_it != edge_coedge_map.end()) {
+                occtl_node_id_t coedge_id = map_it->second.first;
+                occtl_node_id_t face_id = map_it->second.second;
+
+                // Get polygon-on-tri for this coedge
+                occtl_polygon_on_tri_view_t potv;
+                occtl_status_t potv_status = occtl_mesh_coedge_polygon_on_tri(_handle, coedge_id, &potv);
+                if (potv_status == OCCTL_OK && potv.node_count >= 2) {
+                    // Get face triangulation
+                    occtl_triangulation_view_t tv;
+                    occtl_status_t tv_status = occtl_mesh_face_triangulation(_handle, face_id, &tv);
+                    if (tv_status == OCCTL_OK && tv.node_count > 0) {
+                        // Map polygon-on-tri indices to 3D positions
+                        edge_pts.reserve(potv.node_count);
+                        for (size_t j = 0; j < potv.node_count; j++) {
+                            uint32_t idx = potv.node_indices[j];
+                            if (idx < tv.node_count) {
+                                edge_pts.emplace_back(
+                                    tv.nodes[3 * idx], tv.nodes[3 * idx + 1], tv.nodes[3 * idx + 2]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Strategy 3: fallback — sample the edge's 3D curve directly via topology.
+        // This works for all edges (both free and face-owned) without needing
+        // mesh-cached polygon data.
+        if (edge_pts.size() < 2) {
+            int32_t has_curve = 0;
+            occtl_status_t hs = occtl_topo_edge_has_curve(_handle, eid, &has_curve);
+            if (hs == OCCTL_OK && has_curve) {
+                double u_first = 0.0, u_last = 0.0;
+                occtl_status_t rs = occtl_topo_edge_range(_handle, eid, &u_first, &u_last);
+                if (rs == OCCTL_OK && u_last > u_first) {
+                    // Always evaluate endpoints.
+                    occtl_point3_t pt;
+                    edge_pts.reserve(4);
+                    if (occtl_topo_edge_eval(_handle, eid, u_first, &pt) == OCCTL_OK) {
+                        edge_pts.emplace_back(pt.x, pt.y, pt.z);
+                    }
+                    // For curved edges, sample intermediate points based on deflection.
+                    double u_range = u_last - u_first;
+                    // Estimate arc length: for a straight edge the chord equals the
+                    // arc, but for curved edges we need more samples.  Use tangent
+                    // magnitude at midpoint as a rough guide.
+                    occtl_vector3_t d1_mid;
+                    int mid_samples = 0;
+                    if (occtl_topo_edge_eval_d1(_handle, eid, (u_first + u_last) * 0.5, &pt, &d1_mid) == OCCTL_OK) {
+                        double tan_len = std::sqrt(d1_mid.x * d1_mid.x + d1_mid.y * d1_mid.y + d1_mid.z * d1_mid.z);
+                        double est_arc = tan_len * u_range;
+                        if (est_arc > deflection * 2.0) {
+                            mid_samples = std::min(64, std::max(1, static_cast<int>(std::ceil(est_arc / deflection))));
+                        }
+                    }
+                    for (int k = 1; k < mid_samples; ++k) {
+                        double u = u_first + u_range * static_cast<double>(k) / static_cast<double>(mid_samples);
+                        if (occtl_topo_edge_eval(_handle, eid, u, &pt) == OCCTL_OK) {
+                            edge_pts.emplace_back(pt.x, pt.y, pt.z);
+                        }
+                    }
+                    // Add endpoint (always last).
+                    if (occtl_topo_edge_eval(_handle, eid, u_last, &pt) == OCCTL_OK) {
+                        edge_pts.emplace_back(pt.x, pt.y, pt.z);
+                    }
+                }
+            }
+        }
+
+        if (edge_pts.size() < 2) {
+            continue;
+        }
+
+        // Build tube segments along the polyline
+        for (size_t i = 0; i + 1 < edge_pts.size(); i++) {
+            _add_segment(edge_pts[i], edge_pts[i + 1], eid, static_cast<uint64_t>(i));
+        }
+    }
     if (existing_body) {
         return Ref<MultiMesh>();
     }
 
-    // Set up MultiMesh
-    out_mm->set_mesh(cyl_mesh);
-    out_mm->set_instance_count(static_cast<int>(xforms.size()));
-    out_mm->set_transform_format(MultiMesh::TRANSFORM_3D);
+    // Set up MultiMesh.
+    // Order per Godot docs (https://docs.godotengine.org/en/stable/tutorials/performance/using_multimesh.html):
+    //   1. Set format (must be BEFORE set_instance_count)
+    //   2. Set instance count (before set_mesh to avoid RID allocation with wrong format)
+    //   3. Set mesh
+    //   4. Set transforms
+	out_mm->set_transform_format(MultiMesh::TRANSFORM_3D);
+	out_mm->set_instance_count(static_cast<int>(xforms.size()));
+	out_mm->set_mesh(cyl_mesh);
 
-    for (int i = 0; i < static_cast<int>(xforms.size()); i++) {
-        out_mm->set_instance_transform(i, xforms[i]);
-    }
+	for (int i = 0; i < static_cast<int>(xforms.size()); i++) {
+		out_mm->set_instance_transform(i, xforms[i]);
+	}
 
-    return out_mm;
+	return out_mm;
 }
 
 // ---------------------------------------------------------------------------
@@ -1110,10 +1250,10 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
 // ---------------------------------------------------------------------------
 
 Ref<MultiMesh> OcctlGraphHandle::mesh_vertices(
-    const Variant& vertex_ids,
-    double radius,
-    const Ref<OcctlMeshOptions>& options,
-    const Variant& existing)
+	const Variant& vertex_ids,
+	double radius,
+	const Ref<OcctlMeshOptions>& options,
+	const Variant& existing)
 {
     // Check if existing is a PhysicsBody3D (→ collision shapes) or MultiMesh
     PhysicsBody3D* existing_body = nullptr;
@@ -1237,10 +1377,15 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_vertices(
         return Ref<MultiMesh>();
     }
 
-    // Set up MultiMesh
-    out_mm->set_mesh(sphere_mesh);
-    out_mm->set_instance_count(static_cast<int>(xforms.size()));
+    // Set up MultiMesh.
+    // Order per Godot docs (https://docs.godotengine.org/en/stable/tutorials/performance/using_multimesh.html):
+    //   1. Set format (must be BEFORE set_instance_count)
+    //   2. Set instance count (before set_mesh to avoid RID allocation with wrong format)
+    //   3. Set mesh
+    //   4. Set transforms
     out_mm->set_transform_format(MultiMesh::TRANSFORM_3D);
+    out_mm->set_instance_count(static_cast<int>(xforms.size()));
+    out_mm->set_mesh(sphere_mesh);
 
     for (int i = 0; i < static_cast<int>(xforms.size()); i++) {
         out_mm->set_instance_transform(i, xforms[i]);

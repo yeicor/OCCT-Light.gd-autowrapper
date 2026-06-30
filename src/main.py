@@ -300,6 +300,20 @@ def main() -> None:
 
         hdr = generate_handle_header(s)
         src = generate_handle_source(s, "", "")
+        if cls == "OcctlGraphHandle":
+            has_coedge = "coedge_map" in src
+            has_print = "UtilityFunctions::print" in src
+            outpath = autowrapper_dir / f"{cls}.cpp"
+            old = outpath.read_text() if outpath.exists() else "<NONE>"
+            old_has_coedge = "coedge_map" in old if outpath.exists() else False
+            old_has_print = (
+                "UtilityFunctions::print" in old if outpath.exists() else False
+            )
+            print(f"DEBUG {cls}: NEW has coedge_map={has_coedge} print={has_print}")
+            print(
+                f"DEBUG {cls}: OLD has coedge_map={old_has_coedge} print={old_has_print}"
+            )
+            print(f"DEBUG {cls}: write_path={outpath} exists={outpath.exists()}")
         if _write_if_changed(autowrapper_dir / f"{cls}.h", hdr):
             written_count += 1
         if _write_if_changed(autowrapper_dir / f"{cls}.cpp", src):
