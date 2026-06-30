@@ -523,6 +523,12 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
         size_t nv = tv.node_count;
         size_t nt = tv.triangle_count;
 
+        // Skip degenerate faces with no vertices (they would cause buffer overruns
+        // on fd.verts even with clamped indices). Skip faces with no triangles too.
+        if (nv == 0 || nt == 0) {
+            continue;
+        }
+
         fd.verts.reserve(nv);
         for (size_t i = 0; i < nv; i++) {
             fd.verts.push_back(Vector3(
@@ -534,7 +540,11 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
 
         fd.indices.reserve(3 * nt);
         for (size_t i = 0; i < 3 * nt; i++) {
-            fd.indices.push_back(static_cast<int>(tv.triangles[i]));
+            uint32_t idx = tv.triangles[i];
+            if (idx >= nv) {
+                idx = 0; // Clamp out-of-range triangle indices to 0 to prevent buffer overruns
+            }
+            fd.indices.push_back(static_cast<int>(idx));
         }
 
         if (tv.uvs && include_uvs) {
@@ -641,11 +651,14 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
         // Map from serialized position to vertex index
         std::unordered_map<uint64_t, int> pos_map;
         auto pos_hash = [](const Vector3& v) -> uint64_t {
-            // Quantize to ~1e-9 precision
-            uint64_t hx, hy, hz;
-            memcpy(&hx, &v.x, sizeof(hx)); hx >>= 4;
-            memcpy(&hy, &v.y, sizeof(hy)); hy >>= 4;
-            memcpy(&hz, &v.z, sizeof(hz)); hz >>= 4;
+            // Quantize to ~1e-9 precision.
+            // Read exactly sizeof(component) bytes (4 for float, 8 for double)
+            // to stay within the Vector3 struct bounds (ASAN-safe) and support
+            // both single and double precision builds.
+            uint64_t hx = 0, hy = 0, hz = 0;
+            memcpy(&hx, &v.x, sizeof(v.x)); hx >>= 4;
+            memcpy(&hy, &v.y, sizeof(v.y)); hy >>= 4;
+            memcpy(&hz, &v.z, sizeof(v.z)); hz >>= 4;
             return hx ^ (hy << 20) ^ (hz << 40);
         };
 
