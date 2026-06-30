@@ -1723,8 +1723,14 @@ def _generate_body(
                     )
                     if _needs_init:
                         _fn = f"occtl_{resolved[6:-2]}_init"
-                        lines.append(f"    {resolved} {local} = {{}};")
-                        lines.append(f"    ::{_fn}(&{local});")
+                        # Skip the separate init call if this function IS
+                        # the init function (otherwise the init call would
+                        # be duplicated before the actual call).
+                        if c_func_name == _fn:
+                            lines.append(f"    {resolved} {local} = {{}};")
+                        else:
+                            lines.append(f"    {resolved} {local} = {{}};")
+                            lines.append(f"    ::{_fn}(&{local});")
                     else:
                         lines.append(f"    {resolved} {local} = {{}};")
                     call_args.append(f"&{local}")
