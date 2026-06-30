@@ -1109,7 +1109,7 @@ def _generate_out_param_copy_line(
             f"Either add the type to OUT_PARAM_PRIM_TYPES, VALUE_STRUCT_TYPES, or provide a wrapper class."
         )
     if resolved in VALUE_STRUCT_TYPES:
-        return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
+        return f"{indent}if ({name}.is_valid()) {name}->_c_struct = {local_var};"
     if resolved in UINT64_ID_TYPES:
         return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
     if resolved in OUT_PARAM_PRIM_TYPES or resolved in ENUM_TYPES:
@@ -1254,17 +1254,9 @@ def _generate_body(
                     base_r = _c_type_strip_ptr(t_stripped).strip()
                     b = re.sub(r"^(const|volatile)\s+", "", base_r).strip()
                     if is_value_struct_type(b):
-                        base_no_const = (
-                            base_r.replace("const ", "", 1)
-                            if base_r.startswith("const ")
-                            else base_r
-                        )
-                        lines.append(f"    {base_no_const} _{name}_c = {{}};")
+                        lines.append(f"    const {b}* _{name}_ptr = nullptr;")
                         lines.append(
-                            f"    const {base_no_const}* _{name}_ptr = nullptr;"
-                        )
-                        lines.append(
-                            f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
+                            f"    if ({name}.is_valid()) {{ _{name}_ptr = &{name}->_c_struct; }}"
                         )
                         call_args_null.append(f"_{name}_ptr")
                         call_args_buf.append(f"_{name}_ptr")
@@ -1456,7 +1448,7 @@ def _generate_body(
             lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{")
             lines.append(f"        Ref<{struct_cls}> _item;")
             lines.append(f"        _item.instantiate();")
-            lines.append(f"        _item->copy_from_c(_{buf_name}_buf[_i]);")
+            lines.append(f"        _item->_c_struct = _{buf_name}_buf[_i];")
             lines.append(f"        _result[static_cast<int64_t>(_i)] = _item;")
             lines.append(f"    }}")
             lines.append("    return _result;")
@@ -1502,7 +1494,7 @@ def _generate_body(
                     )
                     lines.append(f"        Ref<{struct_cls}> _item;")
                     lines.append(f"        _item.instantiate();")
-                    lines.append(f"        _item->copy_from_c(_{aname}_buf[_i]);")
+                    lines.append(f"        _item->_c_struct = _{aname}_buf[_i];")
                     lines.append(
                         f"        _{aname_cpp}[static_cast<int64_t>(_i)] = _item;"
                     )
@@ -1751,15 +1743,9 @@ def _generate_body(
                     lines.append(f"    const uint8_t* _{name}_c = {name}.ptr();")
                     call_args.append(f"_{name}_c")
                 elif is_value_struct_type(base):
-                    base_no_const = (
-                        base_raw.replace("const ", "", 1)
-                        if base_raw.startswith("const ")
-                        else base_raw
-                    )
-                    lines.append(f"    {base_no_const} _{name}_c = {{}};")
-                    lines.append(f"    const {base_no_const}* _{name}_ptr = nullptr;")
+                    lines.append(f"    const {base}* _{name}_ptr = nullptr;")
                     lines.append(
-                        f"    if ({name}.is_valid()) {{ _{name}_c = {name}->to_c(); _{name}_ptr = &_{name}_c; }}"
+                        f"    if ({name}.is_valid()) {{ _{name}_ptr = &{name}->_c_struct; }}"
                     )
                     call_args.append(f"_{name}_ptr")
                 elif base in HANDLE_TYPES:
@@ -1792,7 +1778,7 @@ def _generate_body(
                     f"reinterpret_cast<{t}>(static_cast<uintptr_t>(static_cast<int64_t>({name})))"
                 )
             elif is_value_struct_type(t):
-                call_args.append(f"{name}->to_c()")
+                call_args.append(f"{name}->_c_struct")
             elif t == "char*":
                 local = f"_{name}_c"
                 lines.append(f"    godot::CharString _{name}_cs = {name}.utf8();")
@@ -1991,7 +1977,7 @@ def _generate_body(
             lines.append(f"    for (size_t _i = 0; _i < {total_expr}; _i++) {{")
             lines.append(f"        Ref<{cls}> _item;")
             lines.append(f"        _item.instantiate();")
-            lines.append(f"        _item->copy_from_c(_{ptr_name}_ptr[_i]);")
+            lines.append(f"        _item->_c_struct = _{ptr_name}_ptr[_i];")
             lines.append(f"        _result[static_cast<int64_t>(_i)] = _item;")
             lines.append(f"    }}")
             lines.append(f"    return _result;")
