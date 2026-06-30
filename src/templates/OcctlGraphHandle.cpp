@@ -955,8 +955,11 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
         MultiMesh* mm_obj = Object::cast_to<MultiMesh>(existing.operator godot::Object*());
         if (mm_obj) {
             out_mm = Ref<MultiMesh>(mm_obj);
-            // Clear existing data while preserving user customizations
+            // Clear existing data while preserving user customizations.
+            // If the MultiMesh already had instances (e.g. from a test),
+            // we must first set count to 0, then set format, then set mesh.
             out_mm->set_instance_count(0);
+            out_mm->set_transform_format(MultiMesh::TRANSFORM_3D);
             out_mm->set_mesh(Ref<ArrayMesh>());
         }
     }
@@ -1267,7 +1270,11 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_vertices(
         MultiMesh* mm_obj = Object::cast_to<MultiMesh>(existing.operator godot::Object*());
         if (mm_obj) {
             out_mm = Ref<MultiMesh>(mm_obj);
+            // Clear existing data while preserving user customizations.
+            // If the MultiMesh already had instances (e.g. from a test),
+            // we must first set count to 0, then set format, then set mesh.
             out_mm->set_instance_count(0);
+            out_mm->set_transform_format(MultiMesh::TRANSFORM_3D);
             out_mm->set_mesh(Ref<ArrayMesh>());
         }
     }

@@ -396,6 +396,7 @@ static func test_mesh_faces_physics_body() -> String:
 		return "expected shape on CollisionShape3D"
 	if not (shape is ConcavePolygonShape3D):
 		return "expected ConcavePolygonShape3D for faces, got %s" % shape.get_class()
+	body.free()
 	return ""
 
 static func test_mesh_edges_physics_body() -> String:
@@ -435,6 +436,7 @@ static func test_mesh_edges_physics_body() -> String:
 		return "expected shape on CollisionShape3D"
 	if not (shape is CapsuleShape3D):
 		return "expected CapsuleShape3D for edges, got %s" % shape.get_class()
+	body.free()
 	return ""
 
 static func test_mesh_vertices_physics_body() -> String:
@@ -474,6 +476,7 @@ static func test_mesh_vertices_physics_body() -> String:
 		return "expected shape on CollisionShape3D"
 	if not (shape is SphereShape3D):
 		return "expected SphereShape3D for vertices, got %s" % shape.get_class()
+	body.free()
 	return ""
 
 static func test_physics_body_reuse_clears_children() -> String:
@@ -509,4 +512,5 @@ static func test_physics_body_reuse_clears_children() -> String:
 	if second_count != first_count:
 		return "expected same number of children after reuse, got %d vs %d" % [second_count, first_count]
 
+	body.free()
 	return ""
