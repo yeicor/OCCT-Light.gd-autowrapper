@@ -4,6 +4,7 @@ Each C struct like occtl_point3_t gets a dedicated Godot class (OcctlPoint3)
 with typed fields and to_c()/from_c() conversion helpers.
 """
 
+import re
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -263,6 +264,98 @@ FACTORY_METHODS: dict[str, list[tuple[str, list[tuple[str, str]], list[str]]]] =
 # (method_name, return_type, [implementation_lines])
 # These generate `to_*()` methods that convert from the value type to a
 # Godot-native type.
+
+# Godot type → parameter name mapping for auto-derived from_* factories.
+_TO_REVERSE_PARAM_NAME: dict[str, str] = {
+    "Vector3": "v",
+    "Vector2": "v",
+    "Transform3D": "t",
+    "AABB": "a",
+    "Color": "c",
+}
+
+
+def _reverse_to_method_body_assignments(
+    body_lines: list[str], ret_type: str
+) -> list[str] | None:
+    """Try to reverse a TO_METHOD body into factory body assignments.
+
+    Given a to_*() body like:
+        Vector3 result;
+        result.x = x;
+        result.y = y;
+        result.z = z;
+        return result;
+
+    Produces assignments for the reverse factory:
+        instance->x = v.x;
+        instance->y = v.y;
+        instance->z = v.z;
+
+    Returns None if the body cannot be reversed (too complex).
+    """
+    param_name = _TO_REVERSE_PARAM_NAME.get(ret_type)
+    if param_name is None:
+        return None
+
+    lines = []
+    for line in body_lines:
+        stripped = line.strip()
+        # Skip declaration lines (contain the return type name)
+        if stripped.startswith(ret_type) and "result" in stripped:
+            continue
+        # Skip return statements
+        if stripped.startswith("return "):
+            continue
+        # Skip empty lines
+        if not stripped:
+            continue
+        # Handle: result.X = Y;
+        m = re.match(r"^result\.(\w+)\s*=\s*(\w+);?", stripped)
+        if m:
+            field = m.group(1)
+            c_field = m.group(2)
+            lines.append(f"instance->{c_field} = {param_name}.{field};")
+            continue
+        # Handle: result.basis[i][j] = field;
+        m = re.match(
+            r"^result\.basis\[(\d+)\]\[(\d+)\]\s*=\s*(\w+)\[(\d+)\];?", stripped
+        )
+        if m:
+            arr_name = m.group(3)
+            idx = m.group(4)
+            i = m.group(1)
+            j = m.group(2)
+            lines.append(f"instance->{arr_name}[{idx}] = {param_name}.basis[{i}][{j}];")
+            continue
+        # Handle: result.origin.X = field;
+        m = re.match(r"^result\.origin\.(\w+)\s*=\s*(\w+)\[(\d+)\];?", stripped)
+        if m:
+            comp = m.group(1)
+            arr_name = m.group(2)
+            idx = m.group(3)
+            lines.append(f"instance->{arr_name}[{idx}] = {param_name}.origin.{comp};")
+            continue
+        # Handle: return Type(r, g, b, a);
+        m = re.match(r"^return\s+\w+\s*\((.*)\)\s*;?", stripped)
+        if m:
+            args = [a.strip() for a in m.group(1).split(",")]
+            if ret_type == "Color" and len(args) == 4:
+                lines.append(f"instance->r = {param_name}.r;")
+                lines.append(f"instance->g = {param_name}.g;")
+                lines.append(f"instance->b = {param_name}.b;")
+                lines.append(f"instance->a = {param_name}.a;")
+                continue
+            # Cannot reverse complex constructors
+            return None
+        # Cannot reverse this line
+        return None
+
+    if not lines:
+        return None
+    return lines
+
+
 TO_METHODS: dict[str, list[tuple[str, str, list[str]]]] = {
     "OcctlPoint3": [
         (
@@ -550,7 +643,7 @@ def generate_value_type_header(struct: CStruct) -> str:
     lines.append(f"    {c_type} to_c() const;")
     lines.append(f"    static Ref<{cls}> from_c(const {c_type}& val);")
     lines.append(f"    void copy_from_c(const {c_type}& val);")
-    # Static factory methods
+    # Static factory methods (explicit + auto-derived from TO_METHODS)
     if cls in FACTORY_METHODS:
         lines.append("")
         for method_name, params, _ in FACTORY_METHODS[cls]:
@@ -558,6 +651,22 @@ def generate_value_type_header(struct: CStruct) -> str:
             lines.append(
                 f"    static Ref<{cls}> {method_name}({param_decls}); // NOLINT"
             )
+    # Auto-derive from_* factory methods from TO_METHODS entries not already in FACTORY_METHODS
+    if cls in TO_METHODS:
+        explicit_factory_names = {name for name, _, _ in FACTORY_METHODS.get(cls, [])}
+        for method_name, ret_type, body in TO_METHODS[cls]:
+            from_name = "from_" + method_name[len("to_") :]
+            if from_name in explicit_factory_names:
+                continue  # Already has explicit factory
+            # Try to auto-derive
+            param_name = _TO_REVERSE_PARAM_NAME.get(ret_type)
+            if (
+                param_name is not None
+                and _reverse_to_method_body_assignments(body, ret_type) is not None
+            ):
+                lines.append(
+                    f"    static Ref<{cls}> {from_name}(const {ret_type}& {param_name}); // NOLINT (auto-derived)"
+                )
     # To-methods (convert to Godot native type)
     if cls in TO_METHODS:
         for method_name, ret_type, _ in TO_METHODS[cls]:
@@ -626,6 +735,7 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
         lines.append(
             f'    ADD_PROPERTY(PropertyInfo(Variant::{vt}, "{clean}"), "set_{clean}", "get_{clean}");'
         )
+    # Factory methods (explicit + auto-derived from TO_METHODS)
     if cls in FACTORY_METHODS:
         for method_name, params, _ in FACTORY_METHODS[cls]:
             param_str = ", ".join(f'"{pn}"' for pn, _ in params)
@@ -633,6 +743,22 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
                 param_str = ", " + param_str
             lines.append(
                 f'    godot::ClassDB::bind_static_method("{cls}", godot::D_METHOD("{method_name}"{param_str}), &{cls}::{method_name});'
+            )
+    # Auto-derived factory methods from TO_METHODS
+    if cls in TO_METHODS:
+        explicit_factory_names = {name for name, _, _ in FACTORY_METHODS.get(cls, [])}
+        for method_name, ret_type, body in TO_METHODS[cls]:
+            from_name = "from_" + method_name[len("to_") :]
+            if from_name in explicit_factory_names:
+                continue
+            param_name = _TO_REVERSE_PARAM_NAME.get(ret_type)
+            if param_name is None:
+                continue
+            rev = _reverse_to_method_body_assignments(body, ret_type)
+            if rev is None:
+                continue
+            lines.append(
+                f'    godot::ClassDB::bind_static_method("{cls}", godot::D_METHOD("{from_name}", "{param_name}"), &{cls}::{from_name});'
             )
     if cls in TO_METHODS:
         for method_name, ret_type, _ in TO_METHODS[cls]:
@@ -907,7 +1033,7 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
     lines.append("}")
     lines.append("")
 
-    # Factory method implementations
+    # Factory method implementations (explicit + auto-derived from TO_METHODS)
     if cls in FACTORY_METHODS:
         for method_name, params, assignments in FACTORY_METHODS[cls]:
             param_decls = ", ".join(f"{pt} {pn}" for pn, pt in params)
@@ -916,6 +1042,38 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
             lines.append(f"    instance.instantiate();")
             for assignment in assignments:
                 lines.append(f"    {assignment}")
+            lines.append("    return instance;")
+            lines.append("}")
+            lines.append("")
+
+    # Auto-derived from_* factory methods from TO_METHODS
+    if cls in TO_METHODS:
+        explicit_factory_names = {name for name, _, _ in FACTORY_METHODS.get(cls, [])}
+        for method_name, ret_type, body in TO_METHODS[cls]:
+            from_name = "from_" + method_name[len("to_") :]
+            if from_name in explicit_factory_names:
+                continue  # Already has explicit factory
+            param_name = _TO_REVERSE_PARAM_NAME.get(ret_type)
+            if param_name is None:
+                continue
+            rev_assignments = _reverse_to_method_body_assignments(body, ret_type)
+            if rev_assignments is None:
+                continue
+            lines.append(
+                f"Ref<{cls}> {cls}::{from_name}(const {ret_type}& {param_name}) {{"
+            )
+            lines.append(f"    Ref<{cls}> instance;")
+            lines.append(f"    instance.instantiate();")
+            # For array-based fields (e.g. Transform's m vector), prepend resize
+            # Detect by looking for instance->field[idx] = ... assignments
+            _resized: set[str] = set()
+            for assn in rev_assignments:
+                m_r = re.match(r"instance->(\w+)\[(\d+)\]", assn)
+                if m_r and m_r.group(1) not in _resized:
+                    _resized.add(m_r.group(1))
+                    # No resize needed for raw arrays - std::vector would need it
+            for assn in rev_assignments:
+                lines.append(f"    {assn}")
             lines.append("    return instance;")
             lines.append("}")
             lines.append("")

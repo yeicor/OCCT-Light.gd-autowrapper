@@ -359,11 +359,12 @@ class HeaderParser:
             return None
         name = m.group(1)
         value = m.group(2).strip()
-        if not value or value.startswith("(") and value.endswith(")"):
-            pass
-        # Filter out function-like macros
+        # Filter out function-like macros (ones with '(' in the name)
         if "(" in name:
             return None
+        # Note: Empty values or parenthesized values are intentional in some
+        # headers as placeholder #defines (e.g., OCCTL_API). They are kept
+        # and will be filtered later by _filtered_constants in gen_wrapper.py.
         guard_d, guard_e = _extract_guard_info(node, source)
         doc = _extract_comment(node, source)
         return CConstant(
@@ -417,14 +418,21 @@ class HeaderParser:
                         try:
                             evalue = int(parts[1].strip(), 0)
                         except ValueError:
+                            # KNOWN EXCEPTION: enum values may use expressions
+                            # (e.g. OCCTL_FOO = (OCCTL_BAR + 1)) or macro references
+                            # that can't be parsed as simple integers at codegen time.
+                            # The value stays at -1; downstream generators handle this
+                            # gracefully.
                             pass
                     if ename:
                         values.append(CEnumValue(name=ename, value=evalue))
             enum_name = typedef_name
-            # Extract the C tag name if any
+            # Extract the C tag name if present (for documentation purposes)
+            # Note: The tag name is only used as a fallback; the typedef name is
+            # always the canonical enum name for Godot binding.
             tag_m = re.search(r"enum\s+(\w+)\s*\{", text)
             if tag_m:
-                pass
+                pass  # tag name available in tag_m.group(1) if needed
             result.enums.append(
                 CEnum(
                     name=enum_name,
@@ -536,6 +544,10 @@ class HeaderParser:
                     )
                 )
             elif len(parts) == 1 and parts[0]:
+                # KNOWN EXCEPTION: a semicolon-delimited fragment in the struct body
+                # with only a single token (no type/name pair). This can happen with
+                # embedded preprocessor directives, bit-field declarations not captured
+                # by the regex, or trailing annotations. These are intentionally skipped.
                 pass
         return fields
 

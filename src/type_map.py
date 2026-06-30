@@ -377,6 +377,12 @@ INPUT_PTR_SIZE_ARRAY_TYPES: dict[str, str] = {
     "uint64_t": "PackedInt64Array",
     "occtl_point3_t": "Array",  # Array[OcctlPoint3] at runtime
     "occtl_point2_t": "Array",  # Array[OcctlPoint2] at runtime
+    "occtl_color_rgba_t": "Array",  # Array[OcctlColorRgba] at runtime
+    "occtl_direction3_t": "Array",  # Array[OcctlDirection3] at runtime
+    "occtl_direction2_t": "Array",  # Array[OcctlDirection2] at runtime
+    "occtl_vector3_t": "Array",  # Array[OcctlVector3] at runtime
+    "occtl_vector2_t": "Array",  # Array[OcctlVector2] at runtime
+    "occtl_transform_t": "Array",  # Array[OcctlTransform] at runtime
     "uint8_t": "PackedByteArray",
 }
 
