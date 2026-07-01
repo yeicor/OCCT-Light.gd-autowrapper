@@ -2502,12 +2502,30 @@ def _c_type_to_godot_doc_type(c_type: str) -> str:
     """Map C type to Godot type string for doc XML attributes.
 
     Returns the bare class name (without Ref<...>) for RefCounted types.
+    Handles input ptr+size pair types (const T* -> PackedArray),
+    and maps C++-level types (int64_t, double) to Godot doc types (int, float).
     """
     t = c_type.strip()
+    # Check if this is a const pointer to an input ptr+size array element type.
+    # These are collapsed into PackedArray params in the Godot wrapper.
+    if t.startswith("const ") and t.endswith("*") and not t.endswith("**"):
+        inner = t[len("const ") : -1].strip()
+        if is_input_ptr_size_type(inner):
+            array_type = input_ptr_size_godot_type(inner)
+            if array_type:
+                return array_type
     gt = godot_param_type(t)
     if gt == "int" and t in ENUM_TYPES:
         return "int"
-    return _doc_type_strip_ref(gt)
+    result = _doc_type_strip_ref(gt)
+    # Map C++ type names to proper Godot doc type names
+    _cpp_to_doc = {
+        "int64_t": "int",
+        "double": "float",
+    }
+    if result in _cpp_to_doc:
+        return _cpp_to_doc[result]
+    return result
 
 
 def _describe_return(ret_mapped: str, c_ret: str) -> str:
@@ -2516,6 +2534,8 @@ def _describe_return(ret_mapped: str, c_ret: str) -> str:
         return ""
     if ret_mapped == "int" and c_ret.strip() == "occtl_status_t":
         return "    [return] Status code ([constant OclCore.OCCTL_OK] on success)."
+    if ret_mapped.startswith("int") and c_ret.strip() == "bool":
+        return "    [return] Boolean result (0 = false, 1 = true)."
     if ret_mapped.startswith("Ref<"):
         inner = ret_mapped[4:-1]
         if inner.endswith("Handle"):
@@ -2550,6 +2570,8 @@ def _describe_param(p: CParameter, ret: str) -> str:
     if is_out_param(t, p.name, ret):
         if t.rstrip("* \t").strip() == "occtl_status_t":
             base_desc = "Output status code. Receives the operation result."
+        elif t.startswith("const ") and t.endswith("*"):
+            base_desc = "Output parameter."
         else:
             base_desc = "Output parameter."
     elif t in ENUM_TYPES:
@@ -2571,7 +2593,11 @@ def _describe_param(p: CParameter, ret: str) -> str:
             else:
                 base_desc = f"An optional [{cls}]. Pass null to use defaults."
         elif inner in UINT64_ID_TYPES:
-            base_desc = f"A {_C_TYPE_DOC_DESC.get(inner, inner)}."
+            base_desc = f"Array of {_C_TYPE_DOC_DESC.get(inner, inner)} IDs."
+        elif is_input_ptr_size_type(inner):
+            # Input ptr+size array type - describe as an array
+            array_gt = input_ptr_size_godot_type(inner) or "array"
+            base_desc = f"Input array ({array_gt}) of elements."
         elif inner in HANDLE_TYPES:
             cls = c_type_to_godot_class(inner) + "Handle"
             base_desc = f"A [{cls}] handle."
@@ -2700,6 +2726,12 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
             )
         methods.append("\t\t\t<description>")
         doc = _doc_comment_to_bbcode(clean_doc)
+        # Strip phantom param references from original C doc that refer to
+        # parameters that were collapsed/removed in the Godot wrapper.
+        # The C API may have had size params (n_objects, n_tools, etc.) that
+        # are now merged into PackedArray params.
+        kept_param_names = {p.name for p in kept_params}
+        doc = _strip_phantom_params(doc, kept_param_names)
         methods.append(f"\t\t\t\t{_rstrip_period(doc)}.")
         # Avoid duplicate param descriptions — only add if not already in doc
         existing_params = set(re.findall(r"\[param\s+(\w+)\]", doc))
@@ -2765,6 +2797,35 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         + (f"\t<constants>\n{constants_xml}\n\t</constants>\n" if has_constants else "")
         + "</class>\n"
     )
+
+
+def _strip_phantom_params(doc: str, kept_param_names: set[str]) -> str:
+    """Remove [param ...] references from a doc string for params that
+    were collapsed/removed in the Godot wrapper (e.g., size params like
+    n_objects that are merged into PackedArray params)."""
+
+    # First pass: remove entire "[param name] See [code]..." lines for phantom
+    # params. Must run BEFORE standalone [param] removal so the full form is
+    # still present.
+    doc = re.sub(
+        r"\[param\s+(\w+)\]\s+See\s+\[code\]occtl_\w+\[/code\]\.?\s*",
+        "",
+        doc,
+    )
+
+    # Second pass: remove standalone [param phantom_name] references
+    def _replacer(m):
+        pname = m.group(1)
+        if pname not in kept_param_names:
+            return ""  # Remove the phantom reference
+        return m.group(0)
+
+    doc = re.sub(r"\[param\s+(\w+)\]", _replacer, doc)
+
+    # Clean up extra whitespace from removed references
+    doc = re.sub(r"[ \t]*\n[ \t]*", "\n", doc)
+    doc = re.sub(r"\n{3,}", "\n\n", doc)
+    return doc.strip()
 
 
 def generate_gdscript_tests(

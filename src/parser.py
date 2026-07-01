@@ -211,15 +211,26 @@ def _doc_comment_to_bbcode(text: str) -> str:
     if not text:
         return text
 
-    # Handle inline @code ... @endcode
+    # Normalise line endings / trim leading/trailing whitespace
+    text = text.strip()
+
+    # --- Pre-pass: handle @code with language specifier BEFORE @endcode removal ---
+    # @code{cpp} ... @endcode  ->  [codeblock lang=cpp] ... [/codeblock]
+    # Also @code{c} or @code{h}
+    def _codeblock_lang_replacer(m):
+        lang = m.group(1).strip() if m.group(1) else ""
+        lang_attr = f" lang={lang}" if lang in ("cpp", "c", "h") else ""
+        body = m.group(2).strip()
+        return f"[codeblock{lang_attr}]\n{body}\n[/codeblock]"
+
     text = re.sub(
-        r"@code(\{[^}]*\})?\s+(.*?)\s+@endcode",
-        lambda m: f"[codeblock]{m.group(2)}[/codeblock]",
+        r"@code\{(\w+)\}\s*(.*?)\s*@endcode",
+        _codeblock_lang_replacer,
         text,
         flags=re.DOTALL,
     )
 
-    # Handle multi-line @code / @endcode blocks
+    # --- Handle multi-line @code / @endcode blocks (no language specifier) ---
     lines = text.split("\n")
     processed_lines = []
     in_codeblock = False
@@ -233,20 +244,24 @@ def _doc_comment_to_bbcode(text: str) -> str:
             in_codeblock = False
             processed_lines.append("[/codeblock]")
             continue
-        if stripped.startswith("@code{"):
-            lang_match = re.match(r"@code\{(\w+)\}", stripped)
-            lang = lang_match.group(1) if lang_match else ""
-            lang_attr = f" lang={lang}" if lang in ("cpp", "c", "h") else ""
-            in_codeblock = True
-            processed_lines.append(f"[codeblock{lang_attr}]")
-            continue
         if in_codeblock:
             processed_lines.append(line)
         else:
             processed_lines.append(line)
     text = "\n".join(processed_lines)
 
-    # Split into codeblock/non-codeblock segments
+    # Handle inline @c name / @p name / @a name and @c word -> [code]...[/code]
+    # Must be done before generic @cmd stripping
+    text = re.sub(r"@[cpa]\s+(\w+)", r"[code]\1[/code]", text)
+
+    # @b word -> [b]word[/b]
+    text = re.sub(r"@b\s+(\w+)", r"[b]\1[/b]", text)
+
+    # @e word / @em word -> [i]word[/i]
+    text = re.sub(r"@[eE]\s+(\w+)", r"[i]\1[/i]", text)
+
+    # Split into codeblock/non-codeblock segments so we only process
+    # outside code blocks.
     segments = re.split(r"(\[codeblock.*?\].*?\[/codeblock\])", text, flags=re.DOTALL)
 
     def _process_segment(seg: str) -> str:
