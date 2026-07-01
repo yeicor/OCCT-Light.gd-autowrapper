@@ -1119,7 +1119,7 @@ def _generate_out_param_copy_line(
             f"Either add the type to OUT_PARAM_PRIM_TYPES, VALUE_STRUCT_TYPES, or provide a wrapper class."
         )
     if resolved in VALUE_STRUCT_TYPES:
-        return f"{indent}if ({name}.is_valid()) {name}->_c_struct = {local_var};"
+        return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
     if resolved in UINT64_ID_TYPES:
         return f"{indent}if ({name}.is_valid()) {name}->copy_from_c({local_var});"
     if resolved in OUT_PARAM_PRIM_TYPES or resolved in ENUM_TYPES:
@@ -1458,7 +1458,7 @@ def _generate_body(
             lines.append(f"    for (size_t _i = 0; _i < _{cnt_name}_cnt; _i++) {{")
             lines.append(f"        Ref<{struct_cls}> _item;")
             lines.append(f"        _item.instantiate();")
-            lines.append(f"        _item->_c_struct = _{buf_name}_buf[_i];")
+            lines.append(f"        _item->copy_from_c(_{buf_name}_buf[_i]);")
             lines.append(f"        _result[static_cast<int64_t>(_i)] = _item;")
             lines.append(f"    }}")
             lines.append("    return _result;")
@@ -1504,7 +1504,7 @@ def _generate_body(
                     )
                     lines.append(f"        Ref<{struct_cls}> _item;")
                     lines.append(f"        _item.instantiate();")
-                    lines.append(f"        _item->_c_struct = _{aname}_buf[_i];")
+                    lines.append(f"        _item->copy_from_c(_{aname}_buf[_i]);")
                     lines.append(
                         f"        _{aname_cpp}[static_cast<int64_t>(_i)] = _item;"
                     )
@@ -1988,7 +1988,7 @@ def _generate_body(
             lines.append(f"    for (size_t _i = 0; _i < {total_expr}; _i++) {{")
             lines.append(f"        Ref<{cls}> _item;")
             lines.append(f"        _item.instantiate();")
-            lines.append(f"        _item->_c_struct = _{ptr_name}_ptr[_i];")
+            lines.append(f"        _item->copy_from_c(_{ptr_name}_ptr[_i]);")
             lines.append(f"        _result[static_cast<int64_t>(_i)] = _item;")
             lines.append(f"    }}")
             lines.append(f"    return _result;")

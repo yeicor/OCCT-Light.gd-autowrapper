@@ -64,12 +64,15 @@ def generate_all_tests(
                 f.unlink()
                 print(f"  [cleanup] removed orphan test: {f.name}")
 
-    # Include hand-written manual test files if they exist (from parent tests dir)
-    manual_tests = ["test_select_iter"]
-    for mt in manual_tests:
-        mt_file = tests_parent_dir / f"{mt}.gd"
-        if mt_file.exists():
-            test_paths.append(f"res://tests/{mt}.gd")
+    # Auto-discover hand-written manual test files from the parent tests directory.
+    # Any file matching test_*.gd in the parent tests dir (but not in autowrapper subdir)
+    # is included automatically. This allows contributors to add new test suites
+    # without editing this script.
+    for mt_file in sorted(tests_parent_dir.glob("test_*.gd")):
+        path = f"res://tests/{mt_file.name}"
+        if path not in test_paths:
+            test_paths.append(path)
+            print(f"  [manual] discovered {mt_file.name}")
 
     # Write index.gd in the parent tests directory (not in autowrapper subdir)
     # This file is read by TestRunner at runtime.

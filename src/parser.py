@@ -7,6 +7,7 @@ OCCT-Light C header files.
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from tree_sitter import Language, Node, Parser
 from tree_sitter_cpp import language as cpp_language
@@ -501,14 +502,14 @@ def _doc_comment_to_bbcode(text: str) -> str:
         # XML newlines within element text are collapsed to spaces;
         # [br] preserves line breaks visually in the Godot docs panel.
         seg = re.sub(r"\n[ \t]*\n", " [br] ", seg)  # blank-line separated = paragraph
-        seg = seg.replace("\n", " [br] ")  # single newline = line break
+        seg = seg.replace("\n", " ")  # single newline = space
 
         return seg
 
     result = []
     for seg in segments:
         result.append(_process_segment(seg))
-    return "".join(result)
+    return escape("".join(result))
 
 
 def _extract_guard_info(node: Node, source: bytes) -> tuple[str, str]:

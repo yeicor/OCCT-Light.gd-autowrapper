@@ -82,7 +82,7 @@
 				A low-resolution cylinder mesh is instanced along each edge polyline segment using [MultiMesh] transforms — one cylinder per segment — for efficient rendering.
 
 				- [code]edge_ids[/code]: [code]null[/code] for all edges, or a [PackedInt64Array] of edge node IDs.
-				- [code]radius[/code]: Tube radius. Default [code]0.01[/code]. If [code]<= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal for consistent visual size across different models.
+				- [code]radius[/code]: Tube radius. Default [code]0.01[/code]. If [code]&lt;= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal for consistent visual size across different models.
 				- [code]options[/code]: Meshing options (controls cylinder resolution via the angle parameter).
 				- [code]existing[/code]: [code]null[/code], [MultiMesh], or [PhysicsBody3D].
 				  When a [MultiMesh] is passed, mesh and transforms are replaced
@@ -103,7 +103,7 @@
 				A low-resolution sphere mesh is instanced at each vertex position using [MultiMesh] transforms for efficient rendering.
 
 				- [code]vertex_ids[/code]: [code]null[/code] for all vertices, or a [PackedInt64Array] of vertex node IDs.
-				- [code]radius[/code]: Sphere radius. Default [code]0.02[/code] (double the edge radius default). If [code]<= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal.
+				- [code]radius[/code]: Sphere radius. Default [code]0.02[/code] (double the edge radius default). If [code]&lt;= 0[/code], uses [code]options.deflection * 10[/code]. The radius is automatically scaled by the graph's bounding box diagonal.
 				- [code]options[/code]: Meshing options (controls sphere resolution via the angle parameter).
 				- [code]existing[/code]: [code]null[/code], [MultiMesh], or [PhysicsBody3D].
 				  When a [MultiMesh] is passed, mesh and transforms are replaced
