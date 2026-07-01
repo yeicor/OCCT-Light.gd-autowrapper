@@ -1062,6 +1062,41 @@ def _c_default_to_godot(c_val: str) -> str:
     return v
 
 
+def _enum_to_string_method_name(enum_def: CEnum, functions: list[CFunction]) -> str:
+    """Convert an enum name to a method name like 'node_kind_to_string'.
+
+    Strips the `_t` suffix from the enum typedef name, then strips the
+    common function prefix (e.g. ``occtl_`` or ``occtl_heal_``) the same
+    way function method names are derived, and appends ``_to_string``.
+    """
+    name = enum_def.enum_name
+    # Strip _t suffix if present
+    if name.endswith("_t"):
+        name = name[:-2]
+    # Strip common function prefix (same logic as for function methods)
+    prefix = _common_function_prefix(functions)
+    if prefix and name.startswith(prefix):
+        name = name[len(prefix) :]
+    return name + "_to_string"
+
+
+def _generate_enum_to_string_body(enum_def: CEnum, method_name: str, cls: str) -> str:
+    """Generate the switch-case body for an enum-to-string method.
+
+    The generated method converts an int value to its string constant name.
+    """
+    c_enum_type = enum_def.enum_name  # e.g. occtl_node_kind_t
+    lines = []
+    lines.append(f"String {cls}::{method_name}(int val) {{ // NOLINT")
+    lines.append(f"    switch (static_cast<{c_enum_type}>(val)) {{")
+    for ev in enum_def.values:
+        lines.append(f'        case {ev.name}: return "{ev.name}";')
+    lines.append('        default: return "<unknown>";')
+    lines.append("    }")
+    lines.append("}")
+    return "\n".join(lines)
+
+
 def _wrapper_class_name(header_include: str) -> str:
     stem = Path(header_include).stem
     parts = stem.replace("occtl_", "", 1).split("_")
@@ -2139,7 +2174,12 @@ def generate_wrapper_header(
         ret = _constant_godot_return_type(c, parsed.constants)
         if ret != "int":
             lines.append(f"    {ret} const_{c.name}(); // NOLINT")
-    # Enum values are registered via BIND_ENUM_CONSTANT; no methods needed.
+    # Enum-to-string helper methods
+    existing_method_names = set(_function_method_names(functions).values())
+    for enum in parsed.enums:
+        emname = _enum_to_string_method_name(enum, functions)
+        if emname not in existing_method_names:
+            lines.append(f"    String {emname}(int val); // NOLINT")
     method_names = _function_method_names(functions)
     for f in functions:
         ret_mapped = _func_return_type_mapped(f)
@@ -2289,6 +2329,14 @@ def generate_wrapper_source(
             lines.append(
                 f'    godot::ClassDB::bind_integer_constant(get_class_static(), "{escape(enum.enum_name)}", "{ev.name}", {ev.name});'
             )
+    # Bind enum-to-string helper methods
+    existing_method_names = set(_function_method_names(public_functions).values())
+    for enum in parsed.enums:
+        emname = _enum_to_string_method_name(enum, functions)
+        if emname not in existing_method_names:
+            lines.append(
+                f'    godot::ClassDB::bind_method(godot::D_METHOD("{emname}", "val"), &{cls}::{emname});'
+            )
     method_names = _function_method_names(public_functions)
     for f in public_functions:
         mname = method_names[f.name]
@@ -2325,6 +2373,13 @@ def generate_wrapper_source(
             lines.append("    return {};")
         lines.append("}")
         lines.append("")
+
+    # Enum-to-string method implementations
+    for enum in parsed.enums:
+        emname = _enum_to_string_method_name(enum, functions)
+        if emname not in existing_method_names:
+            lines.append(_generate_enum_to_string_body(enum, emname, cls))
+            lines.append("")
 
     if not public_functions and not parsed.constants and not parsed.enums:
         lines.append(f"void {cls}::_unused() {{}}")
