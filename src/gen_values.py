@@ -908,6 +908,14 @@ def generate_value_type_header(struct: CStruct) -> str:
                 lines.append(f'#include "{sub_cls}.h"')
                 added_includes.add(sub_cls)
 
+    # For INITABLE types, also include the header that declares the *_init() function
+    # (may differ from the struct's defining header)
+    if c_type in INITABLE_TYPES and c_type in INITABLE_TYPE_HEADERS:
+        init_header = INITABLE_TYPE_HEADERS[c_type]
+        if init_header != struct.header_include and init_header not in added_includes:
+            lines.append(f'#include "occtl/{init_header}"')
+            added_includes.add(init_header)
+
     lines.extend(
         [
             "",
@@ -921,13 +929,16 @@ def generate_value_type_header(struct: CStruct) -> str:
         ]
     )
 
-    # For value types that have a matching _init() C function, override
-    # _init() to auto-initialize with sensible defaults on construction.
+    # Store the real C struct directly.
+    # For value types with a matching OCCTL_*_INIT macro, initialize
+    # _c_struct using the macro at compile time. This is more efficient
+    # than calling the runtime _init() function because the initialization
+    # is a constant expression expanded by the preprocessor.
     if c_type in INITABLE_TYPES:
-        lines.append("    void _init() override;")
-
-    # Store the real C struct directly
-    lines.append(f"    {c_type} _c_struct = {{}};")
+        macro_name = c_type[:-2].upper() + "_INIT"
+        lines.append(f"    {c_type} _c_struct = {macro_name};")
+    else:
+        lines.append(f"    {c_type} _c_struct = {{}};")
     # Shadow string holders for pointer-type fields (e.g., const char*)
     # Shadow value holders for const pointer to value struct / uint64_id
     # For paired pointer+count fields: std::vector buffer instead of single holder
@@ -1452,16 +1463,6 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
     lines.append("}")
     lines.append("")
 
-    # _init() — auto-initialize with sensible defaults for INITABLE_TYPES
-    if c_type in INITABLE_TYPES:
-        base_name = c_type[:-2]  # strip "_t" suffix
-        lines.append(f"void {cls}::_init() {{")
-        lines.append(f"    {c_type} _tmp = {{}};")
-        lines.append(f"    ::{base_name}_init(&_tmp);")
-        lines.append(f"    _c_struct = _tmp;")
-        lines.append(f"}}")
-        lines.append("")
-
     # to_c() — direct access to the stored C struct
     lines.append(f"{c_type} {cls}::to_c() const {{")
     lines.append(f"    return _c_struct;")
@@ -1603,6 +1604,18 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
     return "\n".join(lines)
 
 
+def _doc_strip_ref_doc_type(gt: str) -> str:
+    """Strip Ref<...> wrapper from a Godot type string for doc XML attributes.
+
+    In Godot's class reference XML, RefCounted-derived types use just the
+    class name, not "Ref<ClassName>".
+    """
+    m = re.match(r"^Ref<(.+)>$", gt)
+    if m:
+        return m.group(1)
+    return gt
+
+
 def generate_value_type_doc_xml(struct: CStruct) -> str:
     """Generate XML doc for a value type class."""
     cls = c_type_to_godot_class(struct.type_name)
@@ -1612,22 +1625,23 @@ def generate_value_type_doc_xml(struct: CStruct) -> str:
     members = []
     for field in struct.fields:
         gt = _field_godot_type(field, pairs)
+        doc_gt = _doc_strip_ref_doc_type(gt)  # strip Ref<...> for doc XML
         clean = _field_clean_name(field)
         methods.append(f'\t\t<method name="get_{clean}">')
-        methods.append(f'\t\t\t<return type="{gt}" />')
+        methods.append(f'\t\t\t<return type="{doc_gt}" />')
         methods.append("\t\t\t<description>")
         methods.append(f"\t\t\t\tReturns the [member {clean}] value.")
-        methods.append("\t\t\t</description>")
+        methods.append("\t\t</description>")
         methods.append("\t\t</method>")
         methods.append(f'\t\t<method name="set_{clean}">')
         methods.append(f'\t\t\t<return type="void" />')
-        methods.append(f'\t\t\t<argument index="0" name="val" type="{gt}" />')
+        methods.append(f'\t\t\t<argument index="0" name="val" type="{doc_gt}" />')
         methods.append("\t\t\t<description>")
         methods.append(f"\t\t\t\tSets the [member {clean}] value.")
-        methods.append("\t\t\t</description>")
+        methods.append("\t\t</description>")
         methods.append("\t\t</method>")
         members.append(
-            f'\t\t<member name="{clean}" type="{gt}" '
+            f'\t\t<member name="{clean}" type="{doc_gt}" '
             f'setter="set_{clean}" getter="get_{clean}">'
             f"The [member {clean}] field of this [{cls}].</member>"
         )

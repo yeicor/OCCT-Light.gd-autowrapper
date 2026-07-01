@@ -459,17 +459,17 @@ def _two_call_buffer_doc_return_type(f: CFunction) -> str:
 
 
 OUT_PARAM_PRIM_TYPES: dict[str, str] = {
-    "uint32_t": "OcctlUint32",
-    "int32_t": "OcctlInt32",
-    "uint16_t": "OcctlInt32",
-    "uint8_t": "OcctlUint8",  # scalar only; use OcctlByteArray for uint8_t*
-    "size_t": "OcctlSize",
-    "int": "OcctlInt32",
-    "int64_t": "OcctlInt64",
-    "uint64_t": "OcctlUint64",
-    "double": "OcctlDouble",
-    "float": "OcctlDouble",
-    "bool": "OcctlBool",
+    "uint32_t": "OclUint32",
+    "int32_t": "OclInt32",
+    "uint16_t": "OclInt32",
+    "uint8_t": "OclUint8",  # scalar only; use OclByteArray for uint8_t*
+    "size_t": "OclSize",
+    "int": "OclInt32",
+    "int64_t": "OclInt64",
+    "uint64_t": "OclUint64",
+    "double": "OclDouble",
+    "float": "OclDouble",
+    "bool": "OclBoolParam",
 }
 
 
@@ -526,10 +526,10 @@ def _out_param_wrapper_class(base: str, full_type: str = "") -> str | None:
     resolved = _resolve_typedef(base)
     if resolved in HANDLE_TYPES:
         return None
-    # uint8_t* buffer out-params → OcctlByteArray
+    # uint8_t* buffer out-params → OclByteArray
     ft = full_type.strip() if full_type else ""
     if resolved == "uint8_t" and (ft.endswith("*") and not ft.endswith("**")):
-        return "OcctlByteArray"
+        return "OclByteArray"
     if resolved in UINT64_ID_TYPES:
         return c_type_to_godot_class(resolved)
     if resolved in VALUE_STRUCT_TYPES:
@@ -537,11 +537,11 @@ def _out_param_wrapper_class(base: str, full_type: str = "") -> str | None:
     if resolved in OUT_PARAM_PRIM_TYPES:
         return OUT_PARAM_PRIM_TYPES[resolved]
     if resolved in ENUM_TYPES:
-        return "OcctlInt32"
+        return "OclInt32"
     if resolved in ("const char", "char"):
         if _is_const_char_double_ptr(ft):
-            return "OcctlStringArray"
-        return "OcctlString"
+            return "OclStringArray"
+        return "OclString"
     return None
 
 
@@ -607,9 +607,9 @@ def _func_return_type_mapped(f: CFunction) -> str:
 
     out_params = [p for p in f.params if is_out_param(p.type_name, p.name, ret)]
 
-    # const occtl_error_t* → Ref<OcctlError>
+    # const occtl_error_t* → Ref<OclError>
     if ret == "const occtl_error_t*":
-        return "Ref<OcctlError>"
+        return f"Ref<{c_type_to_godot_class('occtl_error_t')}>"
 
     # const char* → String
     if ret == "const char*":
@@ -1520,11 +1520,12 @@ def _generate_body(
             lines.append(f"    return {ret_type_str}();")
         return "\n".join(lines)
 
-    # Special case: const occtl_error_t* return → Ref<OcctlError>
+    # Special case: const occtl_error_t* return → Ref<OclError>
     if ret == "const occtl_error_t*":
+        _err_cls = c_type_to_godot_class("occtl_error_t")
         lines.append(f"    const occtl_error_t* _err = ::{f.name}();")
-        lines.append("    if (!_err) return Ref<OcctlError>();")
-        lines.append("    return OcctlError::from_c(*_err);")
+        lines.append(f"    if (!_err) return Ref<{_err_cls}>();")
+        lines.append(f"    return {_err_cls}::from_c(*_err);")
         return "\n".join(lines)
 
     # Check for callback params → need context struct
@@ -2485,13 +2486,28 @@ def _c_type_to_doc_type_ref(c_type: str, rest: str = "") -> str:
     return rest
 
 
+def _doc_type_strip_ref(gt: str) -> str:
+    """Strip Ref<...> wrapper from Godot type strings for doc XML attributes.
+
+    In Godot's class reference XML, RefCounted-derived types are specified
+    by just the class name, without the Ref<...> wrapper.
+    """
+    m = re.match(r"^Ref<(.+)>$", gt)
+    if m:
+        return m.group(1)
+    return gt
+
+
 def _c_type_to_godot_doc_type(c_type: str) -> str:
-    """Map C type to Godot type string for doc (param type, return type)."""
+    """Map C type to Godot type string for doc XML attributes.
+
+    Returns the bare class name (without Ref<...>) for RefCounted types.
+    """
     t = c_type.strip()
     gt = godot_param_type(t)
     if gt == "int" and t in ENUM_TYPES:
         return "int"
-    return gt
+    return _doc_type_strip_ref(gt)
 
 
 def _describe_return(ret_mapped: str, c_ret: str) -> str:
@@ -2499,7 +2515,7 @@ def _describe_return(ret_mapped: str, c_ret: str) -> str:
     if ret_mapped == "void":
         return ""
     if ret_mapped == "int" and c_ret.strip() == "occtl_status_t":
-        return "    [return] Status code ([constant OcctlCore.OCCTL_OK] on success)."
+        return "    [return] Status code ([constant OclCore.OCCTL_OK] on success)."
     if ret_mapped.startswith("Ref<"):
         inner = ret_mapped[4:-1]
         if inner.endswith("Handle"):
@@ -2658,7 +2674,7 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
             method_attrs += f' experimental="{escape(f_exp)}"'
         methods.append(f"\t\t<method {method_attrs}>")
         if ret_mapped != "void":
-            methods.append(f'\t\t\t<return type="{ret_mapped}" />')
+            methods.append(f'\t\t\t<return type="{_doc_type_strip_ref(ret_mapped)}" />')
         ret = f.return_type.strip()
         # Strip input ptr+size pair size params from doc (like n_objects, n_tools)
         input_ptr_size_pairs = _find_input_ptr_size_pairs(f)

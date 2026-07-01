@@ -23,7 +23,7 @@ def generate_all_docs(
 
     Returns list of filenames written.
     """
-    doc_dir = output_dir / "doc_classes"
+    doc_dir = output_dir / "doc_classes" / "autowrapper"
     doc_dir.mkdir(parents=True, exist_ok=True)
 
     written: list[str] = []
@@ -32,26 +32,29 @@ def generate_all_docs(
     for ph in parsed_headers:
         xml = generate_wrapper_doc_xml(ph)
         from gen_wrapper import _wrapper_class_name
+
         fname = f"{_wrapper_class_name(ph.header_include)}.xml"
         (doc_dir / fname).write_text(xml, encoding="utf-8")
-        written.append(fname)
+        written.append(f"autowrapper/{fname}")
 
     # Value type docs (skip native-mapped types)
     for s in value_structs:
         if s.type_name in VALUE_STRUCT_TYPES:
             xml = generate_value_type_doc_xml(s)
             from type_map import c_type_to_godot_class
+
             fname = f"{c_type_to_godot_class(s.type_name)}.xml"
             (doc_dir / fname).write_text(xml, encoding="utf-8")
-            written.append(fname)
+            written.append(f"autowrapper/{fname}")
 
     # Handle docs
     for s in handle_structs:
         if s.type_name in HANDLE_TYPES:
             xml = generate_handle_doc_xml(s)
             from type_map import c_type_to_godot_class
+
             fname = f"{c_type_to_godot_class(s.type_name)}Handle.xml"
             (doc_dir / fname).write_text(xml, encoding="utf-8")
-            written.append(fname)
+            written.append(f"autowrapper/{fname}")
 
     return written

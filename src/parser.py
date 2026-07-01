@@ -482,6 +482,12 @@ def _doc_comment_to_bbcode(text: str) -> str:
             seg,
         )
 
+        # Convert remaining newlines to [br] for Godot BBCode rendering.
+        # XML newlines within element text are collapsed to spaces;
+        # [br] preserves line breaks visually in the Godot docs panel.
+        seg = re.sub(r"\n[ \t]*\n", " [br] ", seg)  # blank-line separated = paragraph
+        seg = seg.replace("\n", " [br] ")  # single newline = line break
+
         return seg
 
     result = []

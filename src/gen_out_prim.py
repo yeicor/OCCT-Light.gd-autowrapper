@@ -17,26 +17,64 @@ from xml.sax.saxutils import escape
 OUT_PARAM_TYPES: list[tuple[str, str, str, str, str]] = [
     # (C_type, class_name, godot_type, c_to_godot, godot_to_c)
     # Primitive types
-    ("uint32_t", "OclUint32", "int64_t",
-     "static_cast<int64_t>(_value)", "static_cast<uint32_t>(v)"),
-    ("int32_t", "OclInt32", "int64_t",
-     "static_cast<int64_t>(_value)", "static_cast<int32_t>(v)"),
-    ("uint8_t", "OclUint8", "int64_t",
-     "static_cast<int64_t>(_value)", "static_cast<uint8_t>(v)"),
-    ("size_t", "OclSize", "int64_t",
-     "static_cast<int64_t>(_value)", "static_cast<size_t>(v)"),
-    ("int", "OclInt32", "int64_t",
-     "static_cast<int64_t>(_value)", "static_cast<int>(v)"),
-    ("int64_t", "OclInt64", "int64_t",
-     "static_cast<int64_t>(_value)", "static_cast<int64_t>(v)"),
-    ("uint64_t", "OclUint64", "int64_t",
-     "static_cast<int64_t>(_value)", "static_cast<uint64_t>(v)"),
-    ("double", "OclDouble", "double",
-     "_value", "v"),
-    ("float", "OclDouble", "double",
-     "static_cast<double>(_value)", "static_cast<float>(v)"),
-    ("bool", "OclBoolParam", "bool",
-     "_value", "v"),
+    (
+        "uint32_t",
+        "OclUint32",
+        "int64_t",
+        "static_cast<int64_t>(_value)",
+        "static_cast<uint32_t>(v)",
+    ),
+    (
+        "int32_t",
+        "OclInt32",
+        "int64_t",
+        "static_cast<int64_t>(_value)",
+        "static_cast<int32_t>(v)",
+    ),
+    (
+        "uint8_t",
+        "OclUint8",
+        "int64_t",
+        "static_cast<int64_t>(_value)",
+        "static_cast<uint8_t>(v)",
+    ),
+    (
+        "size_t",
+        "OclSize",
+        "int64_t",
+        "static_cast<int64_t>(_value)",
+        "static_cast<size_t>(v)",
+    ),
+    (
+        "int",
+        "OclInt32",
+        "int64_t",
+        "static_cast<int64_t>(_value)",
+        "static_cast<int>(v)",
+    ),
+    (
+        "int64_t",
+        "OclInt64",
+        "int64_t",
+        "static_cast<int64_t>(_value)",
+        "static_cast<int64_t>(v)",
+    ),
+    (
+        "uint64_t",
+        "OclUint64",
+        "int64_t",
+        "static_cast<int64_t>(_value)",
+        "static_cast<uint64_t>(v)",
+    ),
+    ("double", "OclDouble", "double", "_value", "v"),
+    (
+        "float",
+        "OclDouble",
+        "double",
+        "static_cast<double>(_value)",
+        "static_cast<float>(v)",
+    ),
+    ("bool", "OclBoolParam", "bool", "_value", "v"),
 ]
 
 
@@ -77,9 +115,15 @@ def _prim_header_name(cls: str) -> str:
 
 def _uid_include(c_type: str) -> str:
     """Return the OCCT-Light header that declares this UID type."""
-    if c_type in ("occtl_node_id_t", "occtl_joint_id_t", "occtl_ref_uid_t", "occtl_rep_uid_t", "occtl_ref_id_t"):
+    if c_type in (
+        "occtl_node_id_t",
+        "occtl_joint_id_t",
+        "occtl_ref_uid_t",
+        "occtl_rep_uid_t",
+        "occtl_ref_id_t",
+    ):
         return "occtl/occtl_topo_types.h"
-    if c_type in ("occtl_rep_id_t",):
+    if c_type in ("occtl_rep_id_t", "occtl_uid_t"):
         return "occtl/occtl_core.h"
     return "occtl/occtl_core.h"
 
@@ -123,10 +167,20 @@ def _prim_source(c_type: str, cls: str, godot_type: str, is_uid: bool) -> str:
         setter = f"_value.bits = static_cast<uint64_t>(v)"
         copy_from_c = f"_value.bits = v.bits;"
     else:
-        getter = f"static_cast<{godot_type}>(_value)" if godot_type not in ("double", "bool") else f"_value"
+        getter = (
+            f"static_cast<{godot_type}>(_value)"
+            if godot_type not in ("double", "bool")
+            else f"_value"
+        )
         setter = f"_value = static_cast<{c_type}>(v)"
         copy_from_c = f"_value = v;"
-    vt = "INT" if godot_type == "int64_t" else "FLOAT" if godot_type == "double" else "BOOL"
+    vt = (
+        "INT"
+        if godot_type == "int64_t"
+        else "FLOAT"
+        if godot_type == "double"
+        else "BOOL"
+    )
     return (
         f'#include "{hdr}"\n'
         f"\n"
@@ -151,7 +205,13 @@ def _prim_source(c_type: str, cls: str, godot_type: str, is_uid: bool) -> str:
 
 
 def _prim_doc_xml(c_type: str, cls: str, godot_type: str) -> str:
-    vt = "INT" if godot_type == "int64_t" else "FLOAT" if godot_type == "double" else "BOOL"
+    vt = (
+        "INT"
+        if godot_type == "int64_t"
+        else "FLOAT"
+        if godot_type == "double"
+        else "BOOL"
+    )
     return (
         '<?xml version="1.0" encoding="UTF-8" ?>\n'
         f'<class name="{cls}" inherits="RefCounted" version="4.0" '
@@ -175,9 +235,9 @@ def _prim_doc_xml(c_type: str, cls: str, godot_type: str) -> str:
         "\t\t\t<description>Setter for value.</description>\n"
         "\t\t</method>\n"
         "\t</methods>\n"
-        f'\t<members>\n'
+        f"\t<members>\n"
         f'\t\t<member name="value" type="{godot_type}" setter="set_value" getter="get_value">The wrapped {c_type} value.</member>\n'
-        f'\t</members>\n'
+        f"\t</members>\n"
         "</class>\n"
     )
 
@@ -186,9 +246,13 @@ def generate_out_prim_headers() -> list[tuple[str, str]]:
     """Generate .h files for all primitive, UID, string, and byte-array wrappers."""
     files: list[tuple[str, str]] = []
     for c_type, cls, godot_type, c_to_godot, godot_to_c in OUT_PARAM_TYPES:
-        files.append((_prim_header_name(cls), _prim_header(c_type, cls, godot_type, False)))
+        files.append(
+            (_prim_header_name(cls), _prim_header(c_type, cls, godot_type, False))
+        )
     for c_type, cls, godot_type in UID_TYPES:
-        files.append((_prim_header_name(cls), _prim_header(c_type, cls, godot_type, True)))
+        files.append(
+            (_prim_header_name(cls), _prim_header(c_type, cls, godot_type, True))
+        )
     files.append(("OclString.h", STRING_H_CONTENT))
     files.append(("OclStringArray.h", STRING_ARRAY_H_CONTENT))
     files.append(("OclByteArray.h", BYTE_ARRAY_H_CONTENT))
@@ -228,8 +292,8 @@ def generate_out_prim_doc_xml() -> list[tuple[str, str]]:
 # ---------------------------------------------------------------------------
 
 STRING_H_CONTENT = """\
-#ifndef OCCTLSTRING_H
-#define OCCTLSTRING_H
+#ifndef OCLSTRING_H
+#define OCLSTRING_H
 
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -248,7 +312,7 @@ public:
     void copy_from_c(const char* v);
 };
 
-#endif // OCCTLSTRING_H
+#endif // OCLSTRING_H
 """
 
 STRING_CPP_CONTENT = """\
@@ -280,26 +344,26 @@ def _string_doc_xml() -> str:
         '<class name="OclString" inherits="RefCounted" version="4.0" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
-        '\t<brief_description>Out-parameter wrapper for const char*.</brief_description>\n'
-        '\t<description>\n'
-        '\t\tReusable typed wrapper for const char* out-parameters.\n'
-        '\t</description>\n'
-        '\t<tutorials>\n\t</tutorials>\n'
-        '\t<methods>\n'
+        "\t<brief_description>Out-parameter wrapper for const char*.</brief_description>\n"
+        "\t<description>\n"
+        "\t\tReusable typed wrapper for const char* out-parameters.\n"
+        "\t</description>\n"
+        "\t<tutorials>\n\t</tutorials>\n"
+        "\t<methods>\n"
         '\t\t<method name="get_value">\n'
         '\t\t\t<return type="String" />\n'
-        '\t\t\t<description>Getter for value.</description>\n'
-        '\t\t</method>\n'
+        "\t\t\t<description>Getter for value.</description>\n"
+        "\t\t</method>\n"
         '\t\t<method name="set_value">\n'
         '\t\t\t<return type="void" />\n'
         '\t\t\t<argument index="0" name="v" type="String" />\n'
-        '\t\t\t<description>Setter for value.</description>\n'
-        '\t\t</method>\n'
-        '\t</methods>\n'
-        '\t<members>\n'
+        "\t\t\t<description>Setter for value.</description>\n"
+        "\t\t</method>\n"
+        "\t</methods>\n"
+        "\t<members>\n"
         '\t\t<member name="value" type="String" setter="set_value" getter="get_value">The wrapped string value.</member>\n'
-        '\t</members>\n'
-        '</class>\n'
+        "\t</members>\n"
+        "</class>\n"
     )
 
 
@@ -308,8 +372,8 @@ def _string_doc_xml() -> str:
 # ---------------------------------------------------------------------------
 
 STRING_ARRAY_H_CONTENT = """\
-#ifndef OCCTLSTRINGARRAY_H
-#define OCCTLSTRINGARRAY_H
+#ifndef OCLSTRINGARRAY_H
+#define OCLSTRINGARRAY_H
 
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -329,7 +393,7 @@ public:
     void copy_from_c(const PackedStringArray& v);
 };
 
-#endif // OCCTLSTRINGARRAY_H
+#endif // OCLSTRINGARRAY_H
 """
 
 STRING_ARRAY_CPP_CONTENT = """\
@@ -366,30 +430,30 @@ def _string_array_doc_xml() -> str:
         '<class name="OclStringArray" inherits="RefCounted" version="4.0" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
-        '\t<brief_description>Out-parameter wrapper for const char** (string arrays).</brief_description>\n'
-        '\t<description>\n'
-        '\t\tReusable typed wrapper for const char** string-array out-parameters.\n'
-        '\t</description>\n'
-        '\t<tutorials>\n\t</tutorials>\n'
-        '\t<methods>\n'
+        "\t<brief_description>Out-parameter wrapper for const char** (string arrays).</brief_description>\n"
+        "\t<description>\n"
+        "\t\tReusable typed wrapper for const char** string-array out-parameters.\n"
+        "\t</description>\n"
+        "\t<tutorials>\n\t</tutorials>\n"
+        "\t<methods>\n"
         '\t\t<method name="get_strings">\n'
         '\t\t\t<return type="PackedStringArray" />\n'
-        '\t\t\t<description>Getter for the string array.</description>\n'
-        '\t\t</method>\n'
+        "\t\t\t<description>Getter for the string array.</description>\n"
+        "\t\t</method>\n"
         '\t\t<method name="set_strings">\n'
         '\t\t\t<return type="void" />\n'
         '\t\t\t<argument index="0" name="v" type="PackedStringArray" />\n'
-        '\t\t\t<description>Setter for the string array.</description>\n'
-        '\t\t</method>\n'
+        "\t\t\t<description>Setter for the string array.</description>\n"
+        "\t\t</method>\n"
         '\t\t<method name="get_count">\n'
         '\t\t\t<return type="int" />\n'
-        '\t\t\t<description>Number of strings in the array.</description>\n'
-        '\t\t</method>\n'
-        '\t</methods>\n'
-        '\t<members>\n'
+        "\t\t\t<description>Number of strings in the array.</description>\n"
+        "\t\t</method>\n"
+        "\t</methods>\n"
+        "\t<members>\n"
         '\t\t<member name="strings" type="PackedStringArray" setter="set_strings" getter="get_strings">The wrapped string array.</member>\n'
-        '\t</members>\n'
-        '</class>\n'
+        "\t</members>\n"
+        "</class>\n"
     )
 
 
@@ -398,8 +462,8 @@ def _string_array_doc_xml() -> str:
 # ---------------------------------------------------------------------------
 
 BYTE_ARRAY_H_CONTENT = """\
-#ifndef OCCTLBYTEARRAY_H
-#define OCCTLBYTEARRAY_H
+#ifndef OCLBYTEARRAY_H
+#define OCLBYTEARRAY_H
 
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -419,7 +483,7 @@ public:
     void copy_from_c(const PackedByteArray& v);
 };
 
-#endif // OCCTLBYTEARRAY_H
+#endif // OCLBYTEARRAY_H
 """
 
 BYTE_ARRAY_CPP_CONTENT = """\
@@ -456,28 +520,28 @@ def _byte_array_doc_xml() -> str:
         '<class name="OclByteArray" inherits="RefCounted" version="4.0" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
-        '\t<brief_description>Out-parameter wrapper for uint8_t* (byte buffers).</brief_description>\n'
-        '\t<description>\n'
-        '\t\tReusable typed wrapper for uint8_t* buffer out-parameters.\n'
-        '\t</description>\n'
-        '\t<tutorials>\n\t</tutorials>\n'
-        '\t<methods>\n'
+        "\t<brief_description>Out-parameter wrapper for uint8_t* (byte buffers).</brief_description>\n"
+        "\t<description>\n"
+        "\t\tReusable typed wrapper for uint8_t* buffer out-parameters.\n"
+        "\t</description>\n"
+        "\t<tutorials>\n\t</tutorials>\n"
+        "\t<methods>\n"
         '\t\t<method name="get_value">\n'
         '\t\t\t<return type="PackedByteArray" />\n'
-        '\t\t\t<description>Getter for the byte buffer.</description>\n'
-        '\t\t</method>\n'
+        "\t\t\t<description>Getter for the byte buffer.</description>\n"
+        "\t\t</method>\n"
         '\t\t<method name="set_value">\n'
         '\t\t\t<return type="void" />\n'
         '\t\t\t<argument index="0" name="v" type="PackedByteArray" />\n'
-        '\t\t\t<description>Setter for the byte buffer.</description>\n'
-        '\t\t</method>\n'
+        "\t\t\t<description>Setter for the byte buffer.</description>\n"
+        "\t\t</method>\n"
         '\t\t<method name="size">\n'
         '\t\t\t<return type="int" />\n'
-        '\t\t\t<description>Number of bytes in the buffer.</description>\n'
-        '\t\t</method>\n'
-        '\t</methods>\n'
-        '\t<members>\n'
+        "\t\t\t<description>Number of bytes in the buffer.</description>\n"
+        "\t\t</method>\n"
+        "\t</methods>\n"
+        "\t<members>\n"
         '\t\t<member name="value" type="PackedByteArray" setter="set_value" getter="get_value">The wrapped byte buffer.</member>\n'
-        '\t</members>\n'
-        '</class>\n'
+        "\t</members>\n"
+        "</class>\n"
     )

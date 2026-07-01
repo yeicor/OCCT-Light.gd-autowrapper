@@ -435,8 +435,14 @@ def main() -> None:
         print("\nERROR: Class name conflicts detected!", file=sys.stderr)
         for pair, dupes in conflicts.items():
             print(f"  {pair}: {dupes}", file=sys.stderr)
-        print("\nThis means two different source types would produce the same Godot class name.", file=sys.stderr)
-        print("Fix by adding a prefix/suffix to one of the conflicting names.", file=sys.stderr)
+        print(
+            "\nThis means two different source types would produce the same Godot class name.",
+            file=sys.stderr,
+        )
+        print(
+            "Fix by adding a prefix/suffix to one of the conflicting names.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # 4. Build the consolidated class list and split into part files
@@ -524,18 +530,25 @@ def main() -> None:
         )
         # Out-param primitive docs
         for fname, xml in generate_out_prim_doc_xml():
-            (output_dir / "doc_classes" / fname).write_text(xml, encoding="utf-8")
-            doc_files.append(fname)
+            (output_dir / "doc_classes" / "autowrapper" / fname).write_text(
+                xml, encoding="utf-8"
+            )
+            doc_files.append(f"autowrapper/{fname}")
         print(f"Written {len(doc_files)} doc XML files")
 
-        # Clean up orphan doc files (no longer generated)
-        doc_dir = output_dir / "doc_classes"
-        expected_doc_files: set[str] = set(doc_files)
+        # Clean up orphan doc files (no longer generated) — in autowrapper subdir only
+        doc_dir = output_dir / "doc_classes" / "autowrapper"
+        expected_doc_stems: set[str] = set()
+        for d in doc_files:
+            # d is like "autowrapper/OclCore.xml"
+            if d.startswith("autowrapper/"):
+                expected_doc_stems.add(d.split("/", 1)[1].removesuffix(".xml"))
         orphan_doc_count = 0
         for f in doc_dir.iterdir():
-            if f.suffix == ".xml" and f.name not in expected_doc_files:
-                f.unlink()
-                orphan_doc_count += 1
+            if f.suffix == ".xml":
+                if f.stem not in expected_doc_stems:
+                    f.unlink()
+                    orphan_doc_count += 1
         if orphan_doc_count:
             print(f"Removed {orphan_doc_count} orphan doc XML files from {doc_dir}")
 
