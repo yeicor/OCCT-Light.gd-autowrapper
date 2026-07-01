@@ -3,8 +3,8 @@
 // DO NOT EDIT IT DIRECTLY. Make changes to the Python generator instead.
 // ---------------------------------------------------------------------------
 
-#ifndef OCCTLGRAPHHANDLE_H
-#define OCCTLGRAPHHANDLE_H
+#ifndef OCLGRAPHHANDLE_H
+#define OCLGRAPHHANDLE_H
 
 #include <godot_cpp/classes/array_mesh.hpp>
 #include <godot_cpp/classes/multi_mesh.hpp>
@@ -15,12 +15,12 @@
 #include "occtl/occtl_curves.h"
 #include "occtl/occtl_topo.h"
 
-#include "OcctlMeshOptions.h"
+#include "OclMeshOptions.h"
 
 using namespace godot;
 
-class OcctlGraphHandle : public godot::RefCounted {
-    GDCLASS(OcctlGraphHandle, godot::RefCounted)
+class OclGraphHandle : public godot::RefCounted {
+    GDCLASS(OclGraphHandle, godot::RefCounted)
 protected:
     static void _bind_methods();
 
@@ -34,7 +34,7 @@ public:
     occtl_graph_t* _handle = nullptr;
     bool _owns = true;
 
-    ~OcctlGraphHandle() {
+    ~OclGraphHandle() {
         if (_owns && _handle) {
             ::occtl_graph_free(_handle);
             _handle = nullptr;
@@ -56,7 +56,7 @@ public:
     /// @param include_tangents    Compute tangent vectors (requires normals + UVs).
     /// @param include_feature_ids Encode face node IDs as vertex colors.
     /// @param options             Meshing options (deflection, angle, ...).
-    ///                            When null, OCCTL_MESH_OPTIONS_INIT defaults are used.
+    ///                            When null, OCL_MESH_OPTIONS_INIT defaults are used.
     /// @param existing            Optional ArrayMesh, MultiMesh, or PhysicsBody3D to reuse.
     ///                            - ArrayMesh: surfaces cleared, user customizations preserved.
     ///                            - PhysicsBody3D: one ConcavePolygonShape3D child per face
@@ -68,7 +68,7 @@ public:
         bool include_uvs = false,
         bool include_tangents = false,
         bool include_feature_ids = false,
-        const Ref<OcctlMeshOptions>& options = Ref<OcctlMeshOptions>(),
+        const Ref<OclMeshOptions>& options = Ref<OclMeshOptions>(),
         const Variant& existing = Variant()
     );
 
@@ -86,7 +86,7 @@ public:
     Ref<MultiMesh> mesh_edges(
         const Variant& edge_ids = Variant(),
         double radius = 0.01,
-        const Ref<OcctlMeshOptions>& options = Ref<OcctlMeshOptions>(),
+        const Ref<OclMeshOptions>& options = Ref<OclMeshOptions>(),
         const Variant& existing = Variant()
     );
 
@@ -103,9 +103,9 @@ public:
     Ref<MultiMesh> mesh_vertices(
         const Variant& vertex_ids = Variant(),
         double radius = 0.02,
-        const Ref<OcctlMeshOptions>& options = Ref<OcctlMeshOptions>(),
+        const Ref<OclMeshOptions>& options = Ref<OclMeshOptions>(),
         const Variant& existing = Variant()
     );
 };
 
-#endif // OCCTLGRAPHHANDLE_H
+#endif // OCLGRAPHHANDLE_H

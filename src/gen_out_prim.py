@@ -4,7 +4,7 @@ Each generated class wraps a single C value (uint32_t, occtl_node_id_t, etc.)
 with get_value/set_value for Godot and copy_from_c for C++.
 
 These classes are reused across all wrapper functions. For example, any function
-with a uint32_t* out-param uses Ref<OcctlUint32>.
+with a uint32_t* out-param uses Ref<OclUint32>.
 """
 
 from pathlib import Path
@@ -17,57 +17,57 @@ from xml.sax.saxutils import escape
 OUT_PARAM_TYPES: list[tuple[str, str, str, str, str]] = [
     # (C_type, class_name, godot_type, c_to_godot, godot_to_c)
     # Primitive types
-    ("uint32_t", "OcctlUint32", "int64_t",
+    ("uint32_t", "OclUint32", "int64_t",
      "static_cast<int64_t>(_value)", "static_cast<uint32_t>(v)"),
-    ("int32_t", "OcctlInt32", "int64_t",
+    ("int32_t", "OclInt32", "int64_t",
      "static_cast<int64_t>(_value)", "static_cast<int32_t>(v)"),
-    ("uint8_t", "OcctlUint8", "int64_t",
+    ("uint8_t", "OclUint8", "int64_t",
      "static_cast<int64_t>(_value)", "static_cast<uint8_t>(v)"),
-    ("size_t", "OcctlSize", "int64_t",
+    ("size_t", "OclSize", "int64_t",
      "static_cast<int64_t>(_value)", "static_cast<size_t>(v)"),
-    ("int", "OcctlInt32", "int64_t",
+    ("int", "OclInt32", "int64_t",
      "static_cast<int64_t>(_value)", "static_cast<int>(v)"),
-    ("int64_t", "OcctlInt64", "int64_t",
+    ("int64_t", "OclInt64", "int64_t",
      "static_cast<int64_t>(_value)", "static_cast<int64_t>(v)"),
-    ("uint64_t", "OcctlUint64", "int64_t",
+    ("uint64_t", "OclUint64", "int64_t",
      "static_cast<int64_t>(_value)", "static_cast<uint64_t>(v)"),
-    ("double", "OcctlDouble", "double",
+    ("double", "OclDouble", "double",
      "_value", "v"),
-    ("float", "OcctlDouble", "double",
+    ("float", "OclDouble", "double",
      "static_cast<double>(_value)", "static_cast<float>(v)"),
-    ("bool", "OcctlBool", "bool",
+    ("bool", "OclBoolParam", "bool",
      "_value", "v"),
 ]
 
 
 # For UID types (structs with a single .bits uint64 field):
 UID_TYPES: list[tuple[str, str, str]] = [
-    ("occtl_node_id_t", "OcctlNodeId", "int64_t"),
-    ("occtl_uid_t", "OcctlUid", "int64_t"),
-    ("occtl_ref_id_t", "OcctlRefId", "int64_t"),
-    ("occtl_ref_uid_t", "OcctlRefUid", "int64_t"),
-    ("occtl_rep_uid_t", "OcctlRepUid", "int64_t"),
-    ("occtl_rep_id_t", "OcctlRepId", "int64_t"),
-    ("occtl_joint_id_t", "OcctlJointId", "int64_t"),
+    ("occtl_node_id_t", "OclNodeId", "int64_t"),
+    ("occtl_uid_t", "OclUid", "int64_t"),
+    ("occtl_ref_id_t", "OclRefId", "int64_t"),
+    ("occtl_ref_uid_t", "OclRefUid", "int64_t"),
+    ("occtl_rep_uid_t", "OclRepUid", "int64_t"),
+    ("occtl_rep_id_t", "OclRepId", "int64_t"),
+    ("occtl_joint_id_t", "OclJointId", "int64_t"),
 ]
 
 # String out-param types.
 STRING_TYPES: list[str] = [
-    "OcctlString",
-    "OcctlStringArray",
+    "OclString",
+    "OclStringArray",
 ]
 
 OUT_PARAM_STRING_TYPES: dict[str, str] = {
-    "const char": "OcctlString",
-    "const char*": "OcctlString",
+    "const char": "OclString",
+    "const char*": "OclString",
 }
 
 OUT_PARAM_STRING_ARRAY_TYPES: dict[str, str] = {
-    "const char**": "OcctlStringArray",
+    "const char**": "OclStringArray",
 }
 
 OUT_PARAM_BYTE_ARRAY_TYPES: dict[str, str] = {
-    "uint8_t*": "OcctlByteArray",
+    "uint8_t*": "OclByteArray",
 }
 
 
@@ -160,6 +160,8 @@ def _prim_doc_xml(c_type: str, cls: str, godot_type: str) -> str:
         f"\t<brief_description>Out-parameter wrapper for {c_type}.</brief_description>\n"
         "\t<description>\n"
         f"\t\tReusable typed wrapper for {c_type} out-parameters.\n"
+        f"\t\tCreate an instance with [code]{cls}.new()[/code], pass it to the relevant wrapper method, "
+        f"then call [method {cls}.get_value] to retrieve the result.\n"
         "\t</description>\n"
         "\t<tutorials>\n\t</tutorials>\n"
         "\t<methods>\n"
@@ -187,9 +189,9 @@ def generate_out_prim_headers() -> list[tuple[str, str]]:
         files.append((_prim_header_name(cls), _prim_header(c_type, cls, godot_type, False)))
     for c_type, cls, godot_type in UID_TYPES:
         files.append((_prim_header_name(cls), _prim_header(c_type, cls, godot_type, True)))
-    files.append(("OcctlString.h", STRING_H_CONTENT))
-    files.append(("OcctlStringArray.h", STRING_ARRAY_H_CONTENT))
-    files.append(("OcctlByteArray.h", BYTE_ARRAY_H_CONTENT))
+    files.append(("OclString.h", STRING_H_CONTENT))
+    files.append(("OclStringArray.h", STRING_ARRAY_H_CONTENT))
+    files.append(("OclByteArray.h", BYTE_ARRAY_H_CONTENT))
     return files
 
 
@@ -200,9 +202,9 @@ def generate_out_prim_sources() -> list[tuple[str, str]]:
         files.append((f"{cls}.cpp", _prim_source(c_type, cls, godot_type, False)))
     for c_type, cls, godot_type in UID_TYPES:
         files.append((f"{cls}.cpp", _prim_source(c_type, cls, godot_type, True)))
-    files.append(("OcctlString.cpp", STRING_CPP_CONTENT))
-    files.append(("OcctlStringArray.cpp", STRING_ARRAY_CPP_CONTENT))
-    files.append(("OcctlByteArray.cpp", BYTE_ARRAY_CPP_CONTENT))
+    files.append(("OclString.cpp", STRING_CPP_CONTENT))
+    files.append(("OclStringArray.cpp", STRING_ARRAY_CPP_CONTENT))
+    files.append(("OclByteArray.cpp", BYTE_ARRAY_CPP_CONTENT))
     return files
 
 
@@ -214,15 +216,15 @@ def generate_out_prim_doc_xml() -> list[tuple[str, str]]:
     for c_type, cls, godot_type in UID_TYPES:
         files.append((f"{cls}.xml", _prim_doc_xml(c_type, cls, godot_type)))
     # String types
-    files.append(("OcctlString.xml", _string_doc_xml()))
-    files.append(("OcctlStringArray.xml", _string_array_doc_xml()))
+    files.append(("OclString.xml", _string_doc_xml()))
+    files.append(("OclStringArray.xml", _string_array_doc_xml()))
     # ByteArray type
-    files.append(("OcctlByteArray.xml", _byte_array_doc_xml()))
+    files.append(("OclByteArray.xml", _byte_array_doc_xml()))
     return files
 
 
 # ---------------------------------------------------------------------------
-# OcctlString — wraps a single Godot String for const char* out-params
+# OclString — wraps a single Godot String for const char* out-params
 # ---------------------------------------------------------------------------
 
 STRING_H_CONTENT = """\
@@ -235,8 +237,8 @@ STRING_H_CONTENT = """\
 
 using namespace godot;
 
-class OcctlString : public godot::RefCounted {
-    GDCLASS(OcctlString, godot::RefCounted)
+class OclString : public godot::RefCounted {
+    GDCLASS(OclString, godot::RefCounted)
     String _value{};
 protected:
     static void _bind_methods();
@@ -250,23 +252,23 @@ public:
 """
 
 STRING_CPP_CONTENT = """\
-#include "OcctlString.h"
+#include "OclString.h"
 
-String OcctlString::get_value() const {
+String OclString::get_value() const {
     return _value;
 }
 
-void OcctlString::set_value(const String& v) {
+void OclString::set_value(const String& v) {
     _value = v;
 }
 
-void OcctlString::copy_from_c(const char* v) {
+void OclString::copy_from_c(const char* v) {
     _value = v ? String(v) : String();
 }
 
-void OcctlString::_bind_methods() {
-    godot::ClassDB::bind_method(godot::D_METHOD("get_value"), &OcctlString::get_value);
-    godot::ClassDB::bind_method(godot::D_METHOD("set_value", "v"), &OcctlString::set_value);
+void OclString::_bind_methods() {
+    godot::ClassDB::bind_method(godot::D_METHOD("get_value"), &OclString::get_value);
+    godot::ClassDB::bind_method(godot::D_METHOD("set_value", "v"), &OclString::set_value);
     ADD_PROPERTY(PropertyInfo(Variant::STRING, "value"), "set_value", "get_value");
 }
 """
@@ -275,7 +277,7 @@ void OcctlString::_bind_methods() {
 def _string_doc_xml() -> str:
     return (
         '<?xml version="1.0" encoding="UTF-8" ?>\n'
-        '<class name="OcctlString" inherits="RefCounted" version="4.0" '
+        '<class name="OclString" inherits="RefCounted" version="4.0" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
         '\t<brief_description>Out-parameter wrapper for const char*.</brief_description>\n'
@@ -302,7 +304,7 @@ def _string_doc_xml() -> str:
 
 
 # ---------------------------------------------------------------------------
-# OcctlStringArray — wraps a PackedStringArray for const char** out-params
+# OclStringArray — wraps a PackedStringArray for const char** out-params
 # ---------------------------------------------------------------------------
 
 STRING_ARRAY_H_CONTENT = """\
@@ -315,8 +317,8 @@ STRING_ARRAY_H_CONTENT = """\
 
 using namespace godot;
 
-class OcctlStringArray : public godot::RefCounted {
-    GDCLASS(OcctlStringArray, godot::RefCounted)
+class OclStringArray : public godot::RefCounted {
+    GDCLASS(OclStringArray, godot::RefCounted)
     PackedStringArray _value{};
 protected:
     static void _bind_methods();
@@ -331,28 +333,28 @@ public:
 """
 
 STRING_ARRAY_CPP_CONTENT = """\
-#include "OcctlStringArray.h"
+#include "OclStringArray.h"
 
-PackedStringArray OcctlStringArray::get_strings() const {
+PackedStringArray OclStringArray::get_strings() const {
     return _value;
 }
 
-void OcctlStringArray::set_strings(const PackedStringArray& v) {
+void OclStringArray::set_strings(const PackedStringArray& v) {
     _value = v;
 }
 
-int64_t OcctlStringArray::get_count() const {
+int64_t OclStringArray::get_count() const {
     return static_cast<int64_t>(_value.size());
 }
 
-void OcctlStringArray::copy_from_c(const PackedStringArray& v) {
+void OclStringArray::copy_from_c(const PackedStringArray& v) {
     _value = v;
 }
 
-void OcctlStringArray::_bind_methods() {
-    godot::ClassDB::bind_method(godot::D_METHOD("get_strings"), &OcctlStringArray::get_strings);
-    godot::ClassDB::bind_method(godot::D_METHOD("set_strings", "v"), &OcctlStringArray::set_strings);
-    godot::ClassDB::bind_method(godot::D_METHOD("get_count"), &OcctlStringArray::get_count);
+void OclStringArray::_bind_methods() {
+    godot::ClassDB::bind_method(godot::D_METHOD("get_strings"), &OclStringArray::get_strings);
+    godot::ClassDB::bind_method(godot::D_METHOD("set_strings", "v"), &OclStringArray::set_strings);
+    godot::ClassDB::bind_method(godot::D_METHOD("get_count"), &OclStringArray::get_count);
     ADD_PROPERTY(PropertyInfo(Variant::PACKED_STRING_ARRAY, "strings"), "set_strings", "get_strings");
 }
 """
@@ -361,7 +363,7 @@ void OcctlStringArray::_bind_methods() {
 def _string_array_doc_xml() -> str:
     return (
         '<?xml version="1.0" encoding="UTF-8" ?>\n'
-        '<class name="OcctlStringArray" inherits="RefCounted" version="4.0" '
+        '<class name="OclStringArray" inherits="RefCounted" version="4.0" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
         '\t<brief_description>Out-parameter wrapper for const char** (string arrays).</brief_description>\n'
@@ -392,7 +394,7 @@ def _string_array_doc_xml() -> str:
 
 
 # ---------------------------------------------------------------------------
-# OcctlByteArray — wraps a PackedByteArray for uint8_t* buffer out-params
+# OclByteArray — wraps a PackedByteArray for uint8_t* buffer out-params
 # ---------------------------------------------------------------------------
 
 BYTE_ARRAY_H_CONTENT = """\
@@ -405,8 +407,8 @@ BYTE_ARRAY_H_CONTENT = """\
 
 using namespace godot;
 
-class OcctlByteArray : public godot::RefCounted {
-    GDCLASS(OcctlByteArray, godot::RefCounted)
+class OclByteArray : public godot::RefCounted {
+    GDCLASS(OclByteArray, godot::RefCounted)
     PackedByteArray _value{};
 protected:
     static void _bind_methods();
@@ -421,28 +423,28 @@ public:
 """
 
 BYTE_ARRAY_CPP_CONTENT = """\
-#include "OcctlByteArray.h"
+#include "OclByteArray.h"
 
-PackedByteArray OcctlByteArray::get_value() const {
+PackedByteArray OclByteArray::get_value() const {
     return _value;
 }
 
-void OcctlByteArray::set_value(const PackedByteArray& v) {
+void OclByteArray::set_value(const PackedByteArray& v) {
     _value = v;
 }
 
-int64_t OcctlByteArray::size() const {
+int64_t OclByteArray::size() const {
     return static_cast<int64_t>(_value.size());
 }
 
-void OcctlByteArray::copy_from_c(const PackedByteArray& v) {
+void OclByteArray::copy_from_c(const PackedByteArray& v) {
     _value = v;
 }
 
-void OcctlByteArray::_bind_methods() {
-    godot::ClassDB::bind_method(godot::D_METHOD("get_value"), &OcctlByteArray::get_value);
-    godot::ClassDB::bind_method(godot::D_METHOD("set_value", "v"), &OcctlByteArray::set_value);
-    godot::ClassDB::bind_method(godot::D_METHOD("size"), &OcctlByteArray::size);
+void OclByteArray::_bind_methods() {
+    godot::ClassDB::bind_method(godot::D_METHOD("get_value"), &OclByteArray::get_value);
+    godot::ClassDB::bind_method(godot::D_METHOD("set_value", "v"), &OclByteArray::set_value);
+    godot::ClassDB::bind_method(godot::D_METHOD("size"), &OclByteArray::size);
     ADD_PROPERTY(PropertyInfo(Variant::PACKED_BYTE_ARRAY, "value"), "set_value", "get_value");
 }
 """
@@ -451,7 +453,7 @@ void OcctlByteArray::_bind_methods() {
 def _byte_array_doc_xml() -> str:
     return (
         '<?xml version="1.0" encoding="UTF-8" ?>\n'
-        '<class name="OcctlByteArray" inherits="RefCounted" version="4.0" '
+        '<class name="OclByteArray" inherits="RefCounted" version="4.0" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
         '\t<brief_description>Out-parameter wrapper for uint8_t* (byte buffers).</brief_description>\n'

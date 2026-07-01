@@ -46,7 +46,7 @@ def generate_all_tests(
     }
     expected_tests.add("test_select_iter")
 
-    # Generate handle test files from templates (e.g. test_OcctlGraphHandle.gd)
+    # Generate handle test files from templates (e.g. test_OclGraphHandle.gd)
     for c_type in HANDLE_TYPES:
         cls = c_type_to_godot_class(c_type) + "Handle"
         fname = f"test_{cls}.gd"
@@ -57,9 +57,9 @@ def generate_all_tests(
             test_paths.append(f"res://tests/{fname}")
             expected_tests.add(f"test_{cls}")
 
-    # Clean up orphan test files
+    # Clean up orphan test files (both Ocl- and Occtl-prefixed)
     for f in tests_dir.iterdir():
-        if f.suffix == ".gd" and f.stem.startswith("test_Occtl"):
+        if f.suffix == ".gd" and f.name != "index.gd" and "select_iter" not in f.name:
             if f.stem not in expected_tests:
                 f.unlink()
                 print(f"  [cleanup] removed orphan test: {f.name}")

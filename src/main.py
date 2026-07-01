@@ -247,6 +247,24 @@ def main() -> None:
     # Synthesize value structs that the parser missed (tree-sitter edge cases)
     _synthesize_missing_value_structs(parsed_headers, all_value_structs)
 
+    # Populate INITABLE_TYPES -- value structs that have a matching *_init() function
+    from type_map import INITABLE_TYPE_HEADERS, INITABLE_TYPES
+
+    # Build index of all init function names -> their header include
+    init_func_headers: dict[str, str] = {}
+    for ph in parsed_headers:
+        for f in ph.functions:
+            if f.name.endswith("_init"):
+                init_func_headers[f.name] = ph.header_include
+
+    for s in all_value_structs:
+        if s.type_name.endswith("_t"):
+            base = s.type_name[:-2]
+            expected_init = base + "_init"
+            if expected_init in init_func_headers:
+                INITABLE_TYPES.add(s.type_name)
+                INITABLE_TYPE_HEADERS[s.type_name] = init_func_headers[expected_init]
+
     # Populate VALUE_STRUCT_TYPES for type_map lookups
     from type_map import VALUE_STRUCT_TYPES
 
@@ -399,6 +417,28 @@ def main() -> None:
         if _write_if_changed(autowrapper_dir / f"{cls}.cpp", src):
             written_count += 1
 
+    # Conflict detection: verify no class name appears in multiple categories
+    all_names = {
+        "wrappers": set(wrapper_names),
+        "value types": set(value_type_names),
+        "handle classes": set(handle_class_names),
+        "out-param primitives": set(out_prim_names),
+    }
+    conflicts = {}
+    for cat1, names1 in all_names.items():
+        for cat2, names2 in all_names.items():
+            if cat1 < cat2:
+                dupes = names1 & names2
+                if dupes:
+                    conflicts[f"{cat1} vs {cat2}"] = dupes
+    if conflicts:
+        print("\nERROR: Class name conflicts detected!", file=sys.stderr)
+        for pair, dupes in conflicts.items():
+            print(f"  {pair}: {dupes}", file=sys.stderr)
+        print("\nThis means two different source types would produce the same Godot class name.", file=sys.stderr)
+        print("Fix by adding a prefix/suffix to one of the conflicting names.", file=sys.stderr)
+        sys.exit(1)
+
     # 4. Build the consolidated class list and split into part files
     all_classes: list[str] = list(wrapper_names)
     all_classes.extend(value_type_names)
@@ -439,6 +479,24 @@ def main() -> None:
     if _write_if_changed(autowrapper_dir / "module.cpp", msrc):
         written_count += 1
 
+    # Clean up orphan C++ files
+    expected_files: set[str] = set()
+    for cls in value_type_names + wrapper_names + handle_class_names + out_prim_names:
+        expected_files.add(f"{cls}.h")
+        expected_files.add(f"{cls}.cpp")
+    expected_files.add("module.h")
+    expected_files.add("module.cpp")
+    expected_files.add("module_parts.h")
+    for i in range(n_parts):
+        expected_files.add(f"module_part_{i}.cpp")
+    orphan_count = 0
+    for f in autowrapper_dir.iterdir():
+        if f.suffix in (".h", ".cpp") and f.name not in expected_files:
+            f.unlink()
+            orphan_count += 1
+    if orphan_count:
+        print(f"Removed {orphan_count} orphan files from {autowrapper_dir}")
+
     print(f"\nWritten {written_count} C++ source files to {autowrapper_dir}")
 
     # 5. Clean up orphan files (files that should no longer exist)
@@ -469,6 +527,17 @@ def main() -> None:
             (output_dir / "doc_classes" / fname).write_text(xml, encoding="utf-8")
             doc_files.append(fname)
         print(f"Written {len(doc_files)} doc XML files")
+
+        # Clean up orphan doc files (no longer generated)
+        doc_dir = output_dir / "doc_classes"
+        expected_doc_files: set[str] = set(doc_files)
+        orphan_doc_count = 0
+        for f in doc_dir.iterdir():
+            if f.suffix == ".xml" and f.name not in expected_doc_files:
+                f.unlink()
+                orphan_doc_count += 1
+        if orphan_doc_count:
+            print(f"Removed {orphan_doc_count} orphan doc XML files from {doc_dir}")
 
     # 7. GDScript tests
     if not args.skip_tests:

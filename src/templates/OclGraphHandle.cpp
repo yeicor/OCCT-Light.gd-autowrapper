@@ -3,7 +3,7 @@
 // DO NOT EDIT IT DIRECTLY. Make changes to the Python generator instead.
 // ---------------------------------------------------------------------------
 
-#include "OcctlGraphHandle.h"
+#include "OclGraphHandle.h"
 
 #include <godot_cpp/classes/array_mesh.hpp>
 #include <godot_cpp/classes/multi_mesh.hpp>
@@ -31,7 +31,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "OcctlMeshOptions.h"
+#include "OclMeshOptions.h"
 #include "occtl/occtl_topo_relation.h"
 
 using namespace godot;
@@ -121,42 +121,42 @@ struct PairHash {
 // _bind_methods
 // ---------------------------------------------------------------------------
 
-void OcctlGraphHandle::_bind_methods() {
-    godot::ClassDB::bind_method(godot::D_METHOD("set_handle", "handle"), &OcctlGraphHandle::set_handle);
-    godot::ClassDB::bind_method(godot::D_METHOD("get_handle"), &OcctlGraphHandle::get_handle);
-    godot::ClassDB::bind_method(godot::D_METHOD("is_valid"), &OcctlGraphHandle::is_valid);
-    godot::ClassDB::bind_method(godot::D_METHOD("release"), &OcctlGraphHandle::release);
-    godot::ClassDB::bind_method(godot::D_METHOD("free"), static_cast<void(OcctlGraphHandle::*)()>(&OcctlGraphHandle::free));
+void OclGraphHandle::_bind_methods() {
+    godot::ClassDB::bind_method(godot::D_METHOD("set_handle", "handle"), &OclGraphHandle::set_handle);
+    godot::ClassDB::bind_method(godot::D_METHOD("get_handle"), &OclGraphHandle::get_handle);
+    godot::ClassDB::bind_method(godot::D_METHOD("is_valid"), &OclGraphHandle::is_valid);
+    godot::ClassDB::bind_method(godot::D_METHOD("release"), &OclGraphHandle::release);
+    godot::ClassDB::bind_method(godot::D_METHOD("free"), static_cast<void(OclGraphHandle::*)()>(&OclGraphHandle::free));
 
     // --- Meshing methods ---
-    godot::ClassDB::bind_method(godot::D_METHOD("mesh_faces", "face_ids", "include_normals", "include_uvs", "include_tangents", "include_feature_ids", "options", "existing"), &OcctlGraphHandle::mesh_faces, DEFVAL(Variant()), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Variant()));
-    godot::ClassDB::bind_method(godot::D_METHOD("mesh_edges", "edge_ids", "radius", "options", "existing"), &OcctlGraphHandle::mesh_edges, DEFVAL(Variant()), DEFVAL(0.01), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Variant()));
-    godot::ClassDB::bind_method(godot::D_METHOD("mesh_vertices", "vertex_ids", "radius", "options", "existing"), &OcctlGraphHandle::mesh_vertices, DEFVAL(Variant()), DEFVAL(0.02), DEFVAL(Ref<OcctlMeshOptions>()), DEFVAL(Variant()));
+    godot::ClassDB::bind_method(godot::D_METHOD("mesh_faces", "face_ids", "include_normals", "include_uvs", "include_tangents", "include_feature_ids", "options", "existing"), &OclGraphHandle::mesh_faces, DEFVAL(Variant()), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(false), DEFVAL(Ref<OclMeshOptions>()), DEFVAL(Variant()));
+    godot::ClassDB::bind_method(godot::D_METHOD("mesh_edges", "edge_ids", "radius", "options", "existing"), &OclGraphHandle::mesh_edges, DEFVAL(Variant()), DEFVAL(0.01), DEFVAL(Ref<OclMeshOptions>()), DEFVAL(Variant()));
+    godot::ClassDB::bind_method(godot::D_METHOD("mesh_vertices", "vertex_ids", "radius", "options", "existing"), &OclGraphHandle::mesh_vertices, DEFVAL(Variant()), DEFVAL(0.02), DEFVAL(Ref<OclMeshOptions>()), DEFVAL(Variant()));
 }
 
 // ---------------------------------------------------------------------------
 // Handle basics
 // ---------------------------------------------------------------------------
 
-void OcctlGraphHandle::set_handle(int64_t h) {
+void OclGraphHandle::set_handle(int64_t h) {
     _handle = reinterpret_cast<occtl_graph_t*>(static_cast<uintptr_t>(h));
     _owns = true;
 }
 
-int64_t OcctlGraphHandle::get_handle() const {
+int64_t OclGraphHandle::get_handle() const {
     return static_cast<int64_t>(reinterpret_cast<uintptr_t>(_handle));
 }
 
-bool OcctlGraphHandle::is_valid() const {
+bool OclGraphHandle::is_valid() const {
     return _handle != nullptr;
 }
 
-int64_t OcctlGraphHandle::release() {
+int64_t OclGraphHandle::release() {
     _owns = false;
     return get_handle();
 }
 
-void OcctlGraphHandle::free() {
+void OclGraphHandle::free() {
     if (_handle) {
         ::occtl_graph_free(_handle);
         _handle = nullptr;
@@ -401,13 +401,13 @@ static Ref<ArrayMesh> _make_sphere_mesh(int slices) {
 // mesh_faces
 // ---------------------------------------------------------------------------
 
-Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
+Ref<ArrayMesh> OclGraphHandle::mesh_faces(
     const Variant& face_ids,
     bool include_normals,
     bool include_uvs,
     bool include_tangents,
     bool include_feature_ids,
-    const Ref<OcctlMeshOptions>& options,
+    const Ref<OclMeshOptions>& options,
     const Variant& existing)
 {
     // Check if existing is a PhysicsBody3D (→ collision shapes) or ArrayMesh
@@ -950,10 +950,10 @@ Ref<ArrayMesh> OcctlGraphHandle::mesh_faces(
 // mesh_edges
 // ---------------------------------------------------------------------------
 
-Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
+Ref<MultiMesh> OclGraphHandle::mesh_edges(
     const Variant& edge_ids,
     double radius,
-    const Ref<OcctlMeshOptions>& options,
+    const Ref<OclMeshOptions>& options,
     const Variant& existing)
 {
     // Check if existing is a PhysicsBody3D (→ collision shapes) or MultiMesh
@@ -1265,10 +1265,10 @@ Ref<MultiMesh> OcctlGraphHandle::mesh_edges(
 // mesh_vertices
 // ---------------------------------------------------------------------------
 
-Ref<MultiMesh> OcctlGraphHandle::mesh_vertices(
+Ref<MultiMesh> OclGraphHandle::mesh_vertices(
 	const Variant& vertex_ids,
 	double radius,
-	const Ref<OcctlMeshOptions>& options,
+	const Ref<OclMeshOptions>& options,
 	const Variant& existing)
 {
     // Check if existing is a PhysicsBody3D (→ collision shapes) or MultiMesh

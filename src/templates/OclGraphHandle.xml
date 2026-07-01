@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="OcctlGraphHandle" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+<class name="OclGraphHandle" inherits="RefCounted" version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
 	<brief_description>Handle wrapper for occtl_graph_t with built-in meshing methods.</brief_description>
 	<description>
 		Auto-generated handle for the opaque C type [code]occtl_graph_t[/code].
@@ -50,7 +50,7 @@
 			<argument index="2" name="include_uvs" type="bool" />
 			<argument index="3" name="include_tangents" type="bool" />
 			<argument index="4" name="include_feature_ids" type="bool" />
-			<argument index="5" name="options" type="OcctlMeshOptions" />
+			<argument index="5" name="options" type="OclMeshOptions" />
 			<argument index="6" name="existing" type="Variant" />
 			<description>
 				Triangulate faces into an [ArrayMesh] or create collision shapes on a [PhysicsBody3D].
@@ -74,7 +74,7 @@
 			<return type="MultiMesh" />
 			<argument index="0" name="edge_ids" type="Variant" />
 			<argument index="1" name="radius" type="float" />
-			<argument index="2" name="options" type="OcctlMeshOptions" />
+			<argument index="2" name="options" type="OclMeshOptions" />
 			<argument index="3" name="existing" type="Variant" />
 			<description>
 				Build edge tube instances as a [MultiMesh] or create collision shapes on a [PhysicsBody3D].
@@ -95,7 +95,7 @@
 			<return type="MultiMesh" />
 			<argument index="0" name="vertex_ids" type="Variant" />
 			<argument index="1" name="radius" type="float" />
-			<argument index="2" name="options" type="OcctlMeshOptions" />
+			<argument index="2" name="options" type="OclMeshOptions" />
 			<argument index="3" name="existing" type="Variant" />
 			<description>
 				Build vertex sphere instances as a [MultiMesh] or create collision shapes on a [PhysicsBody3D].

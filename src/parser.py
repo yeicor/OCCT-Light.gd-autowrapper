@@ -112,7 +112,7 @@ def _extract_comment(node: Node, source: bytes) -> str:
 
 
 def _strip_comment_markers(text: str) -> str:
-    """Strip /* */ and // comment markers."""
+    """Strip /* */ and // comment markers, preserving line structure."""
     lines = []
     for line in text.split("\n"):
         line = line.strip()
@@ -124,11 +124,370 @@ def _strip_comment_markers(text: str) -> str:
             line = line[1:].strip()
         elif line.startswith("//"):
             line = line[2:].strip()
+        # Strip trailing */ that might remain on the last line
         if line.endswith("*/"):
             line = line[:-2].strip()
+        # After stripping /* or *, the line may just be "/" from "*/"
+        if line in ("*/", "/", ""):
+            continue
         if line:
             lines.append(line)
-    return " ".join(lines)
+    return "\n".join(lines)
+
+
+def _extract_doc_metadata(text: str) -> tuple[str, str, str, str]:
+    """Extract @deprecated, @experimental, and @todo from doc comment.
+    Returns (cleaned_text, deprecated_msg, experimental_msg, todo_msg).
+    """
+    if not text:
+        return text, "", "", ""
+    lines = text.split("\n")
+    cleaned = []
+    deprecated = ""
+    experimental = ""
+    todo = ""
+    in_deprecated = False
+    in_experimental = False
+    in_todo = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("@deprecated"):
+            in_deprecated = True
+            rest = stripped[len("@deprecated") :].strip()
+            if rest:
+                deprecated = rest
+                in_deprecated = False
+            continue
+        if in_deprecated:
+            if stripped.startswith("@") and not stripped.startswith("@deprecated"):
+                in_deprecated = False
+            else:
+                if deprecated:
+                    deprecated += " " + stripped
+                else:
+                    deprecated = stripped
+                continue
+        if stripped.startswith("@experimental"):
+            in_experimental = True
+            rest = stripped[len("@experimental") :].strip()
+            if rest:
+                experimental = rest
+                in_experimental = False
+            continue
+        if in_experimental:
+            if stripped.startswith("@") and not stripped.startswith("@experimental"):
+                in_experimental = False
+            else:
+                if experimental:
+                    experimental += " " + stripped
+                else:
+                    experimental = stripped
+                continue
+        if stripped.startswith("@todo"):
+            in_todo = True
+            rest = stripped[len("@todo") :].strip()
+            if rest:
+                todo = rest
+                in_todo = False
+            continue
+        if in_todo:
+            if stripped.startswith("@") and not stripped.startswith("@todo"):
+                in_todo = False
+            else:
+                if todo:
+                    todo += " " + stripped
+                else:
+                    todo = stripped
+                continue
+        cleaned.append(line)
+    return "\n".join(cleaned), deprecated.strip(), experimental.strip(), todo.strip()
+
+
+def _doc_comment_to_bbcode(text: str) -> str:
+    """Convert Doxygen-style doc comment text to Godot BBCode format.
+    Handles Doxygen @-commands and converts them to Godot's BBCode-like tags.
+    Reference: https://docs.godotengine.org/en/stable/engine_details/class_reference/index.html
+    """
+    if not text:
+        return text
+
+    # Handle inline @code ... @endcode
+    text = re.sub(
+        r"@code(\{[^}]*\})?\s+(.*?)\s+@endcode",
+        lambda m: f"[codeblock]{m.group(2)}[/codeblock]",
+        text,
+        flags=re.DOTALL,
+    )
+
+    # Handle multi-line @code / @endcode blocks
+    lines = text.split("\n")
+    processed_lines = []
+    in_codeblock = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped == "@code":
+            in_codeblock = True
+            processed_lines.append("[codeblock]")
+            continue
+        if stripped == "@endcode":
+            in_codeblock = False
+            processed_lines.append("[/codeblock]")
+            continue
+        if stripped.startswith("@code{"):
+            lang_match = re.match(r"@code\{(\w+)\}", stripped)
+            lang = lang_match.group(1) if lang_match else ""
+            lang_attr = f" lang={lang}" if lang in ("cpp", "c", "h") else ""
+            in_codeblock = True
+            processed_lines.append(f"[codeblock{lang_attr}]")
+            continue
+        if in_codeblock:
+            processed_lines.append(line)
+        else:
+            processed_lines.append(line)
+    text = "\n".join(processed_lines)
+
+    # Split into codeblock/non-codeblock segments
+    segments = re.split(r"(\[codeblock.*?\].*?\[/codeblock\])", text, flags=re.DOTALL)
+
+    def _process_segment(seg: str) -> str:
+        if seg.startswith("[codeblock"):
+            return seg
+
+        # @param[in] name desc / @param[out] name desc / @param[in,out] name desc / @param name desc
+        seg = re.sub(
+            r"@param\s*(?:\[(?:in|out|in,out)\]\s+)?(\w+)\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[param {m.group(1)}] {m.group(2)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @return / @returns description
+        seg = re.sub(
+            r"@returns?\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Returns:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @retval VAL description
+        seg = re.sub(
+            r"@retval\s+(\S+)\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[code]{m.group(1)}[/code]: {m.group(2)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @sa / @see reference
+        # Wrap C API names in [code] tags so they stand out
+        def _sa_replacer(m):
+            refs = m.group(1)
+            # Convert occtl_xxx references to [code] tags
+            refs = re.sub(r"\b(occtl_\w+)\b", r"[code]\1[/code]", refs)
+            return f"[b]See also:[/b] {refs}"
+
+        seg = re.sub(
+            r"@sa\s+(.*?)(?=\s*(?:@\w+|$))",
+            _sa_replacer,
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @note ...
+        seg = re.sub(
+            r"@note\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Note:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @warning ...
+        seg = re.sub(
+            r"@warning\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Warning:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @threadsafe Yes/No
+        seg = re.sub(
+            r"@threadsafe\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Thread safety:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @c name / @p name / @a name -> [code]name[/code]
+        seg = re.sub(r"@[cpa]\s+(\w+)", r"[code]\1[/code]", seg)
+
+        # @b word -> bold
+        seg = re.sub(r"@b\s+(\w+)", r"[b]\1[/b]", seg)
+
+        # @e word / @em word -> italic
+        seg = re.sub(r"@[eE]\s+(\w+)", r"[i]\1[/i]", seg)
+
+        # @arg word -> [code]word[/code]
+        seg = re.sub(r"@arg\s+(\w+)", r"[code]\1[/code]", seg)
+
+        # @file path - strip
+        seg = re.sub(r"@file\s+\S+", "", seg)
+
+        # @ref TypeName -> [code]TypeName[/code]
+        seg = re.sub(r"@ref\s+(\w+)", r"[code]\1[/code]", seg)
+
+        # @link url text @endlink -> [url=url]text[/url]
+        seg = re.sub(
+            r"@link\s+(\S+)\s+(.*?)\s*@endlink",
+            lambda m: f"[url={m.group(1)}]{m.group(2)}[/url]",
+            seg,
+        )
+        seg = re.sub(
+            r"@link\s+(\S+)\s*@endlink",
+            lambda m: f"[url]{m.group(1)}[/url]",
+            seg,
+        )
+
+        # @throws / @exception status desc -> [b]Throws:[/b] [code]status[/code]: desc
+        seg = re.sub(
+            r"@(?:throws|exception)\s+(\S+)\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Throws:[/b] [code]{m.group(1)}[/code]: {m.group(2)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @since version -> [b]Since:[/b] version
+        seg = re.sub(
+            r"@since\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Since:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @pre condition -> [b]Precondition:[/b] condition
+        seg = re.sub(
+            r"@pre\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Precondition:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @post condition -> [b]Postcondition:[/b] condition
+        seg = re.sub(
+            r"@post\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Postcondition:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @bug description -> [b]Bug:[/b] description
+        seg = re.sub(
+            r"@bug\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Bug:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @author name -> [b]Author:[/b] name
+        seg = re.sub(
+            r"@author\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Author:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @version text -> [b]Version:[/b] text
+        seg = re.sub(
+            r"@version\s+(.*?)(?=\s*(?:@\w+|$))",
+            lambda m: f"[b]Version:[/b] {m.group(1)}",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @remark / @remarks text -> plain text
+        seg = re.sub(r"@remarks?\s+(.*?)(?=\s*(?:@\w+|$))", r"\1", seg, flags=re.DOTALL)
+
+        # @section / @subsection / @subsubsection title -> bold title
+        seg = re.sub(
+            r"@sub?section\s+(.*?)(?=\s*(?:@\w+|$))", r"[b]\1[/b]", seg, flags=re.DOTALL
+        )
+
+        # @copydoc - convert to note
+        seg = re.sub(
+            r"@copydoc\s+\S+",
+            "[b]Note:[/b] See the original C documentation for details.",
+            seg,
+        )
+
+        # @verbatim ... @endverbatim -> [codeblock lang=text]
+        seg = re.sub(
+            r"@verbatim\s+(.*?)\s*@endverbatim",
+            lambda m: f"[codeblock lang=text]{m.group(1)}[/codeblock]",
+            seg,
+            flags=re.DOTALL,
+        )
+
+        # @htmlonly ... @endhtmlonly - strip
+        seg = re.sub(
+            r"@(html|latex|xml|man)only.*?@end\1only", "", seg, flags=re.DOTALL
+        )
+
+        # @image - strip
+        seg = re.sub(r"@image\s+\S+.*$", "", seg, flags=re.MULTILINE)
+
+        # Doxygen \\n line break -> [br]
+        seg = re.sub(r"\\\\n", " [br] ", seg)
+
+        # Doxygen escaped chars: \\X -> X  (for @, %, $, #, _, ", |)
+        seg = re.sub(r"\\\\([@%$#_\"|])", r"\1", seg)
+        # Doxygen escaped backslash: \\\\ -> \\ (double backslash -> single)
+        seg = re.sub(r"\\\\\\\\", "\\\\", seg)
+
+        # Strip @f$ math delimiters
+        seg = re.sub(r"@f\$.*?@f\$", " [i](math)[/i] ", seg, flags=re.DOTALL)
+
+        # @copyright -> strip
+        seg = re.sub(r"@copyright\s+.*?(?=\s*(?:@\w+|$))", "", seg)
+
+        # @deprecated, @experimental, @todo already handled by _extract_doc_metadata
+        seg = re.sub(r"@deprecated\s+.*?(?=\s*(?:$|@\w+))", "", seg)
+        seg = re.sub(r"@experimental\s+.*?(?=\s*(?:$|@\w+))", "", seg)
+        seg = re.sub(r"@todo\s+.*?(?=\s*(?:$|@\w+))", "", seg)
+
+        # Remaining inline @-commands: just strip them
+        seg = re.sub(
+            r"@(?:brief|details|name|def|test|private|internal|result|code|endcode|verbatim|endverbatim|page|mainpage|dir)\s+",
+            "",
+            seg,
+        )
+
+        # Strip any remaining standalone @ (might be from partial Doxygen processing)
+        seg = re.sub(r"@[a-zA-Z]+", "", seg)
+
+        # Convert **bold** to [b]bold[/b] (Doxygen/Markdown style)
+        seg = re.sub(r"\*\*(.+?)\*\*", r"[b]\1[/b]", seg, flags=re.DOTALL)
+
+        # Convert #type_name references to [code]type_name[/code]
+        seg = re.sub(r"#([\w_]+)", r"[code]\1[/code]", seg)
+
+        # Convert backtick code: `code` -> [code]code[/code]
+        seg = re.sub(r"`([^`]+)`", r"[code]\1[/code]", seg)
+
+        # Convert NULL/nullptr to [code]null[/code]
+        seg = re.sub(r"\bNULL\b", "[code]null[/code]", seg)
+        seg = re.sub(r"\bnullptr\b", "[code]null[/code]", seg)
+
+        # Convert URLs to [url]...[/url]
+        seg = re.sub(
+            r"(https?://[\w./%#?&=-]+(?:\.[\w./%#?&=-]+)+[\w/]*)",
+            r"[url]\1[/url]",
+            seg,
+        )
+
+        return seg
+
+    result = []
+    for seg in segments:
+        result.append(_process_segment(seg))
+    return "".join(result)
 
 
 def _extract_guard_info(node: Node, source: bytes) -> tuple[str, str]:

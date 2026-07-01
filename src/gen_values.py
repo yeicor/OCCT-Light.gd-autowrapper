@@ -8,10 +8,18 @@ import re
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from parser import CField, CStruct, ParsedHeader
+from parser import (
+    CField,
+    CStruct,
+    ParsedHeader,
+    _doc_comment_to_bbcode,
+    _extract_doc_metadata,
+)
 from type_map import (
     ENUM_TYPES,
     HANDLE_TYPES,
+    INITABLE_TYPE_HEADERS,
+    INITABLE_TYPES,
     UINT64_ID_TYPES,
     VALUE_STRUCT_TYPES,
     c_type_to_godot_class,
@@ -913,6 +921,11 @@ def generate_value_type_header(struct: CStruct) -> str:
         ]
     )
 
+    # For value types that have a matching _init() C function, override
+    # _init() to auto-initialize with sensible defaults on construction.
+    if c_type in INITABLE_TYPES:
+        lines.append("    void _init() override;")
+
     # Store the real C struct directly
     lines.append(f"    {c_type} _c_struct = {{}};")
     # Shadow string holders for pointer-type fields (e.g., const char*)
@@ -1439,6 +1452,16 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
     lines.append("}")
     lines.append("")
 
+    # _init() — auto-initialize with sensible defaults for INITABLE_TYPES
+    if c_type in INITABLE_TYPES:
+        base_name = c_type[:-2]  # strip "_t" suffix
+        lines.append(f"void {cls}::_init() {{")
+        lines.append(f"    {c_type} _tmp = {{}};")
+        lines.append(f"    ::{base_name}_init(&_tmp);")
+        lines.append(f"    _c_struct = _tmp;")
+        lines.append(f"}}")
+        lines.append("")
+
     # to_c() — direct access to the stored C struct
     lines.append(f"{c_type} {cls}::to_c() const {{")
     lines.append(f"    return _c_struct;")
@@ -1583,8 +1606,10 @@ def generate_value_type_source(struct: CStruct, all_types: dict[str, CStruct]) -
 def generate_value_type_doc_xml(struct: CStruct) -> str:
     """Generate XML doc for a value type class."""
     cls = c_type_to_godot_class(struct.type_name)
+    c_type = struct.type_name
     pairs = _find_field_ptr_size_pairs(struct)
     methods = []
+    members = []
     for field in struct.fields:
         gt = _field_godot_type(field, pairs)
         clean = _field_clean_name(field)
@@ -1601,8 +1626,11 @@ def generate_value_type_doc_xml(struct: CStruct) -> str:
         methods.append(f"\t\t\t\tSets the [member {clean}] value.")
         methods.append("\t\t\t</description>")
         methods.append("\t\t</method>")
-
-    # Factory method doc entries
+        members.append(
+            f'\t\t<member name="{clean}" type="{gt}" '
+            f'setter="set_{clean}" getter="get_{clean}">'
+            f"The [member {clean}] field of this [{cls}].</member>"
+        )
     if cls in FACTORY_METHODS:
         for method_name, params, _ in FACTORY_METHODS[cls]:
             methods.append(f'\t\t<method name="{method_name}">')
@@ -1620,8 +1648,6 @@ def generate_value_type_doc_xml(struct: CStruct) -> str:
             methods.append(f"\t\t\t\t[return] A new [{cls}] with fields populated.")
             methods.append("\t\t\t</description>")
             methods.append("\t\t</method>")
-
-    # To-method doc entries
     if cls in TO_METHODS:
         for method_name, ret_type, _ in TO_METHODS[cls]:
             methods.append(f'\t\t<method name="{method_name}">')
@@ -1630,24 +1656,55 @@ def generate_value_type_doc_xml(struct: CStruct) -> str:
             methods.append(f"\t\t\t\tConverts this [{cls}] to a [{ret_type}].")
             methods.append("\t\t\t</description>")
             methods.append("\t\t</method>")
-
     methods_xml = "\n".join(methods)
+    members_xml = "\n".join(members)
+    clean_doc, s_depr, s_exp, s_todo = _extract_doc_metadata(struct.doc_comment or "")
+    brief_desc = (
+        _doc_comment_to_bbcode(clean_doc)
+        if clean_doc
+        else f"Value type wrapper for {c_type}."
+    )
+    desc_parts = [f"Auto-generated wrapper for the C struct [code]{c_type}[/code]."]
+    if c_type in INITABLE_TYPES:
+        desc_parts.append(
+            f"This struct is automatically initialized with sensible defaults "
+            f"when created via [code]{cls}.new()[/code]."
+        )
+    if s_todo:
+        desc_parts.append(f"[b]Todo:[/b] {_doc_comment_to_bbcode(s_todo)}")
+    desc = " ".join(desc_parts)
+    tut_lines = []
+    if struct.doc_comment:
+        for pat in (r"@sa\s+(https?://\S+)", r"@see\s+(https?://\S+)"):
+            urls = re.findall(pat, struct.doc_comment)
+            if urls:
+                tut_lines = [f'\t\t<link title="{u}">{u}</link>' for u in urls]
+                break
+    tutorials_xml = "\t" if not tut_lines else "\n".join(tut_lines)
+    class_attrs = f'name="{cls}" inherits="RefCounted" version="4.0"'
+    if s_depr:
+        class_attrs += f' deprecated="{escape(s_depr)}"'
+    if s_exp:
+        class_attrs += f' experimental="{escape(s_exp)}"'
     return (
         '<?xml version="1.0" encoding="UTF-8" ?>\n'
-        f'<class name="{cls}" inherits="RefCounted" version="4.0" '
+        f"<class {class_attrs} "
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
         "\t<brief_description>"
-        f"Value type wrapper for {struct.type_name}."
+        f"{brief_desc}"
         "\t</brief_description>\n"
         "\t<description>"
-        f"Auto-generated wrapper for the C struct {struct.type_name}."
+        f"{desc}"
         "\t</description>\n"
-        "\t<tutorials>\n\t</tutorials>\n"
+        "\t<tutorials>\n"
+        f"{tutorials_xml}\n"
+        "\t</tutorials>\n"
         "\t<methods>\n"
         f"{methods_xml}\n"
         "\t</methods>\n"
-        "</class>\n"
+        + (f"\t<members>\n{members_xml}\n\t</members>\n" if members else "")
+        + "</class>\n"
     )
 
 

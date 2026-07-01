@@ -353,6 +353,17 @@ TYPEDEF_CANONICAL_MAP: dict[str, str] = {
 # ---------------------------------------------------------------
 # Callback typedefs — function pointer types that need Callable bridge.
 # ---------------------------------------------------------------
+
+
+# ---------------------------------------------------------------
+# Value struct types known to have a matching *_init() function.
+# Populated at runtime by main.py after parsing all headers.
+# ---------------------------------------------------------------
+INITABLE_TYPES: set[str] = set()
+
+# Maps initable struct type -> header that declares its *_init() function
+INITABLE_TYPE_HEADERS: dict[str, str] = {}
+
 CALLBACK_TYPES: set[str] = {
     "occtl_node_visitor_t",
     "occtl_ref_visitor_t",
@@ -388,14 +399,14 @@ INPUT_PTR_SIZE_ARRAY_TYPES: dict[str, str] = {
     "uint32_t": "PackedInt32Array",
     "int64_t": "PackedInt64Array",
     "uint64_t": "PackedInt64Array",
-    "occtl_point3_t": "Array",  # Array[OcctlPoint3] at runtime
-    "occtl_point2_t": "Array",  # Array[OcctlPoint2] at runtime
-    "occtl_color_rgba_t": "Array",  # Array[OcctlColorRgba] at runtime
-    "occtl_direction3_t": "Array",  # Array[OcctlDirection3] at runtime
-    "occtl_direction2_t": "Array",  # Array[OcctlDirection2] at runtime
-    "occtl_vector3_t": "Array",  # Array[OcctlVector3] at runtime
-    "occtl_vector2_t": "Array",  # Array[OcctlVector2] at runtime
-    "occtl_transform_t": "Array",  # Array[OcctlTransform] at runtime
+    "occtl_point3_t": "Array",  # Array[OclPoint3] at runtime
+    "occtl_point2_t": "Array",  # Array[OclPoint2] at runtime
+    "occtl_color_rgba_t": "Array",  # Array[OclColorRgba] at runtime
+    "occtl_direction3_t": "Array",  # Array[OclDirection3] at runtime
+    "occtl_direction2_t": "Array",  # Array[OclDirection2] at runtime
+    "occtl_vector3_t": "Array",  # Array[OclVector3] at runtime
+    "occtl_vector2_t": "Array",  # Array[OclVector2] at runtime
+    "occtl_transform_t": "Array",  # Array[OclTransform] at runtime
     "uint8_t": "PackedByteArray",
 }
 
@@ -538,13 +549,17 @@ GODOT_VARIANT_TYPE: dict[str, str] = {
 # Helper: convert a C type name to a Godot class name
 # ---------------------------------------------------------------
 def c_type_to_godot_class(c_type: str) -> str:
-    """Convert occtl_point3_t → OcctlPoint3, occtl_transform_t → OcctlTransform, etc."""
+    """Convert occtl_point3_t → OclPoint3, occtl_transform_t → OclTransform, etc."""
     name = c_type.strip()
     name = _resolve_typedef(name)
     name = re.sub(r"^(const|volatile)\s+", "", name)
     name = re.sub(r"_t\s*\**$", "", name)
     parts = re.split(r"[_\s]+", name)
-    return "".join(p.capitalize() for p in parts)
+    result = "".join(p.capitalize() for p in parts)
+    # Rename Occtl -> Ocl for concise prefix (6 chars -> 3 chars)
+    if result.startswith("Occtl"):
+        result = "Ocl" + result[5:]
+    return result
 
 
 # ---------------------------------------------------------------
@@ -552,7 +567,7 @@ def c_type_to_godot_class(c_type: str) -> str:
 # ---------------------------------------------------------------
 def param_type_to_variant_type(godot_type: str) -> str:
     """Map a Godot parameter type string to Variant::Type enum name.
-    e.g. 'int' → 'INT', 'Ref<OcctlPoint3>' → 'OBJECT', etc."""
+    e.g. 'int' → 'INT', 'Ref<OclPoint3>' → 'OBJECT', etc."""
     if godot_type in GODOT_VARIANT_TYPE:
         return GODOT_VARIANT_TYPE[godot_type]
     # Ref<T> types map to OBJECT
@@ -680,7 +695,7 @@ def godot_param_type(c_type: str) -> str:
         if typed in ("int64_t", "uint64_t") or inner in ("int64_t", "uint64_t"):
             return "PackedInt64Array"
         if typed == "occtl_point3_t" or inner == "occtl_point3_t":
-            # For simplicity, we use Array of OcctlPoint3 for structured arrays
+            # For simplicity, we use Array of OclPoint3 for structured arrays
             return "Array"
         if typed == "occtl_point2_t" or inner == "occtl_point2_t":
             return "Array"

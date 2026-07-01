@@ -17,7 +17,17 @@ from parser import (
     CParameter,
     CStruct,
     ParsedHeader,
+    _doc_comment_to_bbcode,
+    _extract_doc_metadata,
 )
+
+
+# Helper: strip trailing period(s) from a string to avoid double dots
+# when the generator adds its own trailing period.
+def _rstrip_period(s: str) -> str:
+    return s.rstrip(". ")
+
+
 from type_map import (
     CALLBACK_TYPES,
     CPP_TO_GODOT_TYPE,
@@ -1055,7 +1065,7 @@ def _c_default_to_godot(c_val: str) -> str:
 def _wrapper_class_name(header_include: str) -> str:
     stem = Path(header_include).stem
     parts = stem.replace("occtl_", "", 1).split("_")
-    return "Occtl" + "".join(p.capitalize() for p in parts)
+    return "Ocl" + "".join(p.capitalize() for p in parts)
 
 
 def _common_function_prefix(functions: list[CFunction]) -> str:
@@ -2522,7 +2532,10 @@ def _describe_param(p: CParameter, ret: str) -> str:
     gt = godot_param_type(t)
     base_desc = ""
     if is_out_param(t, p.name, ret):
-        base_desc = "Output parameter."
+        if t.rstrip("* \t").strip() == "occtl_status_t":
+            base_desc = "Output status code. Receives the operation result."
+        else:
+            base_desc = "Output parameter."
     elif t in ENUM_TYPES:
         base_desc = "Enum value."
     elif is_value_struct_type(t):
@@ -2535,16 +2548,25 @@ def _describe_param(p: CParameter, ret: str) -> str:
         inner = t[len("const ") : -1].strip()
         if is_value_struct_type(inner):
             cls = c_type_to_godot_class(inner)
-            base_desc = f"An optional [{cls}]. Pass null to use defaults."
+            if "options" in p.name.lower() or "opts" in p.name.lower():
+                base_desc = (
+                    f"An optional [{cls}] configuration. Pass null to use defaults."
+                )
+            else:
+                base_desc = f"An optional [{cls}]. Pass null to use defaults."
         elif inner in UINT64_ID_TYPES:
             base_desc = f"A {_C_TYPE_DOC_DESC.get(inner, inner)}."
         elif inner in HANDLE_TYPES:
             cls = c_type_to_godot_class(inner) + "Handle"
             base_desc = f"A [{cls}] handle."
+        elif inner == "size_t":
+            base_desc = "Array size."
         else:
             base_desc = "Input parameter."
     elif t in UINT64_ID_TYPES:
         base_desc = f"A {_C_TYPE_DOC_DESC.get(t, t)}."
+    elif t == "occtl_status_t":
+        base_desc = "Status code."
     else:
         base_desc = "Input parameter."
     return f"    [param {p.name}] {base_desc}"
@@ -2555,50 +2577,67 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
     methods = []
     constants = []
 
-    for c in parsed.constants:
+    for c in _filtered_constants(parsed.constants):
         ret = _constant_godot_return_type(c, parsed.constants)
+        clean_doc, c_depr, c_exp, c_todo = _extract_doc_metadata(
+            c.doc_comment or f"Constant for #define {c.name}"
+        )
         if ret in ("int", "bool"):
-            # Integer/bool constants go in <constants> section (class-level)
-            constants.append(
-                f'\t\t<constant name="{escape(c.name)}" value="{escape(str(c.value))}">'
-            )
-            desc = c.doc_comment or f"Constant for #define {c.name}"
-            # Add cross-reference hint
+            base_attrs = f'name="{escape(c.name)}" value="{escape(str(c.value))}"'
+            if c_depr:
+                base_attrs += f' deprecated="{escape(c_depr)}"'
+            if c_exp:
+                base_attrs += f' experimental="{escape(c_exp)}"'
+            constants.append(f"\t\t<constant {base_attrs}>")
+            desc = _doc_comment_to_bbcode(clean_doc)
+            if c_todo:
+                desc += f" [b]Todo:[/b] {_doc_comment_to_bbcode(c_todo)}"
             val_lower = str(c.value).lower()
             if val_lower in ("occtl_ok", "0") and "ok" in c.name.lower():
                 desc += " Success status."
             elif val_lower == "occtl_buffer_too_small":
                 desc += " Returned when a buffer is too small for the output."
-            constants.append(f"\t\t\t{desc}.")
+            constants.append(f"\t\t\t{_rstrip_period(desc)}.")
             constants.append("\t\t</constant>")
         else:
-            # Float/double/string constants keep as <method> tags (no GDScript constant)
-            methods.append(f'\t\t<method name="const_{escape(c.name)}">')
+            method_attrs = f'name="const_{escape(c.name)}"'
+            if c_depr:
+                method_attrs += f' deprecated="{escape(c_depr)}"'
+            if c_exp:
+                method_attrs += f' experimental="{escape(c_exp)}"'
+            methods.append(f"\t\t<method {method_attrs}>")
             methods.append(f'\t\t\t<return type="{ret}" />')
             methods.append("\t\t\t<description>")
-            desc = c.doc_comment or f"Constant wrapper for #define {c.name}"
+            desc = _doc_comment_to_bbcode(clean_doc)
+            if c_todo:
+                desc += f" [b]Todo:[/b] {_doc_comment_to_bbcode(c_todo)}"
             if "pi" in c.name.lower():
                 desc += " Mathematical constant pi."
-            methods.append(f"\t\t\t\t{desc}.")
+            methods.append(f"\t\t\t\t{_rstrip_period(desc)}.")
             methods.append("\t\t\t</description>")
             methods.append("\t\t</method>")
 
     for enum in parsed.enums:
         for ev in enum.values:
-            # Enum values go in <constants> section (class-level)
-            constants.append(
-                f'\t\t<constant name="{escape(ev.name)}" value="{escape(str(ev.value))}">'
-            )
+            _, ev_depr, ev_exp, ev_todo = _extract_doc_metadata(enum.doc_comment)
+            base_attrs = f'name="{escape(ev.name)}" value="{escape(str(ev.value))}"'
+            if ev_depr:
+                base_attrs += f' deprecated="{escape(ev_depr)}"'
+            if ev_exp:
+                base_attrs += f' experimental="{escape(ev_exp)}"'
+            constants.append(f"\t\t<constant {base_attrs}>")
             desc = f"Enum value = {ev.value}"
-            enum_name_lower = enum.enum_name.lower()
-            if "status" in enum_name_lower:
+            ename = enum.enum_name.lower()
+            if "status" in ename:
                 desc += (
                     f" Status code. Defined in [enum {cls}.{escape(enum.enum_name)}]."
                 )
-            elif "kind" in enum_name_lower:
+            elif "kind" in ename:
                 desc += f" Kind identifier. Defined in [enum {cls}.{escape(enum.enum_name)}]."
             else:
                 desc += f" Defined in [enum {cls}.{escape(enum.enum_name)}]."
+            if ev_todo:
+                desc += f" [b]Todo:[/b] {_doc_comment_to_bbcode(ev_todo)}"
             constants.append(f"\t\t\t{desc}")
             constants.append("\t\t</constant>")
 
@@ -2609,20 +2648,31 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         else:
             ret_mapped = _func_return_type_mapped(f)
         mname = method_names[f.name]
-        methods.append(f'\t\t<method name="{escape(mname)}">')
+        clean_doc, f_depr, f_exp, f_todo = _extract_doc_metadata(
+            f.doc_comment or f"Generated binding for {f.name}."
+        )
+        method_attrs = f'name="{escape(mname)}"'
+        if f_depr:
+            method_attrs += f' deprecated="{escape(f_depr)}"'
+        if f_exp:
+            method_attrs += f' experimental="{escape(f_exp)}"'
+        methods.append(f"\t\t<method {method_attrs}>")
         if ret_mapped != "void":
             methods.append(f'\t\t\t<return type="{ret_mapped}" />')
         ret = f.return_type.strip()
-        # Filter out string-length-pair size params and buffer triplet params
+        # Strip input ptr+size pair size params from doc (like n_objects, n_tools)
+        input_ptr_size_pairs = _find_input_ptr_size_pairs(f)
+        size_param_indices = {size_idx for _, size_idx in input_ptr_size_pairs}
         kept_params = []
         for i, p in enumerate(f.params):
             if _is_stripped_out_param(p, ret) or _is_buffer_triplet_param(f, p):
                 continue
+            if i in size_param_indices:
+                continue
             if _is_in_string_len_pair(f, i):
-                # Keep the string param but skip the size param
                 for str_idx, size_idx in _find_string_len_pairs(f):
                     if i == size_idx:
-                        break  # skip size param
+                        break
                 else:
                     kept_params.append(p)
             else:
@@ -2633,25 +2683,55 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
                 f'\t\t\t<argument index="{i}" name="{escape(p.name)}" type="{gt}" />'
             )
         methods.append("\t\t\t<description>")
-        doc = f.doc_comment or f"Generated binding for {f.name}."
-        methods.append(f"\t\t\t\t{doc}")
-        # Add [param] descriptions for each kept param
+        doc = _doc_comment_to_bbcode(clean_doc)
+        methods.append(f"\t\t\t\t{_rstrip_period(doc)}.")
+        # Avoid duplicate param descriptions — only add if not already in doc
+        existing_params = set(re.findall(r"\[param\s+(\w+)\]", doc))
         for p in kept_params:
-            param_desc = _describe_param(p, ret)
-            methods.append(f"\t\t\t\t{param_desc}")
-        # Add [return] description
+            if p.name not in existing_params:
+                param_desc = _describe_param(p, ret)
+                methods.append(f"\t\t\t\t{param_desc}")
+        # Avoid duplicate return description
         ret_desc = _describe_return(ret_mapped, ret)
-        if ret_desc:
+        if ret_desc and "[return]" not in doc and "[b]Returns:[/b]" not in doc:
             methods.append(f"\t\t\t\t{ret_desc}")
+        if f_todo:
+            methods.append(f"\t\t\t\t[b]Todo:[/b] {_doc_comment_to_bbcode(f_todo)}")
         methods.append("\t\t</description>")
         methods.append("\t\t</method>")
 
     methods_xml = "\n".join(methods)
     constants_xml = "\n".join(constants)
     has_constants = bool(constants)
+
+    cl_depr = ""
+    cl_exp = ""
+    for item in parsed.constants + parsed.functions + parsed.enums:
+        if item.doc_comment:
+            _, cl_depr, cl_exp, _ = _extract_doc_metadata(item.doc_comment)
+            if cl_depr or cl_exp:
+                break
+
+    tutorials_xml = "\t"
+    for item in parsed.constants + parsed.functions + parsed.enums:
+        if item.doc_comment:
+            urls = re.findall(r"@sa\s+(https?://\S+)", item.doc_comment)
+            if not urls:
+                urls = re.findall(r"@see\s+(https?://\S+)", item.doc_comment)
+            if urls:
+                tl = [f'\t\t<link title="{u}">{u}</link>' for u in urls]
+                tutorials_xml = "\n".join(tl)
+                break
+
+    class_attrs = f'name="{cls}" inherits="RefCounted" version="4.0"'
+    if cl_depr:
+        class_attrs += f' deprecated="{escape(cl_depr)}"'
+    if cl_exp:
+        class_attrs += f' experimental="{escape(cl_exp)}"'
+
     return (
         '<?xml version="1.0" encoding="UTF-8" ?>\n'
-        f'<class name="{cls}" inherits="RefCounted" version="4.0" '
+        f"<class {class_attrs} "
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">\n'
         "\t<brief_description>\n"
@@ -2660,18 +2740,15 @@ def generate_wrapper_doc_xml(parsed: ParsedHeader) -> str:
         "\t<description>\n"
         f"\t\tAuto-generated wrapper for the OCCT-Light C header {parsed.header_include}.\n"
         "\t</description>\n"
-        "\t<tutorials>\n\t</tutorials>\n"
+        "\t<tutorials>\n"
+        f"{tutorials_xml}\n"
+        "\t</tutorials>\n"
         "\t<methods>\n"
         f"{methods_xml}\n"
         "\t</methods>\n"
         + (f"\t<constants>\n{constants_xml}\n\t</constants>\n" if has_constants else "")
         + "</class>\n"
     )
-
-
-# ---------------------------------------------------------------
-# GDScript test generation
-# ---------------------------------------------------------------
 
 
 def generate_gdscript_tests(
