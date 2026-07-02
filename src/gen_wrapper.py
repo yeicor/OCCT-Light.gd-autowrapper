@@ -2254,6 +2254,82 @@ def _constant_godot_return_type(
 # Source generation
 # ---------------------------------------------------------------
 
+def _wrap_body_in_try_catch(
+    f: CFunction,
+    cls_name: str,
+    method_name: str,
+    body: str,
+) -> str:
+    r'''Wrap body in try-catch using Godot error macros + full stacktrace.
+
+    Every catch block uses std::string concatenation so the C++ braces
+    in the body don't interfere with Python string formatting.
+    '''
+    ret = _func_return_type_mapped(f)
+    fallback_setup, fallback = _get_fallback_value(ret)
+    is_void = ret == "void"
+
+    # Use chr() for special chars to avoid escaping nightmares.
+    # DQ = double-quote for C++ strings, N = newline.
+    DQ = chr(34)
+    N = chr(10)
+    h = ""
+
+    # --- Standard_Failure catch (full stack trace) ---
+    h += "    } catch (const Standard_Failure& anExc) {" + N
+    h += "        { " + N
+    h += ("            std::string _msg = std::string(" + DQ + "%s::%s: " + DQ + ") + anExc.what() + std::string(" + DQ + " Stack: " + DQ + ") + anExc.GetStackString();" + N) % (cls_name, method_name)
+    if is_void:
+        h += "            ERR_FAIL_MSG(_msg.c_str());" + N
+    else:
+        h += ("            %s" + N + "            ERR_FAIL_V_MSG(%s, _msg.c_str());" + N) % (fallback_setup, fallback)
+    h += "        }" + N
+
+    # --- std::exception catch ---
+    h += "    } catch (const std::exception& anExc) {" + N
+    h += "        { " + N
+    h += ("            std::string _msg = std::string(" + DQ + "%s::%s: " + DQ + ") + anExc.what() + std::string(" + DQ + " Type: " + DQ + ") + typeid(anExc).name();" + N) % (cls_name, method_name)
+    if is_void:
+        h += "            ERR_FAIL_MSG(_msg.c_str());" + N
+    else:
+        h += ("            %s" + N + "            ERR_FAIL_V_MSG(%s, _msg.c_str());" + N) % (fallback_setup, fallback)
+    h += "        }" + N
+
+    # --- Unknown catch ---
+    h += "    } catch (...) {" + N
+    h += "        { " + N
+    h += ("            std::string _msg = std::string(" + DQ + "%s::%s (unknown)" + DQ + ");" + N) % (cls_name, method_name)
+    if is_void:
+        h += "            ERR_FAIL_MSG(_msg.c_str());" + N
+    else:
+        h += ("            %s" + N + "            ERR_FAIL_V_MSG(%s, _msg.c_str());" + N) % (fallback_setup, fallback)
+    h += "        }" + N
+
+    h += "    }"
+
+    return "    try {" + N + "    " + body.replace("\n", "\n    ") + N + h
+
+
+def _get_fallback_value(ret_type: str) -> tuple[str, str]:
+    r'''Return an appropriate fallback value for the given return type.'''
+    if ret_type == "void":
+        return "", ""
+    if ret_type == "bool":
+        return "", "false"
+    if ret_type == "int":
+        return "", "-1"
+    if ret_type.startswith("Packed"):
+        return "", "{}"
+    if ret_type in ("String", "Variant", "Dictionary", "Array"):
+        return "", "{}"
+    if ret_type == "double":
+        return "", "0.0"
+    if ret_type == "float":
+        return "", "0.0f"
+    if ret_type.startswith("Ref<"):
+        inner = ret_type[4:-1]
+        return "Ref<" + inner + "> _v_catch; _v_catch.instantiate();", "_v_catch"
+    return "", "{}"
 
 def generate_wrapper_source(
     parsed: ParsedHeader,
@@ -2274,6 +2350,10 @@ def generate_wrapper_source(
         f'#include "{cls}.h"',
         "",
         f'#include "occtl/{parsed.header_include}"',
+        "",
+        "#include <Standard_Failure.hxx>",
+        "#include <TCollection_AsciiString.hxx>",
+        "#include <godot_cpp/core/error_macros.hpp>",
         "",
     ]
     if has_vector:
@@ -2367,10 +2447,10 @@ def generate_wrapper_source(
         mname = method_names[f.name]
         lines.append(f"{ret_mapped} {cls}::{mname}({args_decl}) {{ // NOLINT")
         body = _generate_body(f, cls, parsed)
-        if body.strip():
-            lines.append(body)
-        else:
-            lines.append("    return {};")
+        # Wrap body in try-catch to prevent C++ exceptions from escaping
+        # across the GDExtension boundary (Godot crashes on Windows).
+        catch_all_body = _wrap_body_in_try_catch(f, cls, mname, body)
+        lines.append(catch_all_body)
         lines.append("}")
         lines.append("")
 
